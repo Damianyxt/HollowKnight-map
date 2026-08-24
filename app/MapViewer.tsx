@@ -2,7 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import popupImageGuides from "./popup-image-guides.json";
-import { filterMarkersBySaveState, type SaveFilterMode } from "./save-parser/entity-map";
+import {
+  filterMarkersBySaveState,
+  getCharmDisplayProgress,
+  getMarkerSaveMatches,
+  getSaveGroupProgress,
+  getSaveMappingProgress,
+  type SaveFilterMode,
+} from "./save-parser/entity-map";
 import { parseSaveDirectory } from "./save-parser";
 import type { ParsedSaveSlot } from "./save-parser/types";
 
@@ -15,7 +22,6 @@ const FOCUS_TRANSITION_MS = 220;
 const MAX_BATCH_BREATHING_GLOW_MARKERS = 64;
 const MAP_EDGE_DRAG_ALLOWANCE = 250;
 const MAP_DRAG_RIGHT_ALLOWANCE = 250;
-const COMPLETION_STORAGE_KEY = "hk-map-client-completed-markers-v1";
 const COMPLETABLE_PRIMARY_CATEGORIES = new Set(["装备", "收集物", "Boss"]);
 const INFORMATION_ONLY_MARKER_IDS = new Set([
   "marker_custom_sly_crossroads_57466_35094",
@@ -137,7 +143,7 @@ const HIGHLIGHT_ITEM_NOTES: Record<
   },
   "白色夫人(White Lady)": {
     src: "/icons/收集物/国王之魂-左.png",
-    alt: "国王之魂",
+    alt: "国王之魂(Kingsoul)-左",
     paragraphs: [
       "两片国王之魂碎片可以合成护符国王之魂，它使小骑士每2秒获得4灵魂。",
       "国王之魂也能打开通往深渊之底的道路，在出生地，它可以转变为虚空之心。",
@@ -145,7 +151,7 @@ const HIGHLIGHT_ITEM_NOTES: Record<
   },
   "苍白之王(The Pale King)": {
     src: "/icons/收集物/国王之魂-右.png",
-    alt: "国王之魂",
+    alt: "国王之魂(Kingsoul)-右",
     paragraphs: [
       "两片国王之魂碎片可以合成护符国王之魂，它使小骑士每2秒获得4灵魂。",
       "国王之魂也能打开通往深渊之底的道路，在出生地，它可以转变为虚空之心。",
@@ -413,7 +419,7 @@ const getMarkerVisitNumber = (marker: Marker) => {
 };
 
 function getPopupEmbeddedItemIcons(markerName: string) {
-  const icons: { src: string; alt: string }[] = [];
+  const icons: { src: string; alt: string; displaySize?: "small" }[] = [];
   const leadingIcon = HIGHLIGHT_LEADING_ICONS[markerName];
   if (leadingIcon) icons.push(leadingIcon);
   const itemNote = HIGHLIGHT_ITEM_NOTES[markerName];
@@ -1567,15 +1573,17 @@ function markerHasPopupContent(marker: Marker) {
 
 export default function MapViewer() {
   const viewportRef = useRef<HTMLDivElement>(null);
-  const markerAspectRatiosRef = useRef(new Map<string, number>());
   const transformRef = useRef<ViewTransform>({ x: 0, y: 0, scale: 1 });
   const minimumScaleRef = useRef(1);
   const dragRef = useRef<DragState | null>(null);
   const focusNavigationTimerRef = useRef<number | null>(null);
   const previewTriggerRef = useRef<HTMLButtonElement | null>(null);
   const previewCloseButtonRef = useRef<HTMLButtonElement | null>(null);
-  const [transform, setTransform] = useState<ViewTransform>(transformRef.current);
-  const [, setMarkerMetricsVersion] = useState(0);
+  const [transform, setTransform] = useState<ViewTransform>({ x: 0, y: 0, scale: 1 });
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const [markerAspectRatios, setMarkerAspectRatios] = useState(
+    () => new Map<string, number>(),
+  );
   const [dragging, setDragging] = useState(false);
   const [smoothFocusMoving, setSmoothFocusMoving] = useState(false);
   const [markers, setMarkers] = useState<Marker[]>([]);
@@ -1609,15 +1617,13 @@ export default function MapViewer() {
     src: string;
     alt: string;
   } | null>(null);
-  const [completedMarkerIds, setCompletedMarkerIds] = useState<Set<string>>(
-    () => new Set(),
-  );
   const saveInputRef = useRef<HTMLInputElement>(null);
   const [saveSlots, setSaveSlots] = useState<ParsedSaveSlot[]>([]);
   const [selectedSaveSlot, setSelectedSaveSlot] = useState<string | null>(null);
   const [saveFilterMode, setSaveFilterMode] = useState<SaveFilterMode>("all");
   const [saveFailures, setSaveFailures] = useState<{ slot: number; message: string }[]>([]);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [isParsingSave, setIsParsingSave] = useState(false);
 
   useEffect(() => {
     saveInputRef.current?.setAttribute("webkitdirectory", "");
@@ -1647,9 +1653,6 @@ export default function MapViewer() {
       window.removeEventListener("keydown", closeOnEscape);
     };
   }, [previewImage, closePreviewImage]);
-  const [regionLabelLayouts, setRegionLabelLayouts] =
-    useState<RegionLabelLayouts>(INITIAL_REGION_LABEL_LAYOUTS);
-
   const constrainTransform = useCallback((next: ViewTransform) => {
     const viewport = viewportRef.current;
     if (!viewport) return next;
@@ -1686,12 +1689,17 @@ export default function MapViewer() {
   );
 
   const handleSaveDirectory = async (files: File[]) => {
-    const result = await parseSaveDirectory(files);
-    setSaveSlots(result.slots);
-    setSaveFailures(result.failures);
-    setSaveError(result.error ?? null);
-    setSelectedSaveSlot(result.slots[0]?.slotId ?? null);
-    setSaveFilterMode("all");
+    setIsParsingSave(true);
+    try {
+      const result = await parseSaveDirectory(files);
+      setSaveSlots(result.slots);
+      setSaveFailures(result.failures);
+      setSaveError(result.error ?? null);
+      setSelectedSaveSlot(result.slots[0]?.slotId ?? null);
+      setSaveFilterMode("all");
+    } finally {
+      setIsParsingSave(false);
+    }
   };
 
   const handleSaveInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1726,11 +1734,15 @@ export default function MapViewer() {
   }, [updateTransform]);
 
   useEffect(() => {
-    fitMap();
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    const observer = new ResizeObserver(fitMap);
+    const syncViewport = () => {
+      setViewportWidth(viewport.clientWidth);
+      fitMap();
+    };
+    syncViewport();
+    const observer = new ResizeObserver(syncViewport);
     observer.observe(viewport);
     return () => observer.disconnect();
   }, [fitMap]);
@@ -1819,33 +1831,16 @@ export default function MapViewer() {
     return [...MAP_REGION_CHINESE_LABELS, ...additions];
   }, [regionInfos]);
 
-  useEffect(() => {
-    setRegionLabelLayouts((current) => {
-      let next = current;
-      for (const region of allRegionChineseLabels) {
-        const labelId = `text:${region.name}`;
-        if (next[labelId]) continue;
-        if (next === current) next = { ...current };
+  const regionLabelLayouts = useMemo<RegionLabelLayouts>(() => {
+    const next = { ...INITIAL_REGION_LABEL_LAYOUTS };
+    for (const region of allRegionChineseLabels) {
+      const labelId = `text:${region.name}`;
+      if (!next[labelId]) {
         next[labelId] = { x: region.x, y: region.y, size: region.size };
       }
-      return next;
-    });
-  }, [allRegionChineseLabels]);
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(
-        localStorage.getItem(COMPLETION_STORAGE_KEY) ?? "[]",
-      );
-      if (Array.isArray(saved)) {
-        setCompletedMarkerIds(
-          new Set(saved.filter((id): id is string => typeof id === "string")),
-        );
-      }
-    } catch (error) {
-      console.error("无法读取已完成点位", error);
     }
-  }, []);
+    return next;
+  }, [allRegionChineseLabels]);
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
@@ -1923,12 +1918,11 @@ export default function MapViewer() {
   };
 
   const getPopupPosition = (marker: Marker) => {
-    const viewportWidth = viewportRef.current?.clientWidth ?? 0;
     const markerX =
       transform.x + (marker.x / 100) * MAP_WIDTH * transform.scale;
     const markerY =
       transform.y + (marker.y / 100) * MAP_HEIGHT * transform.scale;
-    const markerAspectRatio = markerAspectRatiosRef.current.get(marker.id) ?? 1;
+    const markerAspectRatio = markerAspectRatios.get(marker.id) ?? 1;
     const renderedMarkerHeight = marker.size * transform.scale * markerAspectRatio;
     const markerTop = markerY - renderedMarkerHeight / 2;
     const markerBottom = markerY + renderedMarkerHeight / 2;
@@ -2005,23 +1999,80 @@ export default function MapViewer() {
           .includes(normalizedFocusSearch),
       )
     : [];
+  const isSaveFilterFocus = Boolean(
+    selectedSaveDetail && saveFilterMode !== "all",
+  );
+  const selectedSaveFilterMatches =
+    selectedMarker && selectedSaveDetail && saveFilterMode !== "all"
+      ? getMarkerSaveMatches(selectedMarker, selectedSaveDetail, saveFilterMode)
+      : [];
+  const saveFilterFocusLabel = isSaveFilterFocus
+    ? `${saveFilterMode === "collected" ? "已完成" : "未完成"}${
+        normalizedFocusSearch
+          ? ` + “${searchQuery.trim()}”`
+          : activeCategoryKeys.length === 1
+            ? ` + ${activeCategoryKeys[0].split("\u0000")[1]}`
+            : activeCategoryKeys.length > 1
+              ? ` + ${activeCategoryKeys.length}类图标`
+              : ""
+      }`
+    : "";
+  const activeCategoryPopupItemNames = new Set(
+    activeCategoryEntries.map((entry) => normalizeItemName(entry.name)),
+  );
+  const activeSearchPopupNames = new Set(
+    [...activeSearchEntries.map((entry) => entry.name), ...activeSearchPopupItemNames].map(
+      (name) => normalizeItemName(name),
+    ),
+  );
+  const activeSavePopupItemNames = new Set(
+    selectedSaveFilterMatches
+      .flatMap((mapping) => [mapping.groupName, mapping.displayName])
+      .map((name) => normalizeItemName(name)),
+  );
   const isPopupLinkFocus =
     Boolean(popupLinkFocus) &&
     selectedMarker?.id === popupLinkFocus?.ownerMarkerId;
+  const popupLinkItemName = normalizeItemName(
+    isPopupLinkFocus && popupLinkFocus ? popupLinkFocus.itemName : "",
+  );
   const activeCategoryItemNames = new Set(
     [
       ...activeCategoryEntries.map((entry) => entry.name),
       ...activeSearchEntries.map((entry) => entry.name),
       ...activeSearchPopupItemNames,
+      ...selectedSaveFilterMatches.flatMap((mapping) => [
+        mapping.groupName,
+        mapping.displayName,
+      ]),
       ...(isPopupLinkFocus && popupLinkFocus ? [popupLinkFocus.itemName] : []),
     ].map((name) => normalizeItemName(name)),
   );
+  const popupItemMatchesActiveFilters = (...names: Array<string | undefined>) => {
+    const normalizedNames = names
+      .filter((name): name is string => Boolean(name))
+      .map((name) => normalizeItemName(name));
+
+    return (
+      (!isPopupLinkFocus ||
+        normalizedNames.some((name) => name === popupLinkItemName)) &&
+      (activeMarkerCategoryKeys.length === 0 ||
+        normalizedNames.some((name) => activeCategoryPopupItemNames.has(name))) &&
+      (!normalizedFocusSearch ||
+        normalizedNames.some((name) => activeSearchPopupNames.has(name))) &&
+      (!isSaveFilterFocus ||
+        normalizedNames.some((name) => activeSavePopupItemNames.has(name)))
+    );
+  };
   const isMaskFragmentFocus =
     activeRegionNames.size > 0 ||
     activeMarkerCategoryKeys.length > 0 ||
-    Boolean(normalizedFocusSearch);
+    Boolean(normalizedFocusSearch) ||
+    isSaveFilterFocus;
   const isSingleCategoryFocus =
-    activeMarkerCategoryKeys.length > 0 || Boolean(normalizedFocusSearch);
+    activeMarkerCategoryKeys.length > 0 ||
+    Boolean(normalizedFocusSearch) ||
+    isSaveFilterFocus;
   const selectedMarkerDirectlyMatchesFilter = selectedMarker
     ? [...activeCategoryEntries, ...activeSearchEntries].some(
         (entry) =>
@@ -2031,22 +2082,21 @@ export default function MapViewer() {
     : false;
   const selectedMarkerContainsFilteredPopupItem = selectedMarker
     ? getPopupEmbeddedItemIcons(selectedMarker.name).some((icon) =>
-        activeCategoryItemNames.has(normalizeItemName(icon.alt)),
+        popupItemMatchesActiveFilters(icon.alt),
       ) ||
       (!INFORMATION_ONLY_MARKER_IDS.has(selectedMarker.id) &&
         (MERCHANT_OFFERS[selectedMarker.iconId] ?? []).some((section) =>
           section.offers.some(
-            (offer) =>
-              activeCategoryItemNames.has(normalizeItemName(offer.name)) ||
-              activeCategoryItemNames.has(
-                normalizeItemName(offer.rewardIconLabel ?? ""),
-              ),
+            (offer) => popupItemMatchesActiveFilters(
+              offer.name,
+              offer.rewardIconLabel,
+            ),
           ),
       )) ||
       classification.relations.some(
         (relation) =>
           relation.ownerIconId === selectedMarker.iconId &&
-          activeCategoryItemNames.has(normalizeItemName(relation.itemName)),
+          popupItemMatchesActiveFilters(relation.itemName),
       )
     : false;
   const shouldFilterPopupContents =
@@ -2056,14 +2106,23 @@ export default function MapViewer() {
       ((activeMarkerCategoryKeys.length > 0 &&
         !selectedMarkerDirectlyMatchesFilter) ||
         (Boolean(normalizedFocusSearch) &&
-          selectedMarkerContainsFilteredPopupItem)));
+          selectedMarkerContainsFilteredPopupItem) ||
+        (isSaveFilterFocus && selectedMarkerContainsFilteredPopupItem)));
   const selectedMerchantSectionsBase = selectedMarker
     ? INFORMATION_ONLY_MARKER_IDS.has(selectedMarker.id)
       ? []
       : (MERCHANT_OFFERS[selectedMarker.iconId] ?? [])
     : [];
+  const shouldShowFullGrimmchildRewards = Boolean(
+    selectedMarker?.iconId === TROUPE_MASTER_GRIMM_ICON_ID &&
+      ["格林之子", "第一阶段", "第二阶段", "第三阶段", "第四阶段"].some(
+        (name) => activeCategoryItemNames.has(normalizeItemName(name)),
+      ),
+  );
   const selectedMerchantSections = shouldFilterPopupContents
-    ? selectedMerchantSectionsBase
+    ? shouldShowFullGrimmchildRewards
+      ? selectedMerchantSectionsBase
+      : selectedMerchantSectionsBase
         .map((section) => ({
           ...section,
           hideHeader:
@@ -2072,11 +2131,10 @@ export default function MapViewer() {
               : section.hideHeader,
           hideCount: true,
           offers: section.offers.filter(
-            (offer) =>
-              activeCategoryItemNames.has(normalizeItemName(offer.name)) ||
-              activeCategoryItemNames.has(
-                normalizeItemName(offer.rewardIconLabel ?? ""),
-              ),
+            (offer) => popupItemMatchesActiveFilters(
+              offer.name,
+              offer.rewardIconLabel,
+            ),
           ),
         }))
         .filter((section) => section.offers.length > 0)
@@ -2100,6 +2158,14 @@ export default function MapViewer() {
   const selectedHighlightLeadingIcon = selectedMarker
     ? HIGHLIGHT_LEADING_ICONS[selectedMarker.name]
     : undefined;
+  const selectedSaveFilteredEmbeddedIcon =
+    selectedMarker && isSaveFilterFocus
+      ? getPopupEmbeddedItemIcons(selectedMarker.name).find((icon) =>
+          popupItemMatchesActiveFilters(icon.alt),
+        )
+      : undefined;
+  const displayedHighlightLeadingIcon =
+    selectedSaveFilteredEmbeddedIcon ?? selectedHighlightLeadingIcon;
   const selectedClassifications = selectedMarker
     ? classification.entries.filter(
         (entry) =>
@@ -2198,37 +2264,178 @@ export default function MapViewer() {
     selectedClassification?.primary &&
       COMPLETABLE_PRIMARY_CATEGORIES.has(selectedClassification.primary),
   );
-  const selectedSecondaryCompletionGroup =
-    selectedClassification?.primary && selectedClassification.secondary
-      ? markers.filter((marker) => {
-          const markerClassification =
-            classification.entries.find(
-              (entry) =>
-                entry.iconId === marker.iconId &&
-                entry.name === marker.name &&
-                entry.primary,
-            ) ??
-            classification.entries.find(
-              (entry) => entry.iconId === marker.iconId && entry.primary,
-            );
-
-          return (
-            markerClassification?.primary === selectedClassification.primary &&
-            markerClassification.secondary === selectedClassification.secondary
-          );
-        })
+  const allSaveMappingProgress = selectedSaveDetail
+    ? getSaveMappingProgress(selectedSaveDetail)
+    : [];
+  const selectedMarkerSaveMappings =
+    selectedMarker
+      ? allSaveMappingProgress.filter(
+          (mapping) => mapping.markerId === selectedMarker.id,
+        )
       : [];
-  const selectedSecondaryCompletedCount =
-    selectedSecondaryCompletionGroup.filter((marker) =>
-      completedMarkerIds.has(marker.id),
-    ).length;
+  const canonicalPopupSaveName = (name: string) =>
+    normalizeItemName(name).replaceAll("的", "").replaceAll("匙", "钥");
+  const fragileCharmParserIds = new Set([
+    "charm-023",
+    "charm-024",
+    "charm-025",
+  ]);
+  const mappingCountsAsCollected = (
+    mapping: (typeof selectedMarkerSaveMappings)[number],
+  ) => {
+    if (mapping.state !== "collected") return false;
+    if (
+      selectedMarker &&
+      canonicalPopupSaveName(selectedMarker.name) === "迪万" &&
+      fragileCharmParserIds.has(mapping.parserId)
+    ) {
+      return mapping.formId?.startsWith("unbreakable-") === true;
+    }
+    return true;
+  };
+  const selectedMarkerCompletedFromSave = Boolean(
+    selectedMarker &&
+      selectedMarkerSaveMappings.some(
+        (mapping) =>
+          mapping.state === "collected" &&
+          [mapping.displayName, mapping.groupName].some(
+            (name) =>
+              canonicalPopupSaveName(name) ===
+              canonicalPopupSaveName(selectedMarker.name),
+          ),
+      ),
+  );
+  const isPopupItemCollected = (
+    names: Array<string | undefined>,
+    offer?: MerchantOffer,
+  ) => {
+    const candidates = names
+      .filter((name): name is string => Boolean(name))
+      .map(canonicalPopupSaveName);
+    if (
+      candidates.some((name) =>
+        ["第一阶段", "第二阶段", "第三阶段", "第四阶段"].includes(name),
+      )
+    ) {
+      candidates.push(canonicalPopupSaveName("格林之子"));
+    }
+    const exactMatch = selectedMarkerSaveMappings.find((mapping) =>
+      (mapping.parserId === "charm-040" && mapping.formNameZh
+        ? [mapping.formNameZh]
+        : [mapping.displayName, mapping.formNameZh]
+      ).some(
+        (name) => name && candidates.includes(canonicalPopupSaveName(name)),
+      ),
+    );
+    if (exactMatch) return mappingCountsAsCollected(exactMatch);
+
+    const groupMatches = selectedMarkerSaveMappings.filter((mapping) =>
+      candidates.includes(canonicalPopupSaveName(mapping.groupName)),
+    );
+    if (groupMatches.length === 0) {
+      const ownerName = selectedMarker
+        ? canonicalPopupSaveName(selectedMarker.name)
+        : "";
+      const contextualMatch = allSaveMappingProgress.find((mapping) => {
+        const displayName = canonicalPopupSaveName(mapping.displayName);
+        return (
+          ownerName &&
+          displayName.includes(ownerName) &&
+          candidates.some((candidate) => displayName.includes(candidate))
+        );
+      });
+      return contextualMatch?.state === "collected";
+    }
+    if (!offer || groupMatches.length === 1) {
+      return groupMatches.some(mappingCountsAsCollected);
+    }
+
+    const repeatedOffers = selectedMerchantSectionsBase.flatMap((section) =>
+      section.offers.filter((candidate) =>
+        candidates.includes(canonicalPopupSaveName(candidate.name)),
+      ),
+    );
+    const occurrenceIndex = repeatedOffers.indexOf(offer);
+    const occurrenceMatch = groupMatches[occurrenceIndex];
+    return occurrenceMatch ? mappingCountsAsCollected(occurrenceMatch) : false;
+  };
+  const popupItemCompletedStamp = (
+    <span className="popup-item-completed-stamp" aria-hidden="true">
+      <img src="/assets/completed-stamp.png" alt="" draggable={false} />
+    </span>
+  );
 
   const categoryGroups = useMemo(() => {
+    const saveGroupProgress = getSaveGroupProgress(selectedSaveDetail);
+    const canonicalProgressName = (name: string) =>
+      normalizeItemName(name).replaceAll("的", "").replaceAll("匙", "钥");
+    const collectedBySecondary = new Map<string, number>();
+    const mappedTotalBySecondary = new Map<string, number>();
+    const mappedSecondaries = new Set<string>();
+    const charmKey = `技能\u0000护符`;
+    const itemKey = `收集物\u0000道具`;
+    const charmDisplayProgress = selectedSaveDetail
+      ? getCharmDisplayProgress(selectedSaveDetail)
+      : undefined;
+    if (selectedSaveDetail) {
+      for (const mapping of getSaveMappingProgress(selectedSaveDetail)) {
+        // All charm forms, including the complete Kingsoul, are counted only
+        // by the dedicated 45-entry charm rule below.
+        if (mapping.groupName === "护符") continue;
+        const displayName = canonicalProgressName(mapping.displayName);
+        const groupName = canonicalProgressName(mapping.groupName);
+        const forcedBossSecondary =
+          mapping.groupName === "Boss攻略进度" &&
+          mapping.parserId === "troupe-master-grimm"
+            ? "非主线Boss"
+            : mapping.parserId === "zote-the-mighty"
+              ? "梦境Boss"
+            : undefined;
+        const matchedEntry =
+          (forcedBossSecondary
+            ? classification.entries.find(
+                (entry) =>
+                  entry.primary === "Boss" &&
+                  entry.secondary === forcedBossSecondary,
+              )
+            : undefined) ??
+          classification.entries.find(
+            (entry) => canonicalProgressName(entry.name) === displayName,
+          ) ??
+          classification.entries.find(
+            (entry) => canonicalProgressName(entry.name) === groupName,
+          ) ??
+          classification.entries.find(
+            (entry) => canonicalProgressName(entry.secondary) === groupName,
+          );
+        // NPC markers can host mapped rewards or quest states, but the NPC
+        // classification itself is not a collectible progress category.
+        if (!matchedEntry?.secondary || matchedEntry.primary === "NPC") continue;
+        const key = `${matchedEntry.primary}\u0000${matchedEntry.secondary}`;
+        mappedSecondaries.add(key);
+        mappedTotalBySecondary.set(
+          key,
+          (mappedTotalBySecondary.get(key) ?? 0) + 1,
+        );
+        if (mapping.state === "collected") {
+          collectedBySecondary.set(key, (collectedBySecondary.get(key) ?? 0) + 1);
+        }
+      }
+      mappedSecondaries.add(charmKey);
+      collectedBySecondary.set(charmKey, charmDisplayProgress!.collected);
+      mappedSecondaries.add(itemKey);
+    }
     const groups = new Map<
       string,
       Map<
         string,
-        { name: string; count: number; iconFile?: string; iconScale?: number }
+        {
+          name: string;
+          count: number;
+          saveProgress?: { collected: number; total: number };
+          iconFile?: string;
+          iconScale?: number;
+        }
       >
     >();
     const popupOccurrenceCounts = new Map<string, number>();
@@ -2281,6 +2488,13 @@ export default function MapViewer() {
         (entry.location.includes("弹窗") ? popupCount : 0);
       let entryCount = countedOccurrences > 0 ? countedOccurrences : 1;
       if (
+        entry.primary === "技能" &&
+        entry.secondary === "护符" &&
+        ["第二阶段", "第三阶段", "第四阶段"].includes(entry.name)
+      ) {
+        entryCount = 0;
+      }
+      if (
         entry.primary === "收集物" &&
         entry.secondary === "国王之魂碎片"
       ) {
@@ -2315,6 +2529,9 @@ export default function MapViewer() {
       secondary.set(entry.secondary, {
         name: entry.secondary,
         count: (current?.count ?? 0) + entryCount,
+        saveProgress: selectedSaveDetail
+          ? saveGroupProgress[entry.secondary]
+          : undefined,
         iconFile:
           iconOverride?.iconFile ??
           current?.iconFile ??
@@ -2344,13 +2561,39 @@ export default function MapViewer() {
           ]),
       ),
     );
+    if (selectedSaveDetail) {
+      for (const [primary, secondaryMap] of groups) {
+        for (const [secondaryName, secondary] of secondaryMap) {
+          const key = `${primary}\u0000${secondaryName}`;
+          if (!mappedSecondaries.has(key)) continue;
+          secondary.saveProgress = {
+            collected: collectedBySecondary.get(key) ?? 0,
+            total:
+              key === charmKey && charmDisplayProgress
+                ? charmDisplayProgress.total
+                : key === itemKey
+                  ? 21
+                  : mappedTotalBySecondary.get(key) ?? secondary.count,
+          };
+        }
+      }
+    }
     return [...groups.entries()].map(([primary, secondaryMap]) => ({
       primary,
       secondary: [...secondaryMap.values()].sort(
         (left, right) => right.count - left.count,
       ),
     }));
-  }, [classification.entries, markers, regionInfos]);
+  }, [classification.entries, markers, regionInfos, selectedSaveDetail]);
+
+  const selectedSecondaryProgress =
+    selectedClassification?.primary && selectedClassification.secondary
+      ? categoryGroups
+          .find((group) => group.primary === selectedClassification.primary)
+          ?.secondary.find(
+            (secondary) => secondary.name === selectedClassification.secondary,
+          )?.saveProgress
+      : undefined;
 
   const normalizedSearch = normalizedFocusSearch;
   const categoryVisibleMarkers = useMemo(() => {
@@ -2528,6 +2771,7 @@ export default function MapViewer() {
   );
 
   const renderedMarkers = useMemo(() => {
+    if (saveFilterMode !== "all") return visibleMarkers;
     if (
       !glowFocusMarkerId ||
       visibleMarkers.some((marker) => marker.id === glowFocusMarkerId)
@@ -2538,7 +2782,7 @@ export default function MapViewer() {
       (marker) => marker.id === glowFocusMarkerId,
     );
     return focusedMarker ? [...visibleMarkers, focusedMarker] : visibleMarkers;
-  }, [glowFocusMarkerId, markers, visibleMarkers]);
+  }, [glowFocusMarkerId, markers, saveFilterMode, visibleMarkers]);
 
   const visibleRegionFocusMarkers = useMemo<Marker[]>(() => {
     if (activeRegionNames.size === 0) return [];
@@ -2573,7 +2817,10 @@ export default function MapViewer() {
   }, [activeRegionNames, allRegionChineseLabels, regionInfoByName, regionLabelLayouts]);
 
   const focusNavigationItems = useMemo(
-    () => [...visibleMarkers, ...visibleRegionFocusMarkers],
+    () =>
+      [...visibleMarkers, ...visibleRegionFocusMarkers].sort(
+        (left, right) => left.x - right.x || left.y - right.y,
+      ),
     [visibleMarkers, visibleRegionFocusMarkers],
   );
 
@@ -2619,6 +2866,16 @@ export default function MapViewer() {
     [updateTransform],
   );
 
+  const openMarker = useCallback((marker: Marker) => {
+    setSelectedMarker(marker);
+    setPopupTab(
+      !INFORMATION_ONLY_MARKER_IDS.has(marker.id) &&
+        MERCHANT_OFFERS[marker.iconId]?.length
+        ? "offers"
+        : "description",
+    );
+  }, []);
+
   const focusMaskFragment = useCallback(
     (nextIndex: number, forcePopup = false) => {
       const viewport = viewportRef.current;
@@ -2657,7 +2914,7 @@ export default function MapViewer() {
         focusNavigationTimerRef.current = null;
       }, FOCUS_TRANSITION_MS);
     },
-    [focusNavigationItems, updateTransform],
+    [focusNavigationItems, openMarker, updateTransform],
   );
 
   useEffect(
@@ -2671,13 +2928,16 @@ export default function MapViewer() {
 
   useEffect(() => {
     if (!isMaskFragmentFocus || focusNavigationItems.length === 0) return;
-    setMaskFragmentCursor(0);
-    setSelectedMarker(null);
-    if (visibleMarkers.length === 1 || focusNavigationItems.length === 1) {
-      focusMaskFragment(0, true);
-      return;
-    }
-    fitMarkersInView(focusNavigationItems);
+    const frame = window.requestAnimationFrame(() => {
+      setMaskFragmentCursor(0);
+      setSelectedMarker(null);
+      if (visibleMarkers.length === 1 || focusNavigationItems.length === 1) {
+        focusMaskFragment(0, true);
+        return;
+      }
+      fitMarkersInView(focusNavigationItems);
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [
     isMaskFragmentFocus,
     normalizedFocusSearch,
@@ -2693,7 +2953,8 @@ export default function MapViewer() {
       !selectedMarker.id.startsWith("region:") &&
       !renderedMarkers.some((marker) => marker.id === selectedMarker.id)
     ) {
-      setSelectedMarker(null);
+      const frame = window.requestAnimationFrame(() => setSelectedMarker(null));
+      return () => window.cancelAnimationFrame(frame);
     }
   }, [renderedMarkers, selectedMarker]);
 
@@ -2720,16 +2981,6 @@ export default function MapViewer() {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setIsResettingFilters(false));
     });
-  };
-
-  const openMarker = (marker: Marker) => {
-    setSelectedMarker(marker);
-    setPopupTab(
-      !INFORMATION_ONLY_MARKER_IDS.has(marker.id) &&
-        MERCHANT_OFFERS[marker.iconId]?.length
-        ? "offers"
-        : "description",
-    );
   };
 
   const openRegionLabel = (region: RegionInfo, layout: RegionLabelLayout) => {
@@ -2920,6 +3171,7 @@ export default function MapViewer() {
         className="save-directory-input"
         type="file"
         multiple
+        disabled={isParsingSave}
         aria-label="选择空洞骑士存档目录"
         onChange={handleSaveInputChange}
       />
@@ -2939,17 +3191,13 @@ export default function MapViewer() {
         onPointerDown={(event) => event.stopPropagation()}
         onWheel={(event) => event.stopPropagation()}
       >
-        <div className="map-filter-logo" aria-hidden="true">
-          <img src="/assets/hollow-knight-logo.png" alt="" />
+        <div className="map-filter-logo">
+          <img src="/assets/hollow-knight-logo.png" alt="" aria-hidden="true" />
+          <div className="map-filter-brand-copy">
+            <h1>空洞骑士·地图攻略</h1>
+            <p>当前显示图标 {visibleMarkers.length}/{markers.length}</p>
+          </div>
         </div>
-        <header className="map-filter-header">
-          <div>
-            <h1>图标筛选</h1>
-          </div>
-          <div className="map-filter-header-actions">
-            <p>当前显示 {visibleMarkers.length}/{markers.length}</p>
-          </div>
-        </header>
         <div className="map-filter-search">
           <input
             type="search"
@@ -2972,35 +3220,36 @@ export default function MapViewer() {
             搜索
           </button>
         </div>
-        <div className="map-filter-save-panel">
-          <div className="map-filter-save-heading">
-            <div>
-              <strong>存档进度</strong>
-              <span>{saveSlots.length > 0 ? "选择槽位后筛选地图" : "导入本地存档以同步收集状态"}</span>
-            </div>
+        <div className="map-filter-save-panel" aria-busy={isParsingSave} aria-live="polite">
+          <div className="map-filter-save-toolbar">
             <button
               type="button"
               className="map-filter-save-upload"
+              disabled={isParsingSave}
+              aria-busy={isParsingSave}
               onClick={() => saveInputRef.current?.click()}
             >
-              {saveSlots.length > 0 ? "重新导入" : "导入存档"}
+              {isParsingSave ? "解析中" : saveSlots.length > 0 ? "重新导入" : "导入存档"}
             </button>
+            {saveSlots.length > 0 && (
+              <div className="map-filter-save-slots" role="group" aria-label="选择存档槽位">
+                {saveSlots.map((slot) => (
+                  <button
+                    type="button"
+                    key={slot.slotId}
+                    className={selectedSaveSlot === slot.slotId ? "is-active" : ""}
+                    aria-pressed={selectedSaveSlot === slot.slotId}
+                    onClick={() => setSelectedSaveSlot(slot.slotId)}
+                  >
+                    槽位 {slot.slotNumber}
+                  </button>
+                ))}
+              </div>
+            )}
+            {saveSlots.length === 0 && (
+              <span className="map-filter-save-hint">根据存档进度显示地图内容</span>
+            )}
           </div>
-          {saveSlots.length > 0 && (
-            <div className="map-filter-save-slots" role="group" aria-label="选择存档槽位">
-              {saveSlots.map((slot) => (
-                <button
-                  type="button"
-                  key={slot.slotId}
-                  className={selectedSaveSlot === slot.slotId ? "is-active" : ""}
-                  aria-pressed={selectedSaveSlot === slot.slotId}
-                  onClick={() => setSelectedSaveSlot(slot.slotId)}
-                >
-                  槽位 {slot.slotNumber}
-                </button>
-              ))}
-            </div>
-          )}
           {saveError && <p className="map-filter-save-error">{saveError}</p>}
           {saveFailures.length > 0 && (
             <p className="map-filter-save-error">
@@ -3008,31 +3257,33 @@ export default function MapViewer() {
             </p>
           )}
         </div>
-        <div className="map-filter-completion-tabs" aria-label="完成状态筛选">
-          {(["all", "collected", "missing"] as const).map((mode) => (
-              <button
-                type="button"
-                key={mode}
-                className={saveFilterMode === mode ? "is-active" : ""}
-                aria-pressed={saveFilterMode === mode}
-                disabled={mode !== "all" && saveSlots.length === 0}
-                title={mode !== "all" && saveSlots.length === 0 ? "请先导入存档" : undefined}
-                onClick={() => {
-                  if (mode === "all") resetFilters();
-                  setSaveFilterMode(mode);
-                }}
-              >
-                {mode === "all" ? "全部" : mode === "collected" ? "已收集" : "未收集"}
-              </button>
-          ))}
-        </div>
+        {saveSlots.length > 0 && (
+          <div className="map-filter-completion-tabs" aria-label="完成状态筛选">
+            {(["all", "collected", "missing"] as const).map((mode) => (
+                <button
+                  type="button"
+                  key={mode}
+                  className={saveFilterMode === mode ? "is-active" : ""}
+                  aria-pressed={saveFilterMode === mode}
+                  onClick={() => {
+                    if (mode === "all") resetFilters();
+                    setSaveFilterMode(mode);
+                  }}
+                >
+                  {mode === "all" ? "全部" : mode === "collected" ? "已完成" : "未完成"}
+                </button>
+            ))}
+          </div>
+        )}
         {normalizedSearch && visibleMarkers.length === 0 && (
           <p className="map-filter-search-empty">没有找到搜索内容</p>
         )}
         {isMaskFragmentFocus && focusNavigationItems.length > 0 && (
           <div className="map-filter-focus-nav" aria-label="筛选结果定位">
             <span>
-              {normalizedFocusSearch
+              {isSaveFilterFocus
+                ? saveFilterFocusLabel
+                : normalizedFocusSearch
                 ? activeCategoryKeys.length > 0
                   ? `筛选 + “${searchQuery.trim()}”`
                   : `搜索：“${searchQuery.trim()}”`
@@ -3113,7 +3364,11 @@ export default function MapViewer() {
                     </span>
                     <span className="map-filter-secondary-copy">
                       <strong>{secondary.name}</strong>
-                      <small>{secondary.count}</small>
+                      <small>
+                        {secondary.saveProgress
+                          ? `${secondary.saveProgress.collected}/${secondary.saveProgress.total}`
+                          : secondary.count}
+                      </small>
                     </span>
                   </button>
                 ))}
@@ -3354,11 +3609,12 @@ export default function MapViewer() {
                   const image = event.currentTarget;
                   if (!image.naturalWidth || !image.naturalHeight) return;
                   const nextRatio = image.naturalHeight / image.naturalWidth;
-                  if (markerAspectRatiosRef.current.get(marker.id) === nextRatio) return;
-                  markerAspectRatiosRef.current.set(marker.id, nextRatio);
-                  if (selectedMarker?.id === marker.id) {
-                    setMarkerMetricsVersion((version) => version + 1);
-                  }
+                  setMarkerAspectRatios((current) => {
+                    if (current.get(marker.id) === nextRatio) return current;
+                    const next = new Map(current);
+                    next.set(marker.id, nextRatio);
+                    return next;
+                  });
                 }}
                 style={{ filter: getMarkerGlow(marker, markerPrimaryCategory) }}
               />
@@ -3397,20 +3653,19 @@ export default function MapViewer() {
         >
           <span className="marker-popup-pointer" aria-hidden="true" />
           <header className="marker-popup-header">
-            {selectedClassification?.primary === "Boss" &&
-              completedMarkerIds.has(selectedMarker.id) && (
-                <span
-                  className="marker-popup-boss-completed-stamp-clip"
-                  aria-hidden="true"
-                >
-                  <img
-                    className="marker-popup-boss-completed-stamp"
-                    src="/assets/completed-stamp.png"
-                    alt=""
-                    draggable={false}
-                  />
-                </span>
-              )}
+            {selectedMarkerCompletedFromSave && (
+              <span
+                className="marker-popup-boss-completed-stamp-clip"
+                aria-hidden="true"
+              >
+                <img
+                  className="marker-popup-boss-completed-stamp"
+                  src="/assets/completed-stamp.png"
+                  alt=""
+                  draggable={false}
+                />
+              </span>
+            )}
             <div className="marker-popup-heading">
               <div className="marker-popup-title-line">
                 <div className="marker-popup-title-and-tags">
@@ -3428,10 +3683,10 @@ export default function MapViewer() {
                 </div>
                 {selectedMarkerSupportsCompletion &&
                   selectedClassification?.primary !== "Boss" &&
-                  selectedSecondaryCompletionGroup.length > 1 && (
+                  selectedSecondaryProgress && (
                     <span className="marker-popup-header-progress">
-                      完成进度 {selectedSecondaryCompletedCount}/
-                      {selectedSecondaryCompletionGroup.length}
+                      完成进度 {selectedSecondaryProgress.collected}/
+                      {selectedSecondaryProgress.total}
                     </span>
                   )}
               </div>
@@ -3487,14 +3742,14 @@ export default function MapViewer() {
               >
                 {selectedPopupHighlight && (
                   <aside
-                    className={`marker-description-highlight${selectedHighlightLeadingIcon ? " has-leading-icon" : ""}${selectedHighlightLeadingIcon?.displaySize === "small" ? " has-small-leading-icon" : ""}${selectedHighlightLeadingIcon?.alt === "面具碎片" ? " has-compact-leading-icon" : ""}${shouldFilterPopupContents ? " without-divider" : ""}`}
+                    className={`marker-description-highlight${displayedHighlightLeadingIcon ? " has-leading-icon" : ""}${displayedHighlightLeadingIcon?.displaySize === "small" ? " has-small-leading-icon" : ""}${displayedHighlightLeadingIcon?.alt === "面具碎片" ? " has-compact-leading-icon" : ""}${shouldFilterPopupContents ? " without-divider" : ""}${displayedHighlightLeadingIcon && isPopupItemCollected([displayedHighlightLeadingIcon.alt]) ? " has-completed-stamp" : ""}`}
                     aria-label="重要描述"
                   >
-                    {selectedHighlightLeadingIcon && (
+                    {displayedHighlightLeadingIcon && (
                       <img
-                        className={`marker-description-highlight-icon${getPopupItemGlowClass(selectedHighlightLeadingIcon.alt, selectedHighlightLeadingIcon.src)}`}
-                        src={selectedHighlightLeadingIcon.src}
-                        alt={selectedHighlightLeadingIcon.alt}
+                        className={`marker-description-highlight-icon${getPopupItemGlowClass(displayedHighlightLeadingIcon.alt, displayedHighlightLeadingIcon.src)}`}
+                        src={displayedHighlightLeadingIcon.src}
+                        alt={displayedHighlightLeadingIcon.alt}
                       />
                     )}
                     <p>
@@ -3513,27 +3768,36 @@ export default function MapViewer() {
                           </span>
                         ))}
                     </p>
-                    {HIGHLIGHT_ITEM_NOTES[selectedMarker.name] && (
-                      <div className="marker-highlight-item-note">
-                        <img
-                          className={`${getPopupItemGlowClass(
+                    {displayedHighlightLeadingIcon &&
+                      isPopupItemCollected([displayedHighlightLeadingIcon.alt]) &&
+                      popupItemCompletedStamp}
+                    {HIGHLIGHT_ITEM_NOTES[selectedMarker.name] &&
+                      !selectedSaveFilteredEmbeddedIcon && (
+                        <div
+                          className={`marker-highlight-item-note${isPopupItemCollected([HIGHLIGHT_ITEM_NOTES[selectedMarker.name].alt]) ? " has-completed-stamp" : ""}`}
+                        >
+                          <img
+                            className={`${getPopupItemGlowClass(
+                              HIGHLIGHT_ITEM_NOTES[selectedMarker.name].alt,
+                              HIGHLIGHT_ITEM_NOTES[selectedMarker.name].src,
+                            ).trim()}${HIGHLIGHT_ITEM_NOTES[selectedMarker.name].src.startsWith("/icons/剑技/") ? " is-nail-art" : ""}`}
+                            src={HIGHLIGHT_ITEM_NOTES[selectedMarker.name].src}
+                            alt={HIGHLIGHT_ITEM_NOTES[selectedMarker.name].alt}
+                          />
+                          <div>
+                            {HIGHLIGHT_ITEM_NOTES[selectedMarker.name].paragraphs.map(
+                              (paragraph) => (
+                                <p key={paragraph}>
+                                  {renderPopupLinkedText(paragraph)}
+                                </p>
+                              ),
+                            )}
+                          </div>
+                          {isPopupItemCollected([
                             HIGHLIGHT_ITEM_NOTES[selectedMarker.name].alt,
-                            HIGHLIGHT_ITEM_NOTES[selectedMarker.name].src,
-                          ).trim()}${HIGHLIGHT_ITEM_NOTES[selectedMarker.name].src.startsWith("/icons/剑技/") ? " is-nail-art" : ""}`}
-                          src={HIGHLIGHT_ITEM_NOTES[selectedMarker.name].src}
-                          alt={HIGHLIGHT_ITEM_NOTES[selectedMarker.name].alt}
-                        />
-                        <div>
-                          {HIGHLIGHT_ITEM_NOTES[selectedMarker.name].paragraphs.map(
-                            (paragraph) => (
-                              <p key={paragraph}>
-                                {renderPopupLinkedText(paragraph)}
-                              </p>
-                            ),
-                          )}
+                          ]) && popupItemCompletedStamp}
                         </div>
-                      </div>
-                    )}
+                      )}
                   </aside>
                 )}
                 {!hideUnmatchedDescription && selectedImageGuide && (
@@ -3704,7 +3968,7 @@ export default function MapViewer() {
                       >
                           {section.offers.map((offer) => (
                             <article
-                              className={`merchant-offer${offer.geoReward ? " is-reward-row" : ""}`}
+                              className={`merchant-offer${offer.geoReward ? " is-reward-row" : ""}${isPopupItemCollected([offer.name, offer.rewardIconLabel], offer) ? " has-completed-stamp" : ""}`}
                               key={`${section.title}-${offer.name}-${offer.detail ?? offer.price ?? "reward"}`}
                             >
                               {!offer.geoReward && section.layout !== "price-table" && <span className="merchant-offer-icons">
@@ -3823,6 +4087,10 @@ export default function MapViewer() {
                                   />
                                 </span>
                               ) : null}
+                              {isPopupItemCollected(
+                                [offer.name, offer.rewardIconLabel],
+                                offer,
+                              ) && popupItemCompletedStamp}
                             </article>
                           ))}
                       </div>

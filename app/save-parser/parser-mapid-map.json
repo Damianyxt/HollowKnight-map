@@ -1,4 +1,4 @@
-﻿[
+[
     {
         "groupName":  "幼虫",
         "mapSequence":  1,
@@ -527,7 +527,7 @@
     {
         "groupName":  "苍白矿石",
         "mapSequence":  5,
-        "markerId":  "marker_1785401497945_6fmuk1",
+        "markerId":  "marker_1785401511467_mp67hm",
         "parserId":  "pale-ore-nosk",
         "module":  "collectionProgress"
     },
@@ -1524,5 +1524,33 @@
         "markerId":  "marker_1785484446612_vk1sbo",
         "parserId":  "lurien",
         "module":  "dreamerProgress"
+    },
+    {
+        "groupName":  "国王之魂碎片",
+        "mapSequence":  1,
+        "markerId":  "marker_1785401752422_zn1pl2",
+        "parserId":  "kingsoul-left-half",
+        "module":  "keyItemProgress"
+    },
+    {
+        "groupName":  "国王之魂碎片",
+        "mapSequence":  2,
+        "markerId":  "marker_1785401965884_mivnhb",
+        "parserId":  "kingsoul-right-half",
+        "module":  "keyItemProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  33,
+        "markerId":  "custom_failed_champion",
+        "parserId":  "failed-champion",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  34,
+        "markerId":  "custom_soul_tyrant",
+        "parserId":  "soul-tyrant",
+        "module":  "bossProgress"
     }
 ]

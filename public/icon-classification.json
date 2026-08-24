@@ -193,8 +193,22 @@
       "iconId": "popup:icons/地标+npc/鹿角虫车站图标.png",
       "name": "鹿角虫道图标",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
+    },
+    {
+      "iconId": "popup:icons/地标+npc/长椅图标.png",
+      "name": "长椅图标",
+      "location": "弹窗",
+      "primary": "收集物",
+      "secondary": "道具"
+    },
+    {
+      "iconId": "popup:icons/地标+npc/电车图标.png",
+      "name": "电车图标",
+      "location": "弹窗",
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_njpvkuL3ojo7vvIhNYXJpc3Nh77yJLndlYnA",
@@ -249,8 +263,8 @@
       "iconId": "popup:icons/地标+npc/生命血茧图标.png",
       "name": "生命血茧图标",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_po5_ohb_ogIXvvIhMZWcgRWF0ZXLvvIkud2VicA",
@@ -298,8 +312,8 @@
       "iconId": "popup:icons/地标+npc/温泉图标.png",
       "name": "温泉图标",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_mlofnianmkJzlr7vogIXph4zlp4bvvIhSZWxpYyBTZWVrZXIgTGVtbe-8iS53ZWJw",
@@ -816,8 +830,8 @@
       "iconId": "popup:icons/商店商品/贝壳标记.webp",
       "name": "贝壳标记",
       "location": "弹窗",
-      "primary": "",
-      "secondary": "商店物品"
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/商店商品/成就-升天.png",
@@ -886,43 +900,43 @@
       "iconId": "popup:icons/商店商品/SHINING标记.webp",
       "name": "闪亮标记",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/商店商品/商贩图针.png",
       "name": "商人图标",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/商店商品/圣甲虫标记.webp",
       "name": "圣甲虫标记",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/商店商品/TOKEN标记.webp",
       "name": "铜币标记",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/商店商品/羽毛笔.webp",
       "name": "羽毛笔",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/商店商品/战士之墓图针.png",
       "name": "战士陵墓图标",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "5pS26ZuG54mpL2ludl9Mb3ZlX0tleSAjNTQwNy5wbmc",
@@ -942,8 +956,8 @@
       "iconId": "popup:icons/收集物/梦之树图标.png",
       "name": "低语之根图标",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/收集物/典雅的钥匙.webp",
@@ -976,6 +990,13 @@
     {
       "iconId": "popup:icons/收集物/光蝇灯笼.webp",
       "name": "光蝇灯笼",
+      "location": "弹窗",
+      "primary": "收集物",
+      "secondary": "道具"
+    },
+    {
+      "iconId": "popup:icons/收集物/收藏家的地图.webp",
+      "name": "收藏家的地图",
       "location": "弹窗",
       "primary": "收集物",
       "secondary": "道具"
@@ -1261,6 +1282,20 @@
       "secondary": "主线Boss"
     },
     {
+      "iconId": "custom_failed_champion",
+      "name": "失败冠军(Failed Champion)",
+      "location": "地图",
+      "primary": "Boss",
+      "secondary": "梦境Boss"
+    },
+    {
+      "iconId": "custom_soul_tyrant",
+      "name": "灵魂暴君(Soul Tyrant)",
+      "location": "地图",
+      "primary": "Boss",
+      "secondary": "梦境Boss"
+    },
+    {
       "iconId": "Qk9TUy_liaflm6Llm6Lplb_moLzmnpfvvIhUcm91cGUgTWFzdGVyIEdyaW1t77yJLnBuZw",
       "name": "剧团团长格林(Troupe Master Grimm)",
       "location": "地图",
@@ -1314,7 +1349,7 @@
       "name": "梦魇之王格林(Nightmare King Grimm)",
       "location": "地图",
       "primary": "Boss",
-      "secondary": "非主线Boss"
+      "secondary": "梦境Boss"
     },
     {
       "iconId": "Qk9TUy_or7rmlq_lhYvvvIhOb3Nr77yJLnBuZw",
@@ -1469,13 +1504,6 @@
       "location": "地图",
       "primary": "NPC",
       "secondary": "多结局NPC"
-    },
-    {
-      "iconId": "custom_zote_colosseum",
-      "name": "伟大的左特(Zote the Mighty)",
-      "location": "地图",
-      "primary": "Boss",
-      "secondary": "非主线Boss"
     },
     {
       "iconId": "custom_zote_colosseum",
