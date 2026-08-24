@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import popupImageGuides from "./popup-image-guides.json";
+import { filterMarkersBySaveState, type SaveFilterMode } from "./save-parser/entity-map";
+import { parseSaveDirectory } from "./save-parser";
+import type { ParsedSaveSlot } from "./save-parser/types";
 
 const MAP_WIDTH = 4498;
 const MAP_HEIGHT = 2901;
@@ -1609,6 +1612,16 @@ export default function MapViewer() {
   const [completedMarkerIds, setCompletedMarkerIds] = useState<Set<string>>(
     () => new Set(),
   );
+  const saveInputRef = useRef<HTMLInputElement>(null);
+  const [saveSlots, setSaveSlots] = useState<ParsedSaveSlot[]>([]);
+  const [selectedSaveSlot, setSelectedSaveSlot] = useState<string | null>(null);
+  const [saveFilterMode, setSaveFilterMode] = useState<SaveFilterMode>("all");
+  const [saveFailures, setSaveFailures] = useState<{ slot: number; message: string }[]>([]);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    saveInputRef.current?.setAttribute("webkitdirectory", "");
+  }, []);
 
   const closePreviewImage = useCallback(() => {
     setPreviewImage(null);
@@ -1666,6 +1679,26 @@ export default function MapViewer() {
 
     return { ...next, x, y };
   }, []);
+
+  const selectedSaveDetail = useMemo(
+    () => saveSlots.find((slot) => slot.slotId === selectedSaveSlot)?.detail ?? null,
+    [saveSlots, selectedSaveSlot],
+  );
+
+  const handleSaveDirectory = async (files: File[]) => {
+    const result = await parseSaveDirectory(files);
+    setSaveSlots(result.slots);
+    setSaveFailures(result.failures);
+    setSaveError(result.error ?? null);
+    setSelectedSaveSlot(result.slots[0]?.slotId ?? null);
+    setSaveFilterMode("all");
+  };
+
+  const handleSaveInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    await handleSaveDirectory(files);
+    event.target.value = "";
+  };
 
   const updateTransform = useCallback(
     (next: ViewTransform) => {
@@ -2320,7 +2353,7 @@ export default function MapViewer() {
   }, [classification.entries, markers, regionInfos]);
 
   const normalizedSearch = normalizedFocusSearch;
-  const visibleMarkers = useMemo(() => {
+  const categoryVisibleMarkers = useMemo(() => {
     const selectedCategoryKeys = (categoryFilter?.secondaries ?? []).filter(
       (key) => !key.startsWith("区域\u0000"),
     );
@@ -2488,6 +2521,11 @@ export default function MapViewer() {
 
     return matchedMarkers;
   }, [categoryFilter, classification, markers, normalizedSearch]);
+
+  const visibleMarkers = useMemo(
+    () => filterMarkersBySaveState(categoryVisibleMarkers, selectedSaveDetail, saveFilterMode),
+    [categoryVisibleMarkers, saveFilterMode, selectedSaveDetail],
+  );
 
   const renderedMarkers = useMemo(() => {
     if (
@@ -2877,6 +2915,14 @@ export default function MapViewer() {
       onWheel={handleWheel}
       aria-label="空洞骑士地图"
     >
+      <input
+        ref={saveInputRef}
+        className="save-directory-input"
+        type="file"
+        multiple
+        aria-label="选择空洞骑士存档目录"
+        onChange={handleSaveInputChange}
+      />
       <button
         type="button"
         className={`map-filter-toggle${filterCollapsed ? " is-collapsed" : ""}`}
@@ -2926,12 +2972,59 @@ export default function MapViewer() {
             搜索
           </button>
         </div>
-        <div className="map-filter-completion-tabs" aria-label="完成状态筛选预览">
-          <button type="button" className="is-active" onClick={resetFilters}>
-            全部
-          </button>
-          <button type="button">已完成</button>
-          <button type="button">未完成</button>
+        <div className="map-filter-save-panel">
+          <div className="map-filter-save-heading">
+            <div>
+              <strong>存档进度</strong>
+              <span>{saveSlots.length > 0 ? "选择槽位后筛选地图" : "导入本地存档以同步收集状态"}</span>
+            </div>
+            <button
+              type="button"
+              className="map-filter-save-upload"
+              onClick={() => saveInputRef.current?.click()}
+            >
+              {saveSlots.length > 0 ? "重新导入" : "导入存档"}
+            </button>
+          </div>
+          {saveSlots.length > 0 && (
+            <div className="map-filter-save-slots" role="group" aria-label="选择存档槽位">
+              {saveSlots.map((slot) => (
+                <button
+                  type="button"
+                  key={slot.slotId}
+                  className={selectedSaveSlot === slot.slotId ? "is-active" : ""}
+                  aria-pressed={selectedSaveSlot === slot.slotId}
+                  onClick={() => setSelectedSaveSlot(slot.slotId)}
+                >
+                  槽位 {slot.slotNumber}
+                </button>
+              ))}
+            </div>
+          )}
+          {saveError && <p className="map-filter-save-error">{saveError}</p>}
+          {saveFailures.length > 0 && (
+            <p className="map-filter-save-error">
+              {saveFailures.map((failure) => `槽位 ${failure.slot} 无法解析`).join("；")}
+            </p>
+          )}
+        </div>
+        <div className="map-filter-completion-tabs" aria-label="完成状态筛选">
+          {(["all", "collected", "missing"] as const).map((mode) => (
+              <button
+                type="button"
+                key={mode}
+                className={saveFilterMode === mode ? "is-active" : ""}
+                aria-pressed={saveFilterMode === mode}
+                disabled={mode !== "all" && saveSlots.length === 0}
+                title={mode !== "all" && saveSlots.length === 0 ? "请先导入存档" : undefined}
+                onClick={() => {
+                  if (mode === "all") resetFilters();
+                  setSaveFilterMode(mode);
+                }}
+              >
+                {mode === "all" ? "全部" : mode === "collected" ? "已收集" : "未收集"}
+              </button>
+          ))}
         </div>
         {normalizedSearch && visibleMarkers.length === 0 && (
           <p className="map-filter-search-empty">没有找到搜索内容</p>

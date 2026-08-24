@@ -1,0 +1,1528 @@
+﻿[
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  1,
+        "markerId":  "marker_1785395264091_1hwpgy",
+        "parserId":  "grub-028",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  2,
+        "markerId":  "marker_1785395283791_0ievsr",
+        "parserId":  "grub-008",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  3,
+        "markerId":  "marker_1785395306563_ipiulc",
+        "parserId":  "grub-007",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  4,
+        "markerId":  "marker_1785395346545_yn3ifi",
+        "parserId":  "grub-033",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  5,
+        "markerId":  "marker_1785395352781_b8pnyb",
+        "parserId":  "grub-009",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  6,
+        "markerId":  "marker_1785395377576_kplfoi",
+        "parserId":  "grub-032",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  7,
+        "markerId":  "marker_1785395393364_6q5pld",
+        "parserId":  "grub-011",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  8,
+        "markerId":  "marker_1785395547451_vpm36b",
+        "parserId":  "grub-039",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  9,
+        "markerId":  "marker_1785395621064_7qpz16",
+        "parserId":  "grub-038",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  10,
+        "markerId":  "marker_1785395630881_k58i9z",
+        "parserId":  "grub-037",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  11,
+        "markerId":  "marker_1785395648406_u3w828",
+        "parserId":  "grub-036",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  12,
+        "markerId":  "marker_1785395684247_l9hksr",
+        "parserId":  "grub-035",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  13,
+        "markerId":  "marker_1785395693405_7xtrp0",
+        "parserId":  "grub-010",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  14,
+        "markerId":  "marker_1785395737639_qckg89",
+        "parserId":  "grub-005",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  15,
+        "markerId":  "marker_1785395749647_o3c42v",
+        "parserId":  "grub-002",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  16,
+        "markerId":  "marker_1785395758534_qn7l9h",
+        "parserId":  "grub-006",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  17,
+        "markerId":  "marker_1785395776338_iyazg5",
+        "parserId":  "grub-031",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  18,
+        "markerId":  "marker_1785395831344_yfgxib",
+        "parserId":  "grub-029",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  19,
+        "markerId":  "marker_1785395838363_oq0sq0",
+        "parserId":  "grub-030",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  20,
+        "markerId":  "marker_1785395847728_wpw1le",
+        "parserId":  "grub-043",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  21,
+        "markerId":  "marker_1785395860827_ecl5f9",
+        "parserId":  "grub-042",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  22,
+        "markerId":  "marker_1785395871565_e42dfd",
+        "parserId":  "grub-027",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  23,
+        "markerId":  "marker_1785395878247_d4kcmy",
+        "parserId":  "grub-026",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  24,
+        "markerId":  "marker_1785395888648_n38egy",
+        "parserId":  "grub-015",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  25,
+        "markerId":  "marker_1785395905083_1ye6ui",
+        "parserId":  "grub-044",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  26,
+        "markerId":  "marker_1785395919179_q4i567",
+        "parserId":  "grub-045",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  27,
+        "markerId":  "marker_1785395919630_eyhqnm",
+        "parserId":  "grub-046",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  28,
+        "markerId":  "marker_1785395951896_8k7w90",
+        "parserId":  "grub-013",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  29,
+        "markerId":  "marker_1785395968988_mrcnpu",
+        "parserId":  "grub-016",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  30,
+        "markerId":  "marker_1785395974838_58pjla",
+        "parserId":  "grub-012",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  31,
+        "markerId":  "marker_1785396133970_4505vt",
+        "parserId":  "grub-025",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  32,
+        "markerId":  "marker_1785396155143_9s950d",
+        "parserId":  "grub-041",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  33,
+        "markerId":  "marker_1785396163378_kkdhjt",
+        "parserId":  "grub-040",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  34,
+        "markerId":  "marker_1785396497411_xhn6uj",
+        "parserId":  "grub-018",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  35,
+        "markerId":  "marker_1785396501612_zcvsvr",
+        "parserId":  "grub-019",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  36,
+        "markerId":  "marker_1785396533461_whlm9r",
+        "parserId":  "grub-021",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  37,
+        "markerId":  "marker_1785396537934_ne5bn6",
+        "parserId":  "grub-022",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  38,
+        "markerId":  "marker_1785396545479_aywi4k",
+        "parserId":  "grub-023",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  39,
+        "markerId":  "marker_1785398090690_bwab7b",
+        "parserId":  "grub-017",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  40,
+        "markerId":  "marker_1785398112742_dgbua3",
+        "parserId":  "grub-003",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  41,
+        "markerId":  "marker_1785398117356_n9nrd0",
+        "parserId":  "grub-004",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  42,
+        "markerId":  "marker_1785398138495_ujvuna",
+        "parserId":  "grub-001",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  43,
+        "markerId":  "marker_1785398416159_d61568",
+        "parserId":  "grub-024",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  44,
+        "markerId":  "marker_1785401774898_4rmxxe",
+        "parserId":  "grub-034",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  45,
+        "markerId":  "marker_1785466271668_cztxjv",
+        "parserId":  "grub-014",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "幼虫",
+        "mapSequence":  46,
+        "markerId":  "marker_1785468753323_xuuuas",
+        "parserId":  "grub-020",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  1,
+        "markerId":  "marker_1785399959737_9jlc8i",
+        "parserId":  "mask-shard-seer",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  2,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "mask-shard-sly-1",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  2,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "mask-shard-sly-2",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  2,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "mask-shard-sly-3",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  2,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "mask-shard-sly-4",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  3,
+        "markerId":  "marker_1785400427609_q9sb59",
+        "parserId":  "mask-shard-bretta",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  4,
+        "markerId":  "marker_1785400598416_g5ferj",
+        "parserId":  "mask-shard-mawlek",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  5,
+        "markerId":  "marker_1785400642811_c8oi3p",
+        "parserId":  "mask-shard-grubfather",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  6,
+        "markerId":  "marker_1785400689718_45rgnf",
+        "parserId":  "mask-shard-crossroads-springs",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  7,
+        "markerId":  "marker_1785400831084_zfp8v7",
+        "parserId":  "mask-shard-queens-station",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  8,
+        "markerId":  "marker_1785400860389_qlwqex",
+        "parserId":  "mask-shard-stone-sanctuary",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  9,
+        "markerId":  "marker_1785400965641_xw4nf8",
+        "parserId":  "mask-shard-waterways",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  10,
+        "markerId":  "marker_1785400994419_eryr1b",
+        "parserId":  "mask-shard-deepnest",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  11,
+        "markerId":  "marker_1785401048342_92ckal",
+        "parserId":  "mask-shard-crystal-peak",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  12,
+        "markerId":  "marker_1785401116806_7fj7db",
+        "parserId":  "mask-shard-hive",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "面具碎片",
+        "mapSequence":  13,
+        "markerId":  "marker_1785401246762_hbydtt",
+        "parserId":  "mask-shard-delicate-flower",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "容器碎片",
+        "mapSequence":  1,
+        "markerId":  "marker_1785399450911_5a8fhn",
+        "parserId":  "vessel-fragment-stag-nest",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "容器碎片",
+        "mapSequence":  2,
+        "markerId":  "marker_1785399536693_x9d11h",
+        "parserId":  "vessel-fragment-greenpath",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "容器碎片",
+        "mapSequence":  3,
+        "markerId":  "marker_1785399568898_wmka95",
+        "parserId":  "vessel-fragment-deepnest",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "容器碎片",
+        "mapSequence":  4,
+        "markerId":  "marker_1785399749771_k7gfup",
+        "parserId":  "vessel-fragment-fountain",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "容器碎片",
+        "mapSequence":  5,
+        "markerId":  "marker_1785399814160_3dw0pf",
+        "parserId":  "vessel-fragment-crossroads",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "容器碎片",
+        "mapSequence":  6,
+        "markerId":  "marker_1785399869180_1cv3c3",
+        "parserId":  "vessel-fragment-city",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "容器碎片",
+        "mapSequence":  7,
+        "markerId":  "marker_1785399959737_9jlc8i",
+        "parserId":  "vessel-fragment-seer",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "容器碎片",
+        "mapSequence":  8,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "vessel-fragment-sly-1",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "容器碎片",
+        "mapSequence":  8,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "vessel-fragment-sly-2",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "苍白矿石",
+        "mapSequence":  1,
+        "markerId":  "marker_1785399959737_9jlc8i",
+        "parserId":  "pale-ore-seer",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "苍白矿石",
+        "mapSequence":  2,
+        "markerId":  "marker_1785400642811_c8oi3p",
+        "parserId":  "pale-ore-grubfather",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "苍白矿石",
+        "mapSequence":  3,
+        "markerId":  "marker_1785401406670_npcez9",
+        "parserId":  "pale-ore-ancient-basin",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "苍白矿石",
+        "mapSequence":  4,
+        "markerId":  "marker_1785401453208_kig6dh",
+        "parserId":  "pale-ore-hallownests-crown",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "苍白矿石",
+        "mapSequence":  5,
+        "markerId":  "marker_1785401497945_6fmuk1",
+        "parserId":  "pale-ore-nosk",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "苍白矿石",
+        "mapSequence":  6,
+        "markerId":  "marker_1785401602207_2r23yb",
+        "parserId":  "pale-ore-colosseum",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符槽",
+        "mapSequence":  1,
+        "markerId":  "marker_1785394615034_hpwpqz",
+        "parserId":  "charm-notch-salubra-1",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符槽",
+        "mapSequence":  1,
+        "markerId":  "marker_1785394615034_hpwpqz",
+        "parserId":  "charm-notch-salubra-2",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符槽",
+        "mapSequence":  1,
+        "markerId":  "marker_1785394615034_hpwpqz",
+        "parserId":  "charm-notch-salubra-3",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符槽",
+        "mapSequence":  1,
+        "markerId":  "marker_1785394615034_hpwpqz",
+        "parserId":  "charm-notch-salubra-4",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符槽",
+        "mapSequence":  2,
+        "markerId":  "marker_1785401602207_2r23yb",
+        "parserId":  "charm-notch-colosseum",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符槽",
+        "mapSequence":  3,
+        "markerId":  "marker_1785402185863_w0fyc3",
+        "parserId":  "charm-notch-fungal-wastes",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符槽",
+        "mapSequence":  4,
+        "markerId":  "marker_1785402205770_qesenz",
+        "parserId":  "charm-notch-fog-canyon",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符槽",
+        "mapSequence":  5,
+        "markerId":  "marker_1785402284549_90n97d",
+        "parserId":  "charm-notch-grimm",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "简单钥匙",
+        "mapSequence":  1,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "simple-key-sly",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "简单钥匙",
+        "mapSequence":  2,
+        "markerId":  "marker_1785403080402_nmdt8q",
+        "parserId":  "simple-key-city-storerooms",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "简单钥匙",
+        "mapSequence":  3,
+        "markerId":  "marker_1785403095618_vxqj6b",
+        "parserId":  "simple-key-ancient-basin",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "简单钥匙",
+        "mapSequence":  4,
+        "markerId":  "marker_1785403197566_2kfjga",
+        "parserId":  "simple-key-pale-lurker",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  1,
+        "markerId":  "marker_1785394615034_hpwpqz",
+        "parserId":  "charm-007",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  1,
+        "markerId":  "marker_1785394615034_hpwpqz",
+        "parserId":  "charm-008",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  1,
+        "markerId":  "marker_1785394615034_hpwpqz",
+        "parserId":  "charm-014",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  1,
+        "markerId":  "marker_1785394615034_hpwpqz",
+        "parserId":  "charm-018",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  1,
+        "markerId":  "marker_1785394615034_hpwpqz",
+        "parserId":  "charm-019",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  2,
+        "markerId":  "marker_1785399959737_9jlc8i",
+        "parserId":  "charm-030",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  3,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "charm-001",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  3,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "charm-004",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  3,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "charm-015",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  3,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "charm-026",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  3,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "charm-037",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  4,
+        "markerId":  "marker_1785400076322_0qr7st",
+        "parserId":  "charm-002",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  5,
+        "markerId":  "marker_1785400642811_c8oi3p",
+        "parserId":  "charm-003",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  5,
+        "markerId":  "marker_1785400642811_c8oi3p",
+        "parserId":  "charm-035",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  6,
+        "markerId":  "marker_1785402284549_90n97d",
+        "parserId":  "charm-040",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  7,
+        "markerId":  "marker_1785402327761_huubjv",
+        "parserId":  "charm-023",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  7,
+        "markerId":  "marker_1785402327761_huubjv",
+        "parserId":  "charm-024",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  7,
+        "markerId":  "marker_1785402327761_huubjv",
+        "parserId":  "charm-025",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  8,
+        "markerId":  "marker_1785469636308_k02bhl",
+        "parserId":  "charm-028",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  9,
+        "markerId":  "marker_1785470490628_uukf91",
+        "parserId":  "charm-011",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  10,
+        "markerId":  "marker_1785478467528_9r0w9a",
+        "parserId":  "charm-010",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  11,
+        "markerId":  "marker_1785478897147_kzz3uo",
+        "parserId":  "charm-029",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  12,
+        "markerId":  "marker_1785478916919_yha4gd",
+        "parserId":  "charm-032",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  13,
+        "markerId":  "marker_1785479141357_38bwwg",
+        "parserId":  "charm-027",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  14,
+        "markerId":  "marker_1785479309037_9hpyy5",
+        "parserId":  "charm-006",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  15,
+        "markerId":  "marker_1785479615909_6rcl25",
+        "parserId":  "charm-005",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  16,
+        "markerId":  "marker_1785479641544_7gqq81",
+        "parserId":  "charm-012",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  17,
+        "markerId":  "marker_1785480044641_36ld1h",
+        "parserId":  "charm-017",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  18,
+        "markerId":  "marker_1785480144962_ufy89h",
+        "parserId":  "charm-016",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  19,
+        "markerId":  "marker_1785480340909_9qi76d",
+        "parserId":  "charm-031",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  20,
+        "markerId":  "marker_1785480395113_8dpj34",
+        "parserId":  "charm-021",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  21,
+        "markerId":  "marker_1785480468855_gyn4gu",
+        "parserId":  "charm-033",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  22,
+        "markerId":  "marker_1785480553008_1njdhn",
+        "parserId":  "charm-022",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  23,
+        "markerId":  "marker_1785480573965_yukt6g",
+        "parserId":  "charm-020",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  24,
+        "markerId":  "marker_1785480770526_ti7jhs",
+        "parserId":  "charm-034",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  25,
+        "markerId":  "marker_1785481036108_tgx1kg",
+        "parserId":  "charm-039",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  26,
+        "markerId":  "marker_1785481357163_8d26qa",
+        "parserId":  "charm-023",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  26,
+        "markerId":  "marker_1785481357163_8d26qa",
+        "parserId":  "charm-024",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  26,
+        "markerId":  "marker_1785481357163_8d26qa",
+        "parserId":  "charm-025",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  27,
+        "markerId":  "marker_1785481779565_9qrlp8",
+        "parserId":  "charm-038",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  28,
+        "markerId":  "marker_1785483318567_z6pfsh",
+        "parserId":  "charm-040",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  29,
+        "markerId":  "marker_1785488669239_gvtbb4",
+        "parserId":  "charm-013",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  30,
+        "markerId":  "marker_1785488975797_esj23s",
+        "parserId":  "charm-009",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "护符",
+        "mapSequence":  31,
+        "markerId":  "marker_1785756096055_rn2aaa",
+        "parserId":  "charm-036",
+        "module":  "collectionProgress"
+    },
+    {
+        "groupName":  "位移能力",
+        "mapSequence":  1,
+        "markerId":  "marker_1785466912675_oeofw6",
+        "parserId":  "double-jump",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "位移能力",
+        "mapSequence":  2,
+        "markerId":  "marker_1785467018875_nfkxkz",
+        "parserId":  "dash",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "位移能力",
+        "mapSequence":  3,
+        "markerId":  "marker_1785467648334_xhmne8",
+        "parserId":  "shadow-dash",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "位移能力",
+        "mapSequence":  4,
+        "markerId":  "marker_1785468288521_fq9ukr",
+        "parserId":  "wall-jump",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "位移能力",
+        "mapSequence":  5,
+        "markerId":  "marker_1785468720850_9kygtz",
+        "parserId":  "super-dash",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "位移能力",
+        "mapSequence":  6,
+        "markerId":  "marker_1785468998601_z24bn0",
+        "parserId":  "acid-armour",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "梦之钉能力",
+        "mapSequence":  1,
+        "markerId":  "marker_1785399959737_9jlc8i",
+        "parserId":  "dream-gate",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "梦之钉能力",
+        "mapSequence":  1,
+        "markerId":  "marker_1785399959737_9jlc8i",
+        "parserId":  "awoken-dream-nail",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "梦之钉能力",
+        "mapSequence":  2,
+        "markerId":  "marker_1785478218946_85h5g2",
+        "parserId":  "dream-nail",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "其他能力",
+        "mapSequence":  1,
+        "markerId":  "marker_1785394615034_hpwpqz",
+        "parserId":  "salubras-blessing",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "其他能力",
+        "mapSequence":  3,
+        "markerId":  "marker_custom_world_sense_48800_24080",
+        "parserId":  "world-sense",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "法术",
+        "mapSequence":  1,
+        "markerId":  "marker_1785405109839_dwb5tm",
+        "parserId":  "vengeful-spirit",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "法术",
+        "mapSequence":  2,
+        "markerId":  "marker_1785405258803_x1kuy1",
+        "parserId":  "shade-soul",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "法术",
+        "mapSequence":  3,
+        "markerId":  "marker_1785466314838_2uagdn",
+        "parserId":  "desolate-dive",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "法术",
+        "mapSequence":  4,
+        "markerId":  "marker_1785466539511_o7p090",
+        "parserId":  "descending-dark",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "法术",
+        "mapSequence":  5,
+        "markerId":  "marker_1785466710494_bwkdeh",
+        "parserId":  "howling-wraiths",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "法术",
+        "mapSequence":  6,
+        "markerId":  "marker_1785466795989_ho4hr9",
+        "parserId":  "abyss-shriek",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "骨钉技艺",
+        "mapSequence":  1,
+        "markerId":  "marker_1785469134625_t0gemc",
+        "parserId":  "great-slash",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "骨钉技艺",
+        "mapSequence":  2,
+        "markerId":  "marker_1785469197319_s6qfqe",
+        "parserId":  "dash-slash",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "骨钉技艺",
+        "mapSequence":  3,
+        "markerId":  "marker_1785469282087_ergixm",
+        "parserId":  "cyclone-slash",
+        "module":  "abilities"
+    },
+    {
+        "groupName":  "店主钥匙",
+        "mapSequence":  1,
+        "markerId":  "marker_1785403408967_peotwy",
+        "parserId":  "shopkeepers-key",
+        "module":  "keyItemProgress"
+    },
+    {
+        "groupName":  "典雅钥匙",
+        "mapSequence":  1,
+        "markerId":  "marker_1785400049577_qkp7zb",
+        "parserId":  "elegant-key",
+        "module":  "keyItemProgress"
+    },
+    {
+        "groupName":  "城市纹章",
+        "mapSequence":  1,
+        "markerId":  "marker_1785470326386_etxoau",
+        "parserId":  "city-crest",
+        "module":  "keyItemProgress"
+    },
+    {
+        "groupName":  "电车通行证",
+        "mapSequence":  1,
+        "markerId":  "marker_1785470071954_oboxkt",
+        "parserId":  "tram-pass",
+        "module":  "keyItemProgress"
+    },
+    {
+        "groupName":  "爱之钥",
+        "mapSequence":  1,
+        "markerId":  "marker_1785479706230_54y866",
+        "parserId":  "love-key",
+        "module":  "keyItemProgress"
+    },
+    {
+        "groupName":  "国王印记",
+        "mapSequence":  1,
+        "markerId":  "marker_1785754769504_9pv72i",
+        "parserId":  "kings-brand",
+        "module":  "keyItemProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  1,
+        "markerId":  "marker_1785400598416_g5ferj",
+        "parserId":  "brooding-mawlek",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  2,
+        "markerId":  "marker_1785400881260_srlpdo",
+        "parserId":  "no-eyes",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  3,
+        "markerId":  "marker_1785401030515_ejn1lv",
+        "parserId":  "crystal-guardian",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  4,
+        "markerId":  "marker_1785401048342_92ckal",
+        "parserId":  "enraged-guardian",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  5,
+        "markerId":  "marker_1785401511467_mp67hm",
+        "parserId":  "nosk",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  6,
+        "markerId":  "marker_1785402284549_90n97d",
+        "parserId":  "troupe-master-grimm",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  7,
+        "markerId":  "marker_1785402289341_aq56yz",
+        "parserId":  "nightmare-king-grimm",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  8,
+        "markerId":  "marker_1785402364818_axuhoa",
+        "parserId":  "zote-the-mighty",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  9,
+        "markerId":  "marker_1785466326926_86b8ac",
+        "parserId":  "soul-master",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  10,
+        "markerId":  "marker_1785467056763_6e7kjf",
+        "parserId":  "hornet-protector",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  11,
+        "markerId":  "marker_1785468315188_db5pgk",
+        "parserId":  "mantis-lords",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  12,
+        "markerId":  "marker_1785468877869_lku7pu",
+        "parserId":  "broken-vessel",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  13,
+        "markerId":  "marker_1785469383604_lb6z89",
+        "parserId":  "gorb",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  14,
+        "markerId":  "marker_1785470017950_daoonz",
+        "parserId":  "marmu",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  15,
+        "markerId":  "marker_1785470094405_qqjset",
+        "parserId":  "galien",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  16,
+        "markerId":  "marker_1785470157963_1dihkt",
+        "parserId":  "elder-hu",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  17,
+        "markerId":  "marker_1785470208570_hom4m0",
+        "parserId":  "uumuu",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  18,
+        "markerId":  "marker_1785470300760_18qk22",
+        "parserId":  "massive-moss-charger",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  19,
+        "markerId":  "marker_1785470326386_etxoau",
+        "parserId":  "false-knight",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  20,
+        "markerId":  "marker_1785470490628_uukf91",
+        "parserId":  "flukemarm",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  21,
+        "markerId":  "marker_1785470591572_6rds4g",
+        "parserId":  "traitor-lord",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  22,
+        "markerId":  "marker_1785477748169_0s4vo1",
+        "parserId":  "watcher-knight",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  23,
+        "markerId":  "marker_1785477790414_h5g22e",
+        "parserId":  "the-collector",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  24,
+        "markerId":  "marker_1785477955090_1s3hyl",
+        "parserId":  "gruz-mother",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  25,
+        "markerId":  "marker_1785478021127_uihoj4",
+        "parserId":  "xero",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  26,
+        "markerId":  "marker_1785478421723_czghw9",
+        "parserId":  "dung-defender",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  27,
+        "markerId":  "marker_1785478440144_jnbtzn",
+        "parserId":  "white-defender",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  28,
+        "markerId":  "marker_1785478557268_y8skn4",
+        "parserId":  "the-hollow-knight",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  29,
+        "markerId":  "marker_1785478754052_co8sjq",
+        "parserId":  "the-radiance",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  30,
+        "markerId":  "marker_1785478814064_v02qw4",
+        "parserId":  "hive-knight",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  31,
+        "markerId":  "marker_1785478933746_tkhq39",
+        "parserId":  "markoth",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "Boss攻略进度",
+        "mapSequence":  32,
+        "markerId":  "marker_1785749394355_56qbrg",
+        "parserId":  "hornet-sentinel",
+        "module":  "bossProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  1,
+        "markerId":  "marker_1785404256813_hvx7x2",
+        "parserId":  "map-cliffs",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  2,
+        "markerId":  "marker_1785404269018_mxdj88",
+        "parserId":  "map-city",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  3,
+        "markerId":  "marker_1785404335394_vng26c",
+        "parserId":  "map-fog-canyon",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  4,
+        "markerId":  "marker_1785404342381_881up1",
+        "parserId":  "map-royal-gardens",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  5,
+        "markerId":  "marker_1785404411269_2k2kya",
+        "parserId":  "map-crossroads",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  6,
+        "markerId":  "marker_1785404442500_t8cg8z",
+        "parserId":  "map-greenpath",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  7,
+        "markerId":  "marker_1785404455045_r4g9i5",
+        "parserId":  "map-deepnest",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  8,
+        "markerId":  "marker_1785404463737_c99pc3",
+        "parserId":  "map-deepnest",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  9,
+        "markerId":  "marker_1785404485970_nr2saz",
+        "parserId":  "map-waterways",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  10,
+        "markerId":  "marker_1785404504005_osb6si",
+        "parserId":  "map-abyss",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  11,
+        "markerId":  "marker_1785404551007_vsv99j",
+        "parserId":  "map-outskirts",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  12,
+        "markerId":  "marker_1785404567087_3pzsn6",
+        "parserId":  "map-mines",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "地图",
+        "mapSequence":  13,
+        "markerId":  "marker_1785482395939_sxmnpi",
+        "parserId":  "map-resting-grounds",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "鹿角站",
+        "mapSequence":  1,
+        "markerId":  "marker_1785394124911_bf0cw1",
+        "parserId":  "stag-gardens-station",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "鹿角站",
+        "mapSequence":  2,
+        "markerId":  "marker_1785394155594_ll49dl",
+        "parserId":  "stag-distant-village",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "鹿角站",
+        "mapSequence":  3,
+        "markerId":  "marker_1785394167389_b6jasx",
+        "parserId":  "stag-greenpath",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "鹿角站",
+        "mapSequence":  4,
+        "markerId":  "marker_1785394190495_o83gr0",
+        "parserId":  "stag-queens-station",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "鹿角站",
+        "mapSequence":  5,
+        "markerId":  "marker_1785394205193_jjni08",
+        "parserId":  "stag-crossroads",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "鹿角站",
+        "mapSequence":  6,
+        "markerId":  "marker_1785394215742_5ommfk",
+        "parserId":  "stag-city-storerooms",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "鹿角站",
+        "mapSequence":  7,
+        "markerId":  "marker_1785394260134_upwobr",
+        "parserId":  "stag-kings-station",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "鹿角站",
+        "mapSequence":  8,
+        "markerId":  "marker_1785394334543_da6w71",
+        "parserId":  "stag-resting-grounds",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "鹿角站",
+        "mapSequence":  9,
+        "markerId":  "marker_1785401854435_dp8d9x",
+        "parserId":  "stag-dirtmouth",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "鹿角站",
+        "mapSequence":  10,
+        "markerId":  "marker_1785469949853_qisyqf",
+        "parserId":  "stag-hidden-station",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "鹿角站",
+        "mapSequence":  11,
+        "markerId":  "marker_1785742360090_pfcmel",
+        "parserId":  "stag-nest",
+        "module":  "explorationProgress"
+    },
+    {
+        "groupName":  "守梦者",
+        "mapSequence":  1,
+        "markerId":  "marker_1785395564710_befq2l",
+        "parserId":  "herrah",
+        "module":  "dreamerProgress"
+    },
+    {
+        "groupName":  "守梦者",
+        "mapSequence":  2,
+        "markerId":  "marker_1785470224532_6wbvop",
+        "parserId":  "monomon",
+        "module":  "dreamerProgress"
+    },
+    {
+        "groupName":  "守梦者",
+        "mapSequence":  3,
+        "markerId":  "marker_1785484446612_vk1sbo",
+        "parserId":  "lurien",
+        "module":  "dreamerProgress"
+    }
+]

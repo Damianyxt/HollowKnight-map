@@ -1,0 +1,380 @@
+{
+  "generatedAt": "generated from Steam UserGameStatsSchema_367520.bin",
+  "source": "Steam client appcache achievement schema",
+  "gameSlug": "hollow-knight",
+  "achievements": [
+    {
+      "source_ref": "TEACHER",
+      "title": "Teacher",
+      "icon_path": "/assets/achievements/hollow-knight/teacher.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/teacher_gray.jpg"
+    },
+    {
+      "source_ref": "WATCHER",
+      "title": "Watcher",
+      "icon_path": "/assets/achievements/hollow-knight/watcher.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/watcher_gray.jpg"
+    },
+    {
+      "source_ref": "BEAST",
+      "title": "Beast",
+      "icon_path": "/assets/achievements/hollow-knight/beast.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/beast_gray.jpg"
+    },
+    {
+      "source_ref": "VOID",
+      "title": "Void",
+      "icon_path": "/assets/achievements/hollow-knight/void.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/void_gray.jpg"
+    },
+    {
+      "source_ref": "ENDING_A",
+      "title": "The Hollow Knight",
+      "icon_path": "/assets/achievements/hollow-knight/ending_a.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/ending_a_gray.jpg"
+    },
+    {
+      "source_ref": "ENDING_B",
+      "title": "Sealed Siblings",
+      "icon_path": "/assets/achievements/hollow-knight/ending_b.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/ending_b_gray.jpg"
+    },
+    {
+      "source_ref": "ENDING_C",
+      "title": "Dream No More",
+      "icon_path": "/assets/achievements/hollow-knight/ending_c.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/ending_c_gray.jpg"
+    },
+    {
+      "source_ref": "ENDINGD",
+      "title": "Embrace the Void",
+      "icon_path": "/assets/achievements/hollow-knight/endingd.jpg"
+    },
+    {
+      "source_ref": "FK_DEFEAT",
+      "title": "Falsehood",
+      "icon_path": "/assets/achievements/hollow-knight/fk_defeat.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/fk_defeat_gray.jpg"
+    },
+    {
+      "source_ref": "DREAM_FK",
+      "title": "Strength",
+      "icon_path": "/assets/achievements/hollow-knight/dream_fk.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/dream_fk_gray.jpg"
+    },
+    {
+      "source_ref": "HORNET_1",
+      "title": "Test of Resolve",
+      "icon_path": "/assets/achievements/hollow-knight/hornet_1.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/hornet_1_gray.jpg"
+    },
+    {
+      "source_ref": "HORNET_2",
+      "title": "Proof of Resolve",
+      "icon_path": "/assets/achievements/hollow-knight/hornet_2.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/hornet_2_gray.jpg"
+    },
+    {
+      "source_ref": "SOUL_MASTER_DEFEAT",
+      "title": "Illumination",
+      "icon_path": "/assets/achievements/hollow-knight/soul_master_defeat.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/soul_master_defeat_gray.jpg"
+    },
+    {
+      "source_ref": "DREAM_SOUL_MASTER_DEFEAT",
+      "title": "Mortality",
+      "icon_path": "/assets/achievements/hollow-knight/dream_soul_master_defeat.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/dream_soul_master_defeat_gray.jpg"
+    },
+    {
+      "source_ref": "BROKEN_VESSEL",
+      "title": "Release",
+      "icon_path": "/assets/achievements/hollow-knight/broken_vessel.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/broken_vessel_gray.jpg"
+    },
+    {
+      "source_ref": "DREAM_BROKEN_VESSEL",
+      "title": "Peace",
+      "icon_path": "/assets/achievements/hollow-knight/dream_broken_vessel.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/dream_broken_vessel_gray.jpg"
+    },
+    {
+      "source_ref": "DUNG_DEFENDER",
+      "title": "Honour",
+      "icon_path": "/assets/achievements/hollow-knight/dung_defender.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/dung_defender_gray.jpg"
+    },
+    {
+      "source_ref": "MANTIS_LORDS",
+      "title": "Respect",
+      "icon_path": "/assets/achievements/hollow-knight/mantis_lords.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/mantis_lords_gray.jpg"
+    },
+    {
+      "source_ref": "COLLECTOR",
+      "title": "Obsession",
+      "icon_path": "/assets/achievements/hollow-knight/collector.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/collector_gray.jpg"
+    },
+    {
+      "source_ref": "TRAITOR_LORD",
+      "title": "Execution",
+      "icon_path": "/assets/achievements/hollow-knight/traitor_lord.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/traitor_lord_gray.jpg"
+    },
+    {
+      "source_ref": "ZOTE",
+      "title": "Rivalry",
+      "icon_path": "/assets/achievements/hollow-knight/zote.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/zote_gray.jpg"
+    },
+    {
+      "source_ref": "WHITE_DEFENDER",
+      "title": "Memory",
+      "icon_path": "/assets/achievements/hollow-knight/white_defender.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/white_defender_gray.jpg"
+    },
+    {
+      "source_ref": "GREY_PRINCE",
+      "title": "Dark Romance",
+      "icon_path": "/assets/achievements/hollow-knight/grey_prince.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/grey_prince_gray.jpg"
+    },
+    {
+      "source_ref": "GRIMM",
+      "title": "Grand Performance",
+      "icon_path": "/assets/achievements/hollow-knight/grimm.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/grimm_gray.jpg"
+    },
+    {
+      "source_ref": "NIGHTMARE_GRIMM",
+      "title": "Ritual",
+      "icon_path": "/assets/achievements/hollow-knight/nightmare_grimm.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/nightmare_grimm_gray.jpg"
+    },
+    {
+      "source_ref": "COLOSSEUM_1",
+      "title": "Warrior",
+      "icon_path": "/assets/achievements/hollow-knight/colosseum_1.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/colosseum_1_gray.jpg"
+    },
+    {
+      "source_ref": "COLOSSEUM_2",
+      "title": "Conqueror",
+      "icon_path": "/assets/achievements/hollow-knight/colosseum_2.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/colosseum_2_gray.jpg"
+    },
+    {
+      "source_ref": "COLOSSEUM_3",
+      "title": "Fool",
+      "icon_path": "/assets/achievements/hollow-knight/colosseum_3.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/colosseum_3_gray.jpg"
+    },
+    {
+      "source_ref": "PANTHEON1",
+      "title": "Brotherhood",
+      "icon_path": "/assets/achievements/hollow-knight/pantheon1.jpg"
+    },
+    {
+      "source_ref": "PANTHEON2",
+      "title": "Inspiration",
+      "icon_path": "/assets/achievements/hollow-knight/pantheon2.jpg"
+    },
+    {
+      "source_ref": "PANTHEON3",
+      "title": "Focus",
+      "icon_path": "/assets/achievements/hollow-knight/pantheon3.jpg"
+    },
+    {
+      "source_ref": "PANTHEON4",
+      "title": "Soul & Shade",
+      "icon_path": "/assets/achievements/hollow-knight/pantheon4.jpg"
+    },
+    {
+      "source_ref": "HUNTER_1",
+      "title": "Keen Hunter",
+      "icon_path": "/assets/achievements/hollow-knight/hunter_1.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/hunter_1_gray.jpg"
+    },
+    {
+      "source_ref": "HUNTER_2",
+      "title": "True Hunter",
+      "icon_path": "/assets/achievements/hollow-knight/hunter_2.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/hunter_2_gray.jpg"
+    },
+    {
+      "source_ref": "CHARMED",
+      "title": "Charmed",
+      "icon_path": "/assets/achievements/hollow-knight/charmed.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/charmed_gray.jpg"
+    },
+    {
+      "source_ref": "ENCHANTED",
+      "title": "Enchanted",
+      "icon_path": "/assets/achievements/hollow-knight/enchanted.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/enchanted_gray.jpg"
+    },
+    {
+      "source_ref": "BLESSED",
+      "title": "Blessed",
+      "icon_path": "/assets/achievements/hollow-knight/blessed.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/blessed_gray.jpg"
+    },
+    {
+      "source_ref": "PROTECTED",
+      "title": "Protected",
+      "icon_path": "/assets/achievements/hollow-knight/protected.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/protected_gray.jpg"
+    },
+    {
+      "source_ref": "MASKED",
+      "title": "Masked",
+      "icon_path": "/assets/achievements/hollow-knight/masked.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/masked_gray.jpg"
+    },
+    {
+      "source_ref": "SOULFUL",
+      "title": "Soulful",
+      "icon_path": "/assets/achievements/hollow-knight/soulful.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/soulful_gray.jpg"
+    },
+    {
+      "source_ref": "WORLDSOUL",
+      "title": "Worldsoul",
+      "icon_path": "/assets/achievements/hollow-knight/worldsoul.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/worldsoul_gray.jpg"
+    },
+    {
+      "source_ref": "ATTUNEMENT",
+      "title": "Attunement",
+      "icon_path": "/assets/achievements/hollow-knight/attunement.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/attunement_gray.jpg"
+    },
+    {
+      "source_ref": "AWAKENING",
+      "title": "Awakening",
+      "icon_path": "/assets/achievements/hollow-knight/awakening.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/awakening_gray.jpg"
+    },
+    {
+      "source_ref": "ASCENSION",
+      "title": "Ascension",
+      "icon_path": "/assets/achievements/hollow-knight/ascension.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/ascension_gray.jpg"
+    },
+    {
+      "source_ref": "GRUBFRIEND",
+      "title": "Grubfriend",
+      "icon_path": "/assets/achievements/hollow-knight/grubfriend.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/grubfriend_gray.jpg"
+    },
+    {
+      "source_ref": "METAMORPHOSIS",
+      "title": "Metamorphosis",
+      "icon_path": "/assets/achievements/hollow-knight/metamorphosis.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/metamorphosis_gray.jpg"
+    },
+    {
+      "source_ref": "STAG_STATION_HALF",
+      "title": "Connection",
+      "icon_path": "/assets/achievements/hollow-knight/stag_station_half.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/stag_station_half_gray.jpg"
+    },
+    {
+      "source_ref": "STAG_STATION_ALL",
+      "title": "Hope",
+      "icon_path": "/assets/achievements/hollow-knight/stag_station_all.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/stag_station_all_gray.jpg"
+    },
+    {
+      "source_ref": "MAP",
+      "title": "Cartographer",
+      "icon_path": "/assets/achievements/hollow-knight/map.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/map_gray.jpg"
+    },
+    {
+      "source_ref": "NEGLECT",
+      "title": "Neglect",
+      "icon_path": "/assets/achievements/hollow-knight/neglect.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/neglect_gray.jpg"
+    },
+    {
+      "source_ref": "NAILSMITH_KILL",
+      "title": "Purity",
+      "icon_path": "/assets/achievements/hollow-knight/nailsmith_kill.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/nailsmith_kill_gray.jpg"
+    },
+    {
+      "source_ref": "NAILSMITH_SPARE",
+      "title": "Happy Couple",
+      "icon_path": "/assets/achievements/hollow-knight/nailsmith_spare.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/nailsmith_spare_gray.jpg"
+    },
+    {
+      "source_ref": "QUIRREL_EPILOGUE",
+      "title": "Witness",
+      "icon_path": "/assets/achievements/hollow-knight/quirrel_epilogue.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/quirrel_epilogue_gray.jpg"
+    },
+    {
+      "source_ref": "MOURNER",
+      "title": "Solace",
+      "icon_path": "/assets/achievements/hollow-knight/mourner.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/mourner_gray.jpg"
+    },
+    {
+      "source_ref": "MR_MUSHROOM",
+      "title": "Passing of the Age",
+      "icon_path": "/assets/achievements/hollow-knight/mr_mushroom.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/mr_mushroom_gray.jpg"
+    },
+    {
+      "source_ref": "BANISHMENT",
+      "title": "Banishment",
+      "icon_path": "/assets/achievements/hollow-knight/banishment.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/banishment_gray.jpg"
+    },
+    {
+      "source_ref": "SPEEDRUN_1",
+      "title": "Speedrun 1",
+      "icon_path": "/assets/achievements/hollow-knight/speedrun_1.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/speedrun_1_gray.jpg"
+    },
+    {
+      "source_ref": "SPEEDRUN_2",
+      "title": "Speedrun 2",
+      "icon_path": "/assets/achievements/hollow-knight/speedrun_2.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/speedrun_2_gray.jpg"
+    },
+    {
+      "source_ref": "COMPLETION",
+      "title": "Completion",
+      "icon_path": "/assets/achievements/hollow-knight/completion.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/completion_gray.jpg"
+    },
+    {
+      "source_ref": "SPEED_COMPLETION",
+      "title": "Speed Completion",
+      "icon_path": "/assets/achievements/hollow-knight/speed_completion.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/speed_completion_gray.jpg"
+    },
+    {
+      "source_ref": "STEELSOUL",
+      "title": "Steel Soul",
+      "icon_path": "/assets/achievements/hollow-knight/steelsoul.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/steelsoul_gray.jpg"
+    },
+    {
+      "source_ref": "STEELSOUL_COMPLETION",
+      "title": "Steel Heart",
+      "icon_path": "/assets/achievements/hollow-knight/steelsoul_completion.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/steelsoul_completion_gray.jpg"
+    },
+    {
+      "source_ref": "COMPLETIONGG",
+      "title": "Pure Completion",
+      "icon_path": "/assets/achievements/hollow-knight/completiongg.jpg",
+      "icon_gray_path": "/assets/achievements/hollow-knight/completiongg_gray.jpg"
+    }
+  ]
+}
