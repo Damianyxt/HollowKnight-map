@@ -2972,22 +2972,51 @@ export default function MapViewer() {
             搜索
           </button>
         </div>
-        <div className="map-filter-completion-tabs" aria-label="完成状态筛选预览">
-          {saveSlots.length === 0 ? (
+        <div className="map-filter-save-panel">
+          <div className="map-filter-save-heading">
+            <div>
+              <strong>存档进度</strong>
+              <span>{saveSlots.length > 0 ? "选择槽位后筛选地图" : "导入本地存档以同步收集状态"}</span>
+            </div>
             <button
               type="button"
               className="map-filter-save-upload"
               onClick={() => saveInputRef.current?.click()}
             >
-              读取存档进度
+              {saveSlots.length > 0 ? "重新导入" : "导入存档"}
             </button>
-          ) : (
-            (["all", "collected", "missing"] as const).map((mode) => (
+          </div>
+          {saveSlots.length > 0 && (
+            <div className="map-filter-save-slots" role="group" aria-label="选择存档槽位">
+              {saveSlots.map((slot) => (
+                <button
+                  type="button"
+                  key={slot.slotId}
+                  className={selectedSaveSlot === slot.slotId ? "is-active" : ""}
+                  aria-pressed={selectedSaveSlot === slot.slotId}
+                  onClick={() => setSelectedSaveSlot(slot.slotId)}
+                >
+                  槽位 {slot.slotNumber}
+                </button>
+              ))}
+            </div>
+          )}
+          {saveError && <p className="map-filter-save-error">{saveError}</p>}
+          {saveFailures.length > 0 && (
+            <p className="map-filter-save-error">
+              {saveFailures.map((failure) => `槽位 ${failure.slot} 无法解析`).join("；")}
+            </p>
+          )}
+        </div>
+        <div className="map-filter-completion-tabs" aria-label="完成状态筛选">
+          {(["all", "collected", "missing"] as const).map((mode) => (
               <button
                 type="button"
                 key={mode}
                 className={saveFilterMode === mode ? "is-active" : ""}
                 aria-pressed={saveFilterMode === mode}
+                disabled={mode !== "all" && saveSlots.length === 0}
+                title={mode !== "all" && saveSlots.length === 0 ? "请先导入存档" : undefined}
                 onClick={() => {
                   if (mode === "all") resetFilters();
                   setSaveFilterMode(mode);
@@ -2995,30 +3024,8 @@ export default function MapViewer() {
               >
                 {mode === "all" ? "全部" : mode === "collected" ? "已收集" : "未收集"}
               </button>
-            ))
-          )}
+          ))}
         </div>
-        {saveSlots.length > 0 && (
-          <div className="map-filter-save-slots" role="group" aria-label="选择存档槽位">
-            {saveSlots.map((slot) => (
-              <button
-                type="button"
-                key={slot.slotId}
-                className={selectedSaveSlot === slot.slotId ? "is-active" : ""}
-                aria-pressed={selectedSaveSlot === slot.slotId}
-                onClick={() => setSelectedSaveSlot(slot.slotId)}
-              >
-                槽位 {slot.slotNumber}
-              </button>
-            ))}
-          </div>
-        )}
-        {saveError && <p className="map-filter-save-error">{saveError}</p>}
-        {saveFailures.length > 0 && (
-          <p className="map-filter-save-error">
-            {saveFailures.map((failure) => `槽位 ${failure.slot} 无法解析`).join("；")}
-          </p>
-        )}
         {normalizedSearch && visibleMarkers.length === 0 && (
           <p className="map-filter-search-empty">没有找到搜索内容</p>
         )}

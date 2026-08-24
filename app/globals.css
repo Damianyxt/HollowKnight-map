@@ -264,16 +264,74 @@ body {
   text-shadow: 0 0 8px rgba(222, 232, 242, 0.18);
 }
 
-.map-filter-completion-tabs .map-filter-save-upload {
-  grid-column: 1 / -1;
-  border: 1px solid rgba(205, 216, 228, 0.2);
-  color: rgba(244, 242, 238, 0.82);
+.map-filter-completion-tabs button:disabled {
+  color: rgba(244, 242, 238, 0.28);
+  cursor: not-allowed;
+  text-shadow: none;
+}
+
+.map-filter-save-panel {
+  margin: 0 23px 8px 14px;
+  padding: 10px 11px;
+  border: 1px solid rgba(203, 214, 226, 0.14);
+  border-radius: 4px;
+  background: rgba(4, 7, 11, 0.32);
+}
+
+.map-filter-save-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.map-filter-save-heading > div {
+  min-width: 0;
+}
+
+.map-filter-save-heading strong,
+.map-filter-save-heading span {
+  display: block;
+}
+
+.map-filter-save-heading strong {
+  color: rgba(244, 242, 238, 0.86);
+  font-size: 13px;
+}
+
+.map-filter-save-heading span {
+  margin-top: 2px;
+  color: rgba(244, 242, 238, 0.46);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.map-filter-save-upload {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 4px 9px;
+  border: 1px solid rgba(205, 216, 228, 0.24);
+  border-radius: 3px;
+  color: rgba(244, 242, 238, 0.8);
+  background: rgba(213, 225, 238, 0.05);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.map-filter-save-upload:hover,
+.map-filter-save-upload:focus-visible {
+  color: #f4f2ee;
+  border-color: rgba(205, 216, 228, 0.42);
+  background: rgba(213, 225, 238, 0.1);
+  outline: none;
 }
 
 .map-filter-save-slots {
   display: flex;
   gap: 4px;
-  margin: -8px 23px 12px 14px;
+  flex-wrap: wrap;
+  margin-top: 9px;
 }
 
 .map-filter-save-slots button {
@@ -302,7 +360,7 @@ body {
 }
 
 .map-filter-save-error {
-  margin: -8px 23px 10px 14px;
+  margin: 8px 0 0;
   color: #e7b7a6;
   font-size: 12px;
   line-height: 1.4;

@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parseSaveDirectory } from "../app/save-parser/index";
-import type { SaveFileLike } from "../app/save-parser/types";
-import { filterMarkersBySaveState, getMarkerSaveState } from "../app/save-parser/entity-map";
-import parserMap from "../app/save-parser/parser-mapid-map.json";
+import { parseSaveDirectory } from "../app/save-parser/index.ts";
+import type { SaveFileLike } from "../app/save-parser/types.ts";
+import { filterMarkersBySaveState, getMarkerSaveState } from "../app/save-parser/entity-map.ts";
+import parserMap from "../app/save-parser/parser-mapid-map.json" with { type: "json" };
 
 function file(name: string, webkitRelativePath = name): SaveFileLike {
   return {
