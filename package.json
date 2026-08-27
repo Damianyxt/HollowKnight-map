@@ -2,6 +2,7 @@
   "name": "hollow-knight-map-cn",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@11.19.0",
   "main": "electron/main.cjs",
   "engines": {
     "node": ">=22.13.0"
@@ -13,7 +14,7 @@
     "test": "npm run build && tsx --test tests/rendered-html.test.mjs tests/save-parser.test.ts",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
-    ,"desktop:web": "next build"
+    ,"desktop:web": "DESKTOP_BUILD=1 next build"
     ,"desktop:pack:win": "electron-builder --win portable --x64"
   },
   "dependencies": {
@@ -49,13 +50,19 @@
     "appId": "cn.hollowknight.map.test",
     "productName": "空洞骑士地图客户端（测试版）",
     "asar": true,
+    "npmRebuild": false,
+    "electronLanguages": ["zh-CN", "en-US"],
+    "extraMetadata": {
+      "dependencies": {}
+    },
     "directories": {
       "output": "release"
     },
     "files": [
       "electron/**/*",
       "out/**/*",
-      "package.json"
+      "package.json",
+      "!node_modules/**/*"
     ],
     "win": {
       "target": [

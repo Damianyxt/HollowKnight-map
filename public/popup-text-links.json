@@ -1,6 +1,36 @@
 {
   "links": [
     {
+      "name": "阿布",
+      "type": "marker",
+      "markerId": "marker_1785470611423_mo38d9"
+    },
+    {
+      "name": "柯尼法",
+      "type": "marker",
+      "markerId": "marker_1785404411269_2k2kya"
+    },
+    {
+      "name": "灵魂暴君",
+      "type": "marker",
+      "markerId": "custom_soul_tyrant"
+    },
+    {
+      "name": "失败冠军",
+      "type": "marker",
+      "markerId": "custom_failed_champion"
+    },
+    {
+      "name": "斯莱",
+      "type": "marker",
+      "markerId": "marker_1785400049577_qkp7zb"
+    },
+    {
+      "name": "伟大的左特",
+      "type": "marker",
+      "markerId": "custom_zote_dirtmouth_marker"
+    },
+    {
       "name": "护符爱好者萨鲁巴",
       "type": "marker",
       "markerId": "marker_1785394615034_hpwpqz"

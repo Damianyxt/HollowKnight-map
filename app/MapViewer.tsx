@@ -20,8 +20,8 @@ const MAX_SCALE = 4;
 const AUTO_FOCUS_MAX_SCALE_FACTOR = 2.5;
 const FOCUS_TRANSITION_MS = 220;
 const MAX_BATCH_BREATHING_GLOW_MARKERS = 64;
-const MAP_EDGE_DRAG_ALLOWANCE = 250;
-const MAP_DRAG_RIGHT_ALLOWANCE = 250;
+const MAP_EDGE_DRAG_ALLOWANCE = 400;
+const MAP_DRAG_RIGHT_ALLOWANCE = 400;
 const COMPLETABLE_PRIMARY_CATEGORIES = new Set(["装备", "收集物", "Boss"]);
 const INFORMATION_ONLY_MARKER_IDS = new Set([
   "marker_custom_sly_crossroads_57466_35094",
@@ -1573,14 +1573,22 @@ function markerHasPopupContent(marker: Marker) {
 
 export default function MapViewer() {
   const viewportRef = useRef<HTMLDivElement>(null);
+  const filterPanelRef = useRef<HTMLElement>(null);
+  const popupRef = useRef<HTMLElement>(null);
   const transformRef = useRef<ViewTransform>({ x: 0, y: 0, scale: 1 });
   const minimumScaleRef = useRef(1);
   const dragRef = useRef<DragState | null>(null);
+  const dragFrameRef = useRef<number | null>(null);
+  const pendingDragTransformRef = useRef<ViewTransform | null>(null);
   const focusNavigationTimerRef = useRef<number | null>(null);
+  const popupVisibilityFrameRef = useRef<number | null>(null);
+  const popupVisibilityReleaseTimerRef = useRef<number | null>(null);
+  const allowPopupVisibilityCorrectionRef = useRef(false);
   const previewTriggerRef = useRef<HTMLButtonElement | null>(null);
   const previewCloseButtonRef = useRef<HTMLButtonElement | null>(null);
   const [transform, setTransform] = useState<ViewTransform>({ x: 0, y: 0, scale: 1 });
   const [viewportWidth, setViewportWidth] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
   const [markerAspectRatios, setMarkerAspectRatios] = useState(
     () => new Map<string, number>(),
   );
@@ -1599,6 +1607,10 @@ export default function MapViewer() {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter | null>(null);
   const [maskFragmentCursor, setMaskFragmentCursor] = useState(0);
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
+  const [popupMeasuredSize, setPopupMeasuredSize] = useState<{
+    markerId: string;
+    height: number;
+  } | null>(null);
   const [glowFocusMarkerId, setGlowFocusMarkerId] = useState<string | null>(null);
   const [glowFocusRegionName, setGlowFocusRegionName] = useState<string | null>(
     null,
@@ -1717,6 +1729,68 @@ export default function MapViewer() {
     [constrainTransform],
   );
 
+  const ensurePopupVisible = useCallback(() => {
+    const viewport = viewportRef.current;
+    const popup = popupRef.current;
+    if (!viewport || !popup) return;
+
+    const margin = 12;
+    const viewportBounds = viewport.getBoundingClientRect();
+    const popupBounds = popup.getBoundingClientRect();
+    let safeLeft = viewportBounds.left + margin;
+    const safeRight = viewportBounds.right - margin;
+    const panel = filterPanelRef.current;
+    if (!filterCollapsed && panel) {
+      const panelBounds = panel.getBoundingClientRect();
+      const panelSafeLeft = panelBounds.right + margin;
+      if (safeRight - panelSafeLeft >= popupBounds.width) {
+        safeLeft = panelSafeLeft;
+      }
+    }
+
+    let shiftX = 0;
+    let shiftY = 0;
+    if (popupBounds.left < safeLeft) {
+      shiftX = safeLeft - popupBounds.left;
+    } else if (popupBounds.right > safeRight) {
+      shiftX = safeRight - popupBounds.right;
+    }
+    if (popupBounds.top < viewportBounds.top + margin) {
+      shiftY = viewportBounds.top + margin - popupBounds.top;
+    } else if (popupBounds.bottom > viewportBounds.bottom - margin) {
+      shiftY = viewportBounds.bottom - margin - popupBounds.bottom;
+    }
+
+    if (Math.abs(shiftX) < 0.5 && Math.abs(shiftY) < 0.5) return;
+    const current = transformRef.current;
+    updateTransform({
+      ...current,
+      x: current.x + shiftX,
+      y: current.y + shiftY,
+    });
+  }, [filterCollapsed, updateTransform]);
+
+  const schedulePopupVisibilityCheck = useCallback(() => {
+    if (!allowPopupVisibilityCorrectionRef.current) return;
+    if (popupVisibilityFrameRef.current !== null) {
+      window.cancelAnimationFrame(popupVisibilityFrameRef.current);
+    }
+    if (popupVisibilityReleaseTimerRef.current !== null) {
+      window.clearTimeout(popupVisibilityReleaseTimerRef.current);
+    }
+    popupVisibilityFrameRef.current = window.requestAnimationFrame(() => {
+      ensurePopupVisible();
+      popupVisibilityFrameRef.current = window.requestAnimationFrame(() => {
+        ensurePopupVisible();
+        popupVisibilityFrameRef.current = null;
+        popupVisibilityReleaseTimerRef.current = window.setTimeout(() => {
+          allowPopupVisibilityCorrectionRef.current = false;
+          popupVisibilityReleaseTimerRef.current = null;
+        }, 120);
+      });
+    });
+  }, [ensurePopupVisible]);
+
   const fitMap = useCallback(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
@@ -1739,6 +1813,7 @@ export default function MapViewer() {
 
     const syncViewport = () => {
       setViewportWidth(viewport.clientWidth);
+      setViewportHeight(viewport.clientHeight);
       fitMap();
     };
     syncViewport();
@@ -1845,6 +1920,17 @@ export default function MapViewer() {
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
 
+    // 用户手动拖动后尊重其视角，不再为了弹窗完整显示自动回弹。
+    allowPopupVisibilityCorrectionRef.current = false;
+    if (popupVisibilityFrameRef.current !== null) {
+      window.cancelAnimationFrame(popupVisibilityFrameRef.current);
+      popupVisibilityFrameRef.current = null;
+    }
+    if (popupVisibilityReleaseTimerRef.current !== null) {
+      window.clearTimeout(popupVisibilityReleaseTimerRef.current);
+      popupVisibilityReleaseTimerRef.current = null;
+    }
+
     const current = transformRef.current;
     dragRef.current = {
       pointerId: event.pointerId,
@@ -1861,10 +1947,17 @@ export default function MapViewer() {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
 
-    updateTransform({
+    pendingDragTransformRef.current = {
       ...transformRef.current,
       x: drag.originX + event.clientX - drag.startX,
       y: drag.originY + event.clientY - drag.startY,
+    };
+    if (dragFrameRef.current !== null) return;
+    dragFrameRef.current = window.requestAnimationFrame(() => {
+      dragFrameRef.current = null;
+      const pending = pendingDragTransformRef.current;
+      pendingDragTransformRef.current = null;
+      if (pending) updateTransform(pending);
     });
   };
 
@@ -1883,6 +1976,13 @@ export default function MapViewer() {
       event.clientX - drag.startX,
       event.clientY - drag.startY,
     );
+    if (dragFrameRef.current !== null) {
+      window.cancelAnimationFrame(dragFrameRef.current);
+      dragFrameRef.current = null;
+    }
+    const pending = pendingDragTransformRef.current;
+    pendingDragTransformRef.current = null;
+    if (pending) updateTransform(pending);
     dragRef.current = null;
     setDragging(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -1931,7 +2031,26 @@ export default function MapViewer() {
       Math.max(markerX, popupHalfWidth + 12),
       Math.max(popupHalfWidth + 12, viewportWidth - popupHalfWidth - 12),
     );
-    const showBelow = markerY < 157;
+    const popupHeight =
+      (popupMeasuredSize?.markerId === marker.id
+        ? popupMeasuredSize.height
+        : null) ??
+      Math.min(400, Math.max(0, viewportHeight - 32));
+    const availableAbove = markerTop - 26;
+    const availableBelow = viewportHeight - markerBottom - 26;
+    const showBelow =
+      availableAbove < popupHeight && availableBelow > availableAbove;
+    const popupMargin = 12;
+    const rawTop = showBelow ? markerBottom + 14 : markerTop - 14;
+    const top = showBelow
+      ? Math.min(
+          Math.max(rawTop, popupMargin),
+          Math.max(popupMargin, viewportHeight - popupHeight - popupMargin),
+        )
+      : Math.min(
+          Math.max(rawTop, popupHeight + popupMargin),
+          Math.max(popupHeight + popupMargin, viewportHeight - popupMargin),
+        );
     const arrowOffset = Math.min(
       popupHalfWidth - 18,
       Math.max(18 - popupHalfWidth, markerX - left),
@@ -1939,7 +2058,7 @@ export default function MapViewer() {
 
     return {
       left,
-      top: showBelow ? markerBottom + 14 : markerTop - 14,
+      top,
       showBelow,
       arrowOffset,
     };
@@ -1950,7 +2069,8 @@ export default function MapViewer() {
     () => categoryFilter?.secondaries ?? [],
     [categoryFilter],
   );
-  const activeRegionNames = useMemo(
+  const normalizedFocusSearch = searchQuery.trim().toLocaleLowerCase("zh-CN");
+  const categoryRegionNames = useMemo(
     () =>
       new Set(
         activeCategoryKeys
@@ -1959,13 +2079,31 @@ export default function MapViewer() {
       ),
     [activeCategoryKeys],
   );
+  const searchRegionNames = useMemo(
+    () =>
+      new Set(
+        normalizedFocusSearch
+          ? regionInfos
+              .filter((region) =>
+                normalizeItemName(region.name)
+                  .toLocaleLowerCase("zh-CN")
+                  .includes(normalizedFocusSearch),
+              )
+              .map((region) => region.name)
+          : [],
+      ),
+    [normalizedFocusSearch, regionInfos],
+  );
+  const activeRegionNames = useMemo(
+    () => new Set([...categoryRegionNames, ...searchRegionNames]),
+    [categoryRegionNames, searchRegionNames],
+  );
   const activeMarkerCategoryKeys = activeCategoryKeys.filter(
     (key) => !key.startsWith("区域\u0000"),
   );
   const activeCategoryEntries = classification.entries.filter((entry) =>
     activeMarkerCategoryKeys.includes(`${entry.primary}\u0000${entry.secondary}`),
   );
-  const normalizedFocusSearch = searchQuery.trim().toLocaleLowerCase("zh-CN");
   const activeSearchEntries = normalizedFocusSearch
     ? classification.entries.filter((entry) =>
         [entry.name, entry.primary, entry.secondary].some((value) =>
@@ -1979,18 +2117,6 @@ export default function MapViewer() {
     ? [
         ...markers.flatMap((marker) =>
           getPopupEmbeddedItemIcons(marker.name).map((icon) => icon.alt),
-        ),
-        ...Object.values(MERCHANT_OFFERS).flatMap((sections) =>
-          sections.flatMap((section) =>
-            section.offers.flatMap((offer) =>
-              [
-                offer.name,
-                offer.rewardIconLabel,
-                offer.requiredItem?.label,
-                offer.materialCost?.label,
-              ].filter((name): name is string => Boolean(name)),
-            ),
-          ),
         ),
         ...classification.relations.map((relation) => relation.itemName),
       ].filter((name) =>
@@ -2084,15 +2210,6 @@ export default function MapViewer() {
     ? getPopupEmbeddedItemIcons(selectedMarker.name).some((icon) =>
         popupItemMatchesActiveFilters(icon.alt),
       ) ||
-      (!INFORMATION_ONLY_MARKER_IDS.has(selectedMarker.id) &&
-        (MERCHANT_OFFERS[selectedMarker.iconId] ?? []).some((section) =>
-          section.offers.some(
-            (offer) => popupItemMatchesActiveFilters(
-              offer.name,
-              offer.rewardIconLabel,
-            ),
-          ),
-      )) ||
       classification.relations.some(
         (relation) =>
           relation.ownerIconId === selectedMarker.iconId &&
@@ -2442,7 +2559,8 @@ export default function MapViewer() {
     let countedKingsoulFragments = false;
     const countedMultiEndingCharacters = new Set<string>();
     const countedTaskNpcCharacters = new Set<string>();
-    for (const sections of Object.values(MERCHANT_OFFERS)) {
+    for (const [iconId, sections] of Object.entries(MERCHANT_OFFERS)) {
+      if (iconId === CORNIFER_ICON_ID) continue;
       for (const section of sections) {
         for (const offer of section.offers) {
           const offerName = normalizeItemName(offer.name);
@@ -2704,7 +2822,11 @@ export default function MapViewer() {
         return true;
       }
 
-      if (marker.name.toLocaleLowerCase("zh-CN").includes(normalizedSearch)) {
+      if (
+        normalizeItemName(marker.name)
+          .toLocaleLowerCase("zh-CN")
+          .includes(normalizedSearch)
+      ) {
         return true;
       }
 
@@ -2715,24 +2837,6 @@ export default function MapViewer() {
       ) {
         return true;
       }
-
-      const popupMatches = !INFORMATION_ONLY_MARKER_IDS.has(marker.id) &&
-        (MERCHANT_OFFERS[marker.iconId] ?? []).some(
-          (section) =>
-            section.offers.some((offer) =>
-              [
-                offer.name,
-                offer.rewardIconLabel,
-                offer.requiredItem?.label,
-                offer.materialCost?.label,
-              ]
-                .filter(Boolean)
-                .some((text) =>
-                  text!.toLocaleLowerCase("zh-CN").includes(normalizedSearch),
-                ),
-            ),
-      );
-      if (popupMatches) return true;
 
       return !INFORMATION_ONLY_MARKER_IDS.has(marker.id) &&
         classification.relations.some(
@@ -2771,7 +2875,6 @@ export default function MapViewer() {
   );
 
   const renderedMarkers = useMemo(() => {
-    if (saveFilterMode !== "all") return visibleMarkers;
     if (
       !glowFocusMarkerId ||
       visibleMarkers.some((marker) => marker.id === glowFocusMarkerId)
@@ -2782,7 +2885,7 @@ export default function MapViewer() {
       (marker) => marker.id === glowFocusMarkerId,
     );
     return focusedMarker ? [...visibleMarkers, focusedMarker] : visibleMarkers;
-  }, [glowFocusMarkerId, markers, saveFilterMode, visibleMarkers]);
+  }, [glowFocusMarkerId, markers, visibleMarkers]);
 
   const visibleRegionFocusMarkers = useMemo<Marker[]>(() => {
     if (activeRegionNames.size === 0) return [];
@@ -2792,8 +2895,11 @@ export default function MapViewer() {
       if (
         !region ||
         !layout ||
-        (!activeRegionNames.has(region.name) &&
-          (!region.parent || !activeRegionNames.has(region.parent)))
+        !(
+          searchRegionNames.has(region.name) ||
+          categoryRegionNames.has(region.name) ||
+          Boolean(region.parent && categoryRegionNames.has(region.parent))
+        )
       ) {
         return [];
       }
@@ -2814,7 +2920,14 @@ export default function MapViewer() {
           : undefined,
       }];
     });
-  }, [activeRegionNames, allRegionChineseLabels, regionInfoByName, regionLabelLayouts]);
+  }, [
+    activeRegionNames,
+    allRegionChineseLabels,
+    categoryRegionNames,
+    regionInfoByName,
+    regionLabelLayouts,
+    searchRegionNames,
+  ]);
 
   const focusNavigationItems = useMemo(
     () =>
@@ -2876,6 +2989,43 @@ export default function MapViewer() {
     );
   }, []);
 
+  const getPopupAwareTransform = useCallback((
+    percentX: number,
+    percentY: number,
+    nextScale: number,
+  ) => {
+    const viewport = viewportRef.current;
+    if (!viewport) return { x: 0, y: 0 };
+    const margin = 12;
+    const popupHeight = Math.min(400, viewport.clientHeight - 32);
+    const markerScreenHalf = 24 * nextScale;
+
+    // 水平：始终以整个屏幕为范围居中。弹窗打开后如果实际被筛选栏遮挡，
+    // ensurePopupVisible 会再按实际边界轻微移动地图。
+    const availableCenterX = viewport.clientWidth / 2;
+    const targetScreenX = Math.min(
+      Math.max(availableCenterX, margin + markerScreenHalf),
+      viewport.clientWidth - margin - markerScreenHalf,
+    );
+
+    // 垂直：优先让弹窗（默认显示在图标上方）完整可见
+    const minYForPopupAbove = margin + markerScreenHalf + 14 + popupHeight;
+    const maxMarkerY = viewport.clientHeight - margin - markerScreenHalf;
+    let targetScreenY = Math.min(
+      maxMarkerY,
+      Math.max(viewport.clientHeight * 0.6, minYForPopupAbove),
+    );
+    if (minYForPopupAbove > maxMarkerY) {
+      // 视口太矮，上方放不下，把图标放到顶部触发弹窗向下显示
+      targetScreenY = margin + markerScreenHalf;
+    }
+
+    return {
+      x: targetScreenX - (percentX / 100) * MAP_WIDTH * nextScale,
+      y: targetScreenY - (percentY / 100) * MAP_HEIGHT * nextScale,
+    };
+  }, []);
+
   const focusMaskFragment = useCallback(
     (nextIndex: number, forcePopup = false) => {
       const viewport = viewportRef.current;
@@ -2892,15 +3042,13 @@ export default function MapViewer() {
       }
       setSelectedMarker(null);
       setSmoothFocusMoving(true);
-      updateTransform({
-        scale: nextScale,
-        x: viewport.clientWidth / 2 - (marker.x / 100) * MAP_WIDTH * nextScale,
-        y: viewport.clientHeight / 2 - (marker.y / 100) * MAP_HEIGHT * nextScale,
-      });
+      const focused = getPopupAwareTransform(marker.x, marker.y, nextScale);
+      updateTransform({ scale: nextScale, ...focused });
       setMaskFragmentCursor(normalizedIndex);
       focusNavigationTimerRef.current = window.setTimeout(() => {
         setSmoothFocusMoving(false);
         if (forcePopup) {
+          allowPopupVisibilityCorrectionRef.current = true;
           setSelectedMarker(marker);
           setPopupTab(
             !INFORMATION_ONLY_MARKER_IDS.has(marker.id) &&
@@ -2909,12 +3057,13 @@ export default function MapViewer() {
               : "description",
           );
         } else if (markerHasPopupContent(marker)) {
+          allowPopupVisibilityCorrectionRef.current = true;
           openMarker(marker);
         }
         focusNavigationTimerRef.current = null;
       }, FOCUS_TRANSITION_MS);
     },
-    [focusNavigationItems, openMarker, updateTransform],
+    [focusNavigationItems, getPopupAwareTransform, openMarker, updateTransform],
   );
 
   useEffect(
@@ -2922,9 +3071,44 @@ export default function MapViewer() {
       if (focusNavigationTimerRef.current !== null) {
         window.clearTimeout(focusNavigationTimerRef.current);
       }
+      if (popupVisibilityFrameRef.current !== null) {
+        window.cancelAnimationFrame(popupVisibilityFrameRef.current);
+      }
+      if (popupVisibilityReleaseTimerRef.current !== null) {
+        window.clearTimeout(popupVisibilityReleaseTimerRef.current);
+      }
+      if (dragFrameRef.current !== null) {
+        window.cancelAnimationFrame(dragFrameRef.current);
+      }
     },
     [],
   );
+
+  useEffect(() => {
+    if (!selectedMarker) return;
+    schedulePopupVisibilityCheck();
+  }, [selectedMarker, popupTab, filterCollapsed, schedulePopupVisibilityCheck]);
+
+  useEffect(() => {
+    const popup = popupRef.current;
+    if (!selectedMarker || !popup) return;
+    const markerId = selectedMarker.id;
+    const measurePopup = () => {
+      const height = popup.offsetHeight;
+      setPopupMeasuredSize((current) =>
+        current?.markerId === markerId && current.height === height
+          ? current
+          : { markerId, height },
+      );
+    };
+    measurePopup();
+    const observer = new ResizeObserver(() => {
+      measurePopup();
+      schedulePopupVisibilityCheck();
+    });
+    observer.observe(popup);
+    return () => observer.disconnect();
+  }, [selectedMarker, schedulePopupVisibilityCheck]);
 
   useEffect(() => {
     if (!isMaskFragmentFocus || focusNavigationItems.length === 0) return;
@@ -2978,10 +3162,18 @@ export default function MapViewer() {
     setCategoryFilter(null);
     setSearchInput("");
     setSearchQuery("");
+    setSaveFilterMode("all");
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setIsResettingFilters(false));
     });
   };
+
+  const hasActiveFilters = Boolean(
+    categoryFilter ||
+    searchInput.trim() ||
+    searchQuery.trim() ||
+    saveFilterMode !== "all",
+  );
 
   const openRegionLabel = (region: RegionInfo, layout: RegionLabelLayout) => {
     setSelectedMarker({
@@ -3001,41 +3193,6 @@ export default function MapViewer() {
         : undefined,
     });
     setPopupTab("description");
-  };
-
-  const getPopupAwareTransform = (
-    percentX: number,
-    percentY: number,
-    nextScale: number,
-  ) => {
-    const viewport = viewportRef.current;
-    if (!viewport) return { x: 0, y: 0 };
-    const margin = 12;
-    const popupHeight = Math.min(400, viewport.clientHeight - 32);
-    const markerScreenHalf = 24 * nextScale;
-
-    // 水平：目标点尽量居中，但保证图标本体留在视口内
-    const targetScreenX = Math.min(
-      Math.max(viewport.clientWidth / 2, margin + markerScreenHalf),
-      viewport.clientWidth - margin - markerScreenHalf,
-    );
-
-    // 垂直：优先让弹窗（默认显示在图标上方）完整可见
-    const minYForPopupAbove = margin + markerScreenHalf + 14 + popupHeight;
-    const maxMarkerY = viewport.clientHeight - margin - markerScreenHalf;
-    let targetScreenY = Math.min(
-      maxMarkerY,
-      Math.max(viewport.clientHeight * 0.6, minYForPopupAbove),
-    );
-    if (minYForPopupAbove > maxMarkerY) {
-      // 视口太矮，上方放不下，把图标放到顶部触发弹窗向下显示
-      targetScreenY = margin + markerScreenHalf;
-    }
-
-    return {
-      x: targetScreenX - (percentX / 100) * MAP_WIDTH * nextScale,
-      y: targetScreenY - (percentY / 100) * MAP_HEIGHT * nextScale,
-    };
   };
 
   const focusAndOpenMarker = (marker: Marker) => {
@@ -3186,6 +3343,7 @@ export default function MapViewer() {
         <span aria-hidden="true">{filterCollapsed ? "›" : "‹"}</span>
       </button>
       <aside
+        ref={filterPanelRef}
         className={`map-filter-panel${filterCollapsed ? " is-collapsed" : ""}${isResettingFilters ? " is-resetting-filters" : ""}`}
         aria-label="地图图标筛选"
         onPointerDown={(event) => event.stopPropagation()}
@@ -3195,7 +3353,17 @@ export default function MapViewer() {
           <img src="/assets/hollow-knight-logo.png" alt="" aria-hidden="true" />
           <div className="map-filter-brand-copy">
             <h1>空洞骑士·地图攻略</h1>
-            <p>当前显示图标 {visibleMarkers.length}/{markers.length}</p>
+            <div className="map-filter-status-row">
+              <p>当前显示图标 {visibleMarkers.length}/{markers.length}</p>
+              <button
+                type="button"
+                className="map-filter-brand-reset"
+                disabled={!hasActiveFilters}
+                onClick={resetFilters}
+              >
+                重置
+              </button>
+            </div>
           </div>
         </div>
         <div className="map-filter-search">
@@ -3221,7 +3389,7 @@ export default function MapViewer() {
           </button>
         </div>
         <div className="map-filter-save-panel" aria-busy={isParsingSave} aria-live="polite">
-          <div className="map-filter-save-toolbar">
+          <div className={`map-filter-save-toolbar${saveSlots.length === 0 ? " has-save-hint" : ""}`}>
             <button
               type="button"
               className="map-filter-save-upload"
@@ -3247,7 +3415,11 @@ export default function MapViewer() {
               </div>
             )}
             {saveSlots.length === 0 && (
-              <span className="map-filter-save-hint">根据存档进度显示地图内容</span>
+              <span className="map-filter-save-hint">
+                <span>存档默认路径：</span>
+                <span>%USERPROFILE%\AppData\LocalLow\Team Cherry\Hollow Knight</span>
+                <span>上传整个 Hollow Knight 文件夹</span>
+              </span>
             )}
           </div>
           {saveError && <p className="map-filter-save-error">{saveError}</p>}
@@ -3275,7 +3447,7 @@ export default function MapViewer() {
             ))}
           </div>
         )}
-        {normalizedSearch && visibleMarkers.length === 0 && (
+        {normalizedSearch && focusNavigationItems.length === 0 && (
           <p className="map-filter-search-empty">没有找到搜索内容</p>
         )}
         {isMaskFragmentFocus && focusNavigationItems.length > 0 && (
@@ -3639,6 +3811,7 @@ export default function MapViewer() {
       </div>
       {selectedMarker && popupPosition && (
         <section
+          ref={popupRef}
           className={`marker-popup${popupPosition.showBelow ? " is-below" : ""}`}
           style={
             {
