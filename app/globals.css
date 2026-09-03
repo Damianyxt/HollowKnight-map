@@ -9,23 +9,28 @@
   --hk-weight-title: 700;
   --hk-weight-action: 600;
   --hk-weight-body: 400;
-  --hk-text-full: #f4f2ee;
-  --hk-text-main: rgba(244, 242, 238, 0.88);
-  --hk-text-aux: rgba(244, 242, 238, 0.65);
-  --hk-text-disabled: rgba(244, 242, 238, 0.28);
+  --hk-text-full: #f1f7ff;
+  --hk-text-main: #f5f5f7;
+  --hk-text-aux: rgba(223, 240, 255, 0.64);
+  --hk-text-disabled: rgba(223, 240, 255, 0.28);
   --hk-line: rgba(210, 219, 227, 0.24);
   --hk-focus-ring: rgba(235, 241, 247, 0.82);
+  --hk-page-bg-deep: #01040d;
+  --hk-page-bg-mid: #020e22;
+  --hk-page-bg-cyan: rgba(114, 233, 255, 0.027);
   --hk-radius-panel: 8px;
   --hk-radius-control: 7px;
   --hk-radius-compact: 5px;
-  --hk-choice-surface: linear-gradient(135deg, rgba(38, 43, 50, 0.84), rgba(23, 28, 34, 0.9));
-  --hk-choice-active-border: rgba(216, 224, 232, 0.36);
-  --hk-choice-active-background:
-    radial-gradient(circle at 18% 50%, rgba(238, 242, 246, 0.12), transparent 40%),
-    linear-gradient(135deg, rgba(61, 67, 75, 0.97), rgba(30, 35, 42, 0.98));
-  --hk-choice-active-shadow:
-    inset 0 0 8px rgba(238, 242, 246, 0.05),
-    0 0 0 1px rgba(196, 205, 214, 0.03);
+  --hk-choice-surface: rgba(255, 255, 255, 0.08);
+  --hk-choice-active-border: #72e9ff;
+  --hk-choice-active-background: rgba(114, 233, 255, 0.12);
+  --hk-choice-active-shadow: none;
+  --hk-hover-border: rgba(114, 233, 255, 0.28);
+  --hk-hover-background: rgba(114, 233, 255, 0.07);
+  --hk-hover-shadow: none;
+  --hk-subtle-hover-background: rgba(255, 255, 255, 0.08);
+  --hk-subtle-hover-border: rgba(255, 255, 255, 0.18);
+  --hk-inset-control-background: rgba(1, 7, 17, 0.58);
   --hk-motion-fast: 160ms;
   --hk-motion-panel: 220ms;
 }
@@ -40,7 +45,7 @@ body {
   height: 100%;
   margin: 0;
   overflow: visible;
-  background: #080c12;
+  background: var(--hk-page-bg-deep);
 }
 
 body {
@@ -56,9 +61,10 @@ body {
   touch-action: none;
   user-select: none;
   background:
-    radial-gradient(ellipse at 52% 46%, rgba(0, 0, 0, 0.56) 0%, rgba(1, 5, 10, 0.3) 36%, transparent 72%),
-    radial-gradient(ellipse at 52% 46%, transparent 28%, rgba(43, 78, 108, 0.12) 72%, rgba(52, 91, 124, 0.18) 100%),
-    #0a111b;
+    radial-gradient(ellipse at 72% 9%, var(--hk-page-bg-cyan) 0%, transparent 32%),
+    radial-gradient(ellipse at 48% 46%, rgba(14, 41, 79, 0.145) 0%, rgba(4, 13, 32, 0.075) 42%, transparent 70%),
+    radial-gradient(ellipse at 9% 86%, rgba(20, 58, 98, 0.068) 0%, transparent 36%),
+    linear-gradient(135deg, var(--hk-page-bg-deep) 0%, var(--hk-page-bg-mid) 58%, #04132b 100%);
 }
 
 .map-viewport.is-dragging {
@@ -77,14 +83,13 @@ body {
   overflow: hidden;
   color: var(--hk-text-full);
   background:
-    radial-gradient(circle at 50% -20%, rgba(139, 153, 170, 0.12), transparent 42%),
-    linear-gradient(180deg, rgba(18, 22, 29, 0.97), rgba(10, 13, 18, 0.97));
-  border: 1px solid rgba(214, 222, 232, 0.24);
+    radial-gradient(circle at 50% -20%, rgba(114, 233, 255, 0.035), transparent 42%),
+    linear-gradient(180deg, rgba(7, 21, 46, 0.94), rgba(7, 21, 46, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--hk-radius-panel);
   box-shadow:
     inset 0 0 0 2px rgba(255, 255, 255, 0.025),
     0 16px 42px rgba(0, 0, 0, 0.58);
-  backdrop-filter: blur(10px);
   cursor: default;
   touch-action: auto;
   user-select: none;
@@ -106,11 +111,11 @@ body {
   height: 38px;
   padding: 0;
   place-items: center;
-  border: 1px solid rgba(214, 222, 232, 0.24);
+  border: 1px solid rgba(144, 168, 188, 0.2);
   border-left: 0;
   border-radius: 0 5px 5px 0;
-  color: rgba(224, 230, 237, 0.72);
-  background: linear-gradient(180deg, rgba(25, 30, 39, 0.98), rgba(12, 16, 22, 0.98));
+  color: rgba(223, 240, 255, 0.64);
+  background: linear-gradient(180deg, rgba(15, 27, 42, 0.99), rgba(5, 13, 24, 0.99));
   box-shadow: 8px 10px 24px rgba(0, 0, 0, 0.42);
   font: inherit;
   cursor: pointer;
@@ -131,8 +136,11 @@ body {
 .map-filter-toggle:hover,
 .map-filter-toggle:focus-visible {
   color: #ffffff;
-  background: linear-gradient(180deg, rgba(42, 49, 61, 0.99), rgba(18, 23, 31, 0.99));
-  box-shadow: 0 0 12px rgba(221, 232, 244, 0.13), 8px 10px 24px rgba(0, 0, 0, 0.42);
+  border-color: var(--hk-subtle-hover-border);
+  background:
+    linear-gradient(var(--hk-subtle-hover-background), var(--hk-subtle-hover-background)),
+    linear-gradient(180deg, rgba(25, 36, 49, 0.99), rgba(8, 18, 31, 0.99));
+  box-shadow: 0 0 8px rgba(186, 211, 225, 0.07), 8px 10px 24px rgba(0, 0, 0, 0.42);
   outline: none;
 }
 
@@ -209,7 +217,7 @@ body {
   margin: 0;
   padding: 0;
   border: 0;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   background: transparent;
   box-shadow: none;
   font: inherit;
@@ -227,7 +235,7 @@ body {
 }
 
 .map-filter-brand-reset:disabled {
-  color: rgba(244, 242, 238, 0.25);
+  color: rgba(223, 240, 255, 0.25);
   cursor: default;
 }
 
@@ -239,9 +247,9 @@ body {
   min-height: 42px;
   padding: 0 0 0 7px;
   margin: 23px 21px 8px 14px;
-  color: rgba(218, 226, 235, 0.6);
-  background: rgba(0, 0, 0, 0.34);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(223, 240, 255, 0.64);
+  background: var(--hk-inset-control-background);
+  border: 1px solid rgba(145, 168, 187, 0.1);
   border-radius: var(--hk-radius-control);
   overflow: hidden;
 }
@@ -274,7 +282,7 @@ body {
   padding: 5px 8px;
   border: 0;
   border-radius: 6px;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   background: transparent;
   font: inherit;
   font-size: 14px;
@@ -284,8 +292,9 @@ body {
 
 .map-filter-search button:hover,
 .map-filter-search button:focus-visible {
-  color: rgba(244, 242, 238, 0.88);
-  background: rgba(216, 226, 238, 0.08);
+  color: #f5f5f7;
+  background: var(--hk-subtle-hover-background);
+  box-shadow: none;
   outline: none;
 }
 
@@ -309,7 +318,7 @@ body {
   min-height: 0;
   padding: 3px 8px;
   border: 1px solid transparent;
-  border-radius: 5px;
+  border-radius: 10px;
   color: var(--hk-text-aux);
   background: transparent;
   box-shadow: none;
@@ -322,7 +331,7 @@ body {
 
 .map-filter-completion-tabs button:hover,
 .map-filter-completion-tabs button:focus-visible {
-  color: rgba(244, 242, 238, 0.65);
+  color: #f5f5f7;
   border-color: transparent;
   background: transparent;
   box-shadow: none;
@@ -330,7 +339,7 @@ body {
 }
 
 .map-filter-completion-tabs button.is-active {
-  color: var(--hk-text-full);
+  color: #f1f7ff;
   border-color: var(--hk-choice-active-border);
   background: var(--hk-choice-active-background);
   box-shadow: var(--hk-choice-active-shadow);
@@ -391,7 +400,7 @@ body {
   padding: 0 8px;
   border: 0;
   border-radius: 5px;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   background: transparent;
   font: inherit;
   font-size: 14px;
@@ -401,8 +410,9 @@ body {
 
 .map-filter-save-upload:hover,
 .map-filter-save-upload:focus-visible {
-  color: rgba(244, 242, 238, 0.88);
-  background: rgba(216, 226, 238, 0.08);
+  color: #f5f5f7;
+  background: var(--hk-subtle-hover-background);
+  box-shadow: none;
   outline: none;
 }
 
@@ -450,7 +460,7 @@ body {
   min-height: 26px;
   padding: 3px 13px;
   border: 1px solid transparent;
-  border-radius: var(--hk-radius-compact);
+  border-radius: 10px;
   color: var(--hk-text-aux);
   background: transparent;
   font: inherit;
@@ -461,7 +471,7 @@ body {
 
 .map-filter-save-slots button:hover,
 .map-filter-save-slots button:focus-visible {
-  color: var(--hk-text-aux);
+  color: #f5f5f7;
   border-color: transparent;
   background: transparent;
   box-shadow: none;
@@ -469,7 +479,7 @@ body {
 }
 
 .map-filter-save-slots button.is-active {
-  color: var(--hk-text-full);
+  color: #f1f7ff;
   border-color: var(--hk-choice-active-border);
   background: var(--hk-choice-active-background);
   box-shadow: var(--hk-choice-active-shadow);
@@ -566,7 +576,7 @@ body {
   justify-content: space-between;
   margin: 0 23px 0 14px;
   padding: 7px 0 7px 8px;
-  color: rgba(244, 242, 238, 0.88);
+  color: #f5f5f7;
   font-size: 14px;
   font-weight: 400;
 }
@@ -592,7 +602,7 @@ body {
 
 .map-filter-focus-nav > span small {
   margin-left: 4px;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   font-size: 12px;
   line-height: 25px;
 }
@@ -611,7 +621,7 @@ body {
   padding: 0 7px;
   border: 1px solid rgba(210, 221, 233, 0.22);
   border-radius: 3px;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   background: rgba(32, 40, 50, 0.72);
   font: inherit;
   cursor: pointer;
@@ -619,15 +629,18 @@ body {
 
 .map-filter-focus-nav button:hover,
 .map-filter-focus-nav button:focus-visible {
-  border-color: rgba(225, 234, 243, 0.45);
-  color: rgba(244, 242, 238, 0.88);
-  background: rgba(48, 58, 70, 0.82);
+  border-color: var(--hk-subtle-hover-border);
+  color: #f5f5f7;
+  background:
+    linear-gradient(var(--hk-subtle-hover-background), var(--hk-subtle-hover-background)),
+    rgba(32, 40, 50, 0.78);
+  box-shadow: none;
   outline: none;
 }
 
 .map-filter-focus-nav strong {
   min-width: 36px;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   font-size: 12px;
   font-weight: 400;
   line-height: 25px;
@@ -655,6 +668,7 @@ body {
 .map-filter-focus-nav .map-filter-focus-arrow:focus-visible {
   border-color: transparent;
   background: transparent;
+  color: #f5f5f7;
 }
 
 .map-filter-text-action,
@@ -666,7 +680,7 @@ body {
   padding: 0 8px;
   border: 0;
   border-radius: 5px;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   background: transparent;
   box-shadow: none;
   font: inherit;
@@ -686,7 +700,7 @@ body {
   padding: 0 8px;
   border: 0;
   border-radius: 5px;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   background: transparent;
   box-shadow: none;
   font: inherit;
@@ -714,7 +728,7 @@ body {
 .map-filter-focus-nav .map-filter-text-action:focus-visible {
   border: 0;
   color: var(--hk-text-full);
-  background: rgba(216, 226, 238, 0.08);
+  background: var(--hk-subtle-hover-background);
   box-shadow: none;
   outline: none;
 }
@@ -731,8 +745,8 @@ body {
 
 .map-filter-search .map-filter-search-submit:hover,
 .map-filter-search .map-filter-search-submit:focus-visible {
-  border-left-color: rgba(216, 226, 238, 0.2);
-  background: rgba(216, 226, 238, 0.08);
+  border-left-color: var(--hk-subtle-hover-border);
+  background: var(--hk-subtle-hover-background);
 }
 
 .map-filter-secondary-grid > button {
@@ -745,7 +759,7 @@ body {
   padding: 7px 6px;
   position: relative;
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: 10px;
   color: var(--hk-text-aux);
   background: var(--hk-choice-surface);
   font: inherit;
@@ -757,18 +771,11 @@ body {
 
 .map-filter-secondary-grid > button:hover,
 .map-filter-secondary-grid > button:focus-visible {
-  color: rgba(244, 242, 238, 0.88);
-  border-color: rgba(207, 216, 224, 0.14);
-  background: linear-gradient(135deg, rgba(46, 52, 60, 0.91), rgba(25, 30, 37, 0.94));
-  box-shadow: inset 0 0 12px rgba(231, 235, 239, 0.035);
+  color: #f5f5f7;
+  border-color: var(--hk-hover-border);
+  background: var(--hk-hover-background);
+  box-shadow: var(--hk-hover-shadow);
   outline: none;
-}
-
-.map-filter-secondary-grid > button.is-active {
-  color: var(--hk-text-full);
-  border-color: var(--hk-choice-active-border);
-  background: var(--hk-choice-active-background);
-  box-shadow: var(--hk-choice-active-shadow);
 }
 
 .map-filter-secondary-icon {
@@ -776,7 +783,7 @@ body {
   width: 26px;
   height: 26px;
   place-items: center;
-  color: rgba(222, 229, 236, 0.65);
+  color: rgba(223, 240, 255, 0.64);
 }
 
 .map-filter-secondary-icon img {
@@ -790,11 +797,7 @@ body {
 
 .map-filter-secondary-grid > button:hover .map-filter-secondary-icon img,
 .map-filter-secondary-grid > button:focus-visible .map-filter-secondary-icon img {
-  filter: grayscale(0.05) saturate(0.92) brightness(0.98) drop-shadow(0 0 3px rgba(220, 225, 230, 0.13));
-}
-
-.map-filter-secondary-grid > button.is-active .map-filter-secondary-icon img {
-  filter: grayscale(0) saturate(0.98) brightness(1.07) drop-shadow(0 0 5px rgba(225, 231, 236, 0.27));
+  filter: grayscale(0.06) saturate(0.92) brightness(1.02) drop-shadow(0 0 3px rgba(114, 233, 255, 0.16));
 }
 
 .map-filter-panel.is-resetting-filters .map-filter-secondary-grid > button,
@@ -830,13 +833,13 @@ body {
 }
 
 .map-filter-secondary-grid > button.is-active .map-filter-secondary-copy small {
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
 }
 
 .map-filter-empty {
   margin: 10px 0 0;
   padding: 10px;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   background: rgba(255, 255, 255, 0.04);
   border-radius: 7px;
   font-size: 14px;
@@ -846,10 +849,22 @@ body {
 
 .map-filter-search-empty {
   margin: -4px 20px 10px;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   font-size: 14px;
   font-weight: 400;
   line-height: 1.4;
+}
+
+/* Selected filter card SaveScope lifeblood state */
+.map-filter-secondary-grid > button.is-active {
+  border-color: var(--hk-choice-active-border);
+  color: #f1f7ff;
+  background: var(--hk-choice-active-background);
+  box-shadow: var(--hk-choice-active-shadow);
+}
+
+.map-filter-secondary-grid > button.is-active .map-filter-secondary-icon img {
+  filter: grayscale(0.03) saturate(0.94) brightness(1.07);
 }
 
 @media (max-width: 620px) {
@@ -903,8 +918,7 @@ body {
 }
 
 .map-filter-panel button:focus-visible,
-.marker-popup button:focus-visible,
-.image-preview-modal button:focus-visible {
+.marker-popup button:focus-visible {
   outline: 2px solid var(--hk-focus-ring) !important;
   outline-offset: 2px;
 }
@@ -912,10 +926,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .map-viewport *,
   .map-viewport *::before,
-  .map-viewport *::after,
-  .image-preview-modal *,
-  .image-preview-modal *::before,
-  .image-preview-modal *::after {
+  .map-viewport *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
@@ -1043,7 +1054,7 @@ body {
 }
 
 .map-region-label-editor.is-text {
-  color: #f4f2ee;
+  color: #f1f7ff;
   font-family: "Source Han Serif SC", "Noto Serif SC", serif;
   font-weight: 400;
   letter-spacing: 0.12em;
@@ -1081,7 +1092,7 @@ body {
 .map-region-label-text-main {
   position: relative;
   z-index: 1;
-  color: #f4f2ee;
+  color: #f1f7ff;
   filter:
     drop-shadow(0 0 1px rgba(255, 255, 255, 0.4))
     drop-shadow(0 0 2.5px rgb(var(--region-edge-rgb) / 0.58));
@@ -1253,7 +1264,7 @@ body {
   bottom: -8px;
   width: 14px;
   height: 8px;
-  background: linear-gradient(rgba(9, 12, 17, 0.96), rgba(9, 12, 17, 0.96)) center top / 12px 2px no-repeat;
+  background: linear-gradient(rgba(7, 21, 46, 0.98), rgba(7, 21, 46, 0.98)) center top / 12px 2px no-repeat;
   border: 0;
   transform: translateX(-50%);
   pointer-events: none;
@@ -1264,7 +1275,7 @@ body {
   z-index: 1;
   inset: 0;
   content: "";
-  background: rgba(218, 226, 235, 0.34);
+  background: rgba(184, 207, 220, 0.38);
   clip-path: polygon(0 0, 100% 0, 50% 100%);
 }
 
@@ -1274,15 +1285,15 @@ body {
   inset: 0 1px 1px;
   content: "";
   background:
-    radial-gradient(circle at 50% 0, rgba(205, 220, 235, 0.035), transparent 75%),
-    rgba(9, 12, 17, 0.96);
+    radial-gradient(circle at 50% 0, rgba(205, 225, 235, 0.03), transparent 75%),
+    rgba(7, 21, 46, 0.98);
   clip-path: polygon(0 0, 100% 0, 50% 100%);
 }
 
 .marker-popup.is-below .marker-popup-pointer {
   top: -8px;
   bottom: auto;
-  background: linear-gradient(rgba(18, 22, 29, 0.96), rgba(18, 22, 29, 0.96)) center bottom / 12px 2px no-repeat;
+  background: linear-gradient(rgba(7, 21, 46, 0.94), rgba(7, 21, 46, 0.94)) center bottom / 12px 2px no-repeat;
 }
 
 .marker-popup.is-below .marker-popup-pointer::before {
@@ -1292,8 +1303,8 @@ body {
 .marker-popup.is-below .marker-popup-pointer::after {
   inset: 1px 1px 0;
   background:
-    radial-gradient(circle at 50% 100%, rgba(205, 220, 235, 0.035), transparent 75%),
-    rgba(18, 22, 29, 0.96);
+    radial-gradient(circle at 50% 100%, rgba(205, 225, 235, 0.03), transparent 75%),
+    rgba(7, 21, 46, 0.94);
   clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
@@ -1314,7 +1325,7 @@ body {
 }
 
 .marker-popup-content::-webkit-scrollbar-thumb:hover {
-  background: #6b6d75;
+  background: #607784;
 }
 
 .marker-popup-header {
@@ -1337,8 +1348,8 @@ body {
   padding: 8px 20px;
   border: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.34);
-  color: rgba(244, 242, 238, 0.65);
+  background: var(--hk-inset-control-background);
+  color: rgba(223, 240, 255, 0.64);
   font: inherit;
   font-size: 12px;
   font-weight: 600;
@@ -1350,8 +1361,9 @@ body {
 
 .marker-popup-back-breadcrumb:hover,
 .marker-popup-back-breadcrumb:focus-visible {
-  color: rgba(244, 242, 238, 0.88);
-  background: rgba(255, 255, 255, 0.07);
+  color: var(--hk-text-full);
+  background: var(--hk-subtle-hover-background);
+  box-shadow: none;
   outline: none;
 }
 
@@ -1431,7 +1443,7 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 5px;
   padding: 8px 20px;
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(1, 10, 22, 0.24);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -1450,7 +1462,7 @@ body {
 
 .marker-popup-tabs button:hover,
 .marker-popup-tabs button:focus-visible {
-  color: rgba(244, 242, 238, 0.88);
+  color: #f5f5f7;
   background: rgba(255, 255, 255, 0.07);
   outline: none;
 }
@@ -1464,7 +1476,8 @@ body {
 .marker-popup-content {
   min-height: 0;
   padding: 0 9px 18px 20px;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: #55565d #202126;
@@ -1602,7 +1615,7 @@ body {
 
 .marker-description .marker-description-highlight > p {
   margin: 0;
-  color: #f4f2ee;
+  color: #f1f7ff;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.6;
@@ -1651,7 +1664,7 @@ body {
 
 .marker-description .marker-highlight-item-note p {
   margin: 0;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   font-size: 12px;
   font-weight: 400;
   line-height: 1.6;
@@ -1667,7 +1680,7 @@ body {
 
 .marker-description p {
   margin: 0;
-  color: rgba(244, 242, 238, 0.88);
+  color: #f5f5f7;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.7;
@@ -1682,7 +1695,7 @@ body {
   display: inline;
   padding: 0;
   border: 0;
-  color: rgb(114, 154, 202);
+  color: #72e9ff;
   background: transparent;
   font: inherit;
   line-height: inherit;
@@ -1693,141 +1706,11 @@ body {
 
 .marker-description-internal-link:hover,
 .marker-description-internal-link:focus-visible {
-  color: rgb(150, 190, 235);
-  text-shadow: 0 0 7px rgba(114, 154, 202, 0.5);
+  color: #72e9ff;
+  text-shadow:
+    0 0 4px rgba(174, 244, 255, 0.62),
+    0 0 10px rgba(114, 233, 255, 0.38);
   outline: none;
-}
-
-.marker-description-highlight + .marker-image-guide {
-  margin-top: 12px;
-}
-
-.marker-description .marker-image-guide-note {
-  margin: 0;
-}
-
-.marker-image-guide-image {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin-top: 8px;
-  -webkit-mask-image: radial-gradient(ellipse at center, #000 80%, transparent 100%);
-  mask-image: radial-gradient(ellipse at center, #000 80%, transparent 100%);
-  object-fit: contain;
-}
-
-.marker-image-guide-preview-button {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  color: inherit;
-  background: transparent;
-  cursor: zoom-in;
-}
-
-.marker-image-guide-note + .marker-image-guide-preview-button {
-  margin-top: 8px;
-}
-
-.marker-image-guide-preview-button:focus-visible {
-  outline: 1px solid rgba(230, 237, 244, 0.4);
-  outline-offset: 3px;
-}
-
-.marker-image-guide-image:first-child {
-  margin-top: 0;
-}
-
-.marker-image-guide-divider {
-  width: 100%;
-  height: 1px;
-  margin: 14px 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(205, 218, 231, 0.14) 18%,
-    rgba(224, 233, 242, 0.22) 50%,
-    rgba(205, 218, 231, 0.14) 82%,
-    transparent
-  );
-}
-
-.marker-image-preview-backdrop {
-  position: fixed;
-  z-index: 1000;
-  inset: 0;
-  display: grid;
-  padding: 28px;
-  place-items: center;
-  background: rgba(2, 4, 7, 0.88);
-  backdrop-filter: blur(4px);
-  cursor: zoom-out;
-}
-
-.marker-image-preview-panel {
-  position: relative;
-  display: grid;
-  max-width: min(1200px, calc(100vw - 56px));
-  max-height: calc(100vh - 56px);
-  place-items: center;
-  cursor: default;
-}
-
-.marker-image-preview-image {
-  display: block;
-  max-width: 100%;
-  max-height: calc(100vh - 56px);
-  border: 1px solid rgba(218, 226, 235, 0.34);
-  border-radius: 8px;
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.76);
-  object-fit: contain;
-}
-
-.marker-image-preview-close {
-  position: absolute;
-  z-index: 1;
-  top: 10px;
-  right: 10px;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.marker-image-preview-close::before,
-.marker-image-preview-close::after {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 15px;
-  height: 1px;
-  content: "";
-  background: rgba(244, 242, 238, 0.68);
-  transition: background-color 140ms ease, filter 140ms ease;
-}
-
-.marker-image-preview-close::before {
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.marker-image-preview-close::after {
-  transform: translate(-50%, -50%) rotate(-45deg);
-}
-
-.marker-image-preview-close:hover,
-.marker-image-preview-close:focus-visible {
-  outline: none;
-}
-
-.marker-image-preview-close:hover::before,
-.marker-image-preview-close:hover::after,
-.marker-image-preview-close:focus-visible::before,
-.marker-image-preview-close:focus-visible::after {
-  background: #f4f2ee;
-  filter: drop-shadow(0 0 5px rgba(225, 234, 244, 0.72));
 }
 
 .marker-description-subheading {
@@ -1906,7 +1789,7 @@ body {
 }
 
 .marker-description.is-empty p {
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
 }
 
 .merchant-offers {
@@ -1924,7 +1807,7 @@ body {
   align-items: center;
   gap: 8px;
   padding: 2px 2px 0;
-  color: rgba(244, 242, 238, 0.88);
+  color: #f5f5f7;
 }
 
 .merchant-section-header span {
@@ -1949,7 +1832,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: rgba(244, 242, 238, 0.88);
+  color: #f5f5f7;
   font-size: 12px !important;
   font-weight: 400 !important;
   white-space: nowrap;
@@ -1967,14 +1850,14 @@ body {
 }
 
 .merchant-section-header small {
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   font-size: 12px;
   font-weight: 400;
 }
 
 .merchant-section-description {
   margin: 4px 2px 0;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   font-size: 12px;
   font-weight: 400;
   line-height: 1.5;
@@ -2029,7 +1912,7 @@ body {
   display: grid;
   gap: 2px;
   min-width: 0;
-  color: #f4f2ee;
+  color: #f1f7ff;
   font-size: 14px;
 }
 
@@ -2038,7 +1921,7 @@ body {
 }
 
 .merchant-offer-name small {
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   font-size: 12px;
   font-weight: 400;
   line-height: 1.55;
@@ -2049,7 +1932,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: rgba(244, 242, 238, 0.88);
+  color: #f5f5f7;
   font-size: 14px;
 }
 
@@ -2075,7 +1958,7 @@ body {
 
 .marker-popup-header-progress {
   flex: 0 0 auto;
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   font-size: 12px;
   font-weight: 600;
   line-height: 16px;
@@ -2170,32 +2053,35 @@ body {
   outline: none;
 }
 
-/* 全部图标弹窗：空洞骑士式黑灰、银白与克制冷光 */
+/* 全部图标弹窗：深蓝黑、银白与克制冷光 */
 .marker-popup {
-  background:
-    radial-gradient(circle at 50% -16%, rgba(139, 153, 170, 0.14), transparent 40%),
-    linear-gradient(180deg, rgba(18, 22, 29, 0.96), rgba(9, 12, 17, 0.96));
+  background: linear-gradient(
+    180deg,
+    rgba(7, 21, 46, 0.94) 0%,
+    rgba(7, 21, 46, 0.96) 48%,
+    rgba(7, 21, 46, 0.98) 100%
+  );
   overflow: visible;
-  border-color: rgba(218, 226, 235, 0.34);
+  border-color: rgba(139, 181, 204, 0.34);
   border-radius: 8px;
   box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.025),
-    inset 0 0 28px rgba(205, 220, 235, 0.025),
+    inset 0 0 0 2px rgba(220, 235, 242, 0.02),
+    inset 0 0 28px rgba(160, 196, 214, 0.02),
     0 16px 44px rgba(0, 0, 0, 0.66);
 }
 
 .marker-popup .marker-popup-header {
-  border-bottom-color: rgba(210, 220, 231, 0.15);
+  border-bottom-color: rgba(169, 194, 208, 0.14);
 }
 
 .marker-popup h2 {
-  color: #f4f2ee;
+  color: #f1f7ff;
   letter-spacing: 0.025em;
   text-shadow: 0 0 10px rgba(225, 234, 244, 0.1);
 }
 
 .marker-popup .marker-popup-close {
-  color: rgba(224, 230, 237, 0.68);
+  color: rgba(223, 240, 255, 0.64);
 }
 
 .marker-popup .marker-popup-close:hover,
@@ -2203,55 +2089,56 @@ body {
   color: #ffffff;
   background: transparent;
   box-shadow: none;
+  filter: drop-shadow(0 0 4px rgba(235, 244, 253, 0.68));
 }
 
 .marker-popup .marker-popup-tabs {
   gap: 8px;
-  background: rgba(0, 0, 0, 0.34);
-  border-bottom-color: rgba(205, 216, 228, 0.12);
+  background:
+    radial-gradient(circle at 42% 50%, rgba(150, 185, 205, 0.055), transparent 72%),
+    rgba(150, 185, 205, 0.018);
+  border-bottom-color: rgba(161, 188, 204, 0.11);
+  box-shadow: inset 0 0 16px rgba(150, 185, 205, 0.018);
 }
 
 .marker-popup .marker-popup-tabs button {
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: 10px;
 }
 
 .marker-popup .marker-popup-tabs button:hover,
 .marker-popup .marker-popup-tabs button:focus-visible {
-  color: #f4f2ee;
-  border-color: rgba(218, 227, 237, 0.25);
-  background: linear-gradient(135deg, rgba(40, 47, 57, 0.72), rgba(19, 24, 31, 0.78));
+  color: #f1f7ff;
+  border-color: var(--hk-hover-border);
+  background: var(--hk-hover-background);
+  box-shadow: var(--hk-hover-shadow);
 }
 
 .marker-popup .marker-popup-tabs button.is-active {
-  color: #f4f2ee;
-  border-color: rgba(230, 237, 244, 0.4);
-  background:
-    radial-gradient(circle at 50% 55%, rgba(218, 231, 244, 0.12), transparent 70%),
-    linear-gradient(135deg, rgba(51, 60, 72, 0.9), rgba(22, 28, 36, 0.94));
-  box-shadow:
-    inset 0 0 12px rgba(219, 232, 245, 0.05),
-    0 0 10px rgba(215, 229, 243, 0.09);
+  color: #f1f7ff;
+  border-color: var(--hk-choice-active-border);
+  background: var(--hk-choice-active-background);
+  box-shadow: var(--hk-choice-active-shadow);
 }
 
 .marker-popup .marker-popup-content {
   background:
-    radial-gradient(circle at 50% 0, rgba(128, 145, 164, 0.055), transparent 42%),
-    rgba(5, 8, 12, 0.08);
-  scrollbar-color: #59616d #11161d;
+    radial-gradient(circle at 50% 0, rgba(72, 133, 168, 0.045), transparent 42%),
+    rgba(1, 10, 22, 0.1);
+  scrollbar-color: #465766 #09121e;
 }
 
 .marker-popup .marker-popup-content::-webkit-scrollbar-track {
-  background: #11161d;
+  background: #09121e;
 }
 
 .marker-popup .marker-popup-content::-webkit-scrollbar-thumb {
-  background: #59616d;
-  border-color: #11161d;
+  background: #465766;
+  border-color: #09121e;
 }
 
 .marker-popup .merchant-section-header {
-  color: rgba(244, 242, 238, 0.88);
+  color: #f5f5f7;
   text-shadow: 0 0 8px rgba(222, 233, 244, 0.07);
 }
 
@@ -2361,7 +2248,7 @@ body {
 .marker-popup .merchant-section-header span {
   position: relative;
   z-index: 0;
-  color: #f4f2ee;
+  color: #f1f7ff;
   font-size: 12px;
   text-shadow:
     0 0 3px rgba(241, 247, 253, 0.28),
@@ -2447,7 +2334,7 @@ body {
 }
 
 .merchant-offer-reward > span:first-child {
-  color: rgba(244, 242, 238, 0.65);
+  color: rgba(223, 240, 255, 0.64);
   font-size: 12px;
   font-weight: 400;
 }
@@ -2480,9 +2367,9 @@ body {
 
 .marker-popup .merchant-offer:hover {
   background:
-    radial-gradient(circle at 42% 50%, rgba(188, 207, 226, 0.065), transparent 72%),
-    rgba(135, 155, 176, 0.025);
-  box-shadow: inset 0 0 18px rgba(211, 226, 241, 0.025);
+    radial-gradient(circle at 42% 50%, rgba(150, 185, 205, 0.055), transparent 72%),
+    rgba(150, 185, 205, 0.018);
+  box-shadow: inset 0 0 16px rgba(150, 185, 205, 0.018);
 }
 
 @font-face {

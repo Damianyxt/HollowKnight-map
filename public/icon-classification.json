@@ -1,6 +1,13 @@
 {
   "entries": [
     {
+      "iconId": "custom_mender_bug",
+      "name": "维修虫(Mender Bug)",
+      "location": "地图",
+      "primary": "NPC",
+      "secondary": "对话型NPC"
+    },
+    {
       "iconId": "5Zyw5qCHK25wYy_pmL_luIPvvIhDbG90aO-8iS53ZWJw",
       "name": "阿布(Cloth)",
       "location": "地图",

@@ -4931,6 +4931,22 @@
         "iconFiles": []
       },
       "region": "泪水之城"
+    },
+    {
+      "id": "custom_mender_bug",
+      "name": "维修虫(Mender Bug)",
+      "iconId": "custom_mender_bug",
+      "iconFile": "./icons/%E8%87%AA%E5%AE%9A%E4%B9%89/%E7%BB%B4%E4%BF%AE%E8%99%AB.png",
+      "category": "自定义",
+      "x": 46.168,
+      "y": 24.376,
+      "size": 31,
+      "description": "德特茅斯的井口下方，遗忘十字路入口处，在破坏入口处的路标后，离开再返回房间，有 2% 概率遇见维修虫。注意到小骑士后，他会快速飞走，并离开房间。即使他看上去并无感染迹象，也没有敌意，他死亡时仍会爆出感染雾。他死后，这个被损坏的路标不会再被修好。\n杀死维修虫能解锁他的小屋，进入小屋可以阅读他的日记。",
+      "highlight": {
+        "text": "维修虫是一个隐藏 NPC，也可以被当作敌人杀死。在遗忘十字路入口，可以遇见哼着小曲维修路标的他。",
+        "iconFiles": []
+      },
+      "region": "遗忘十字路"
     }
   ],
   "pickedPoints": [

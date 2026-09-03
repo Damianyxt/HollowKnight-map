@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import popupImageGuides from "./popup-image-guides.json";
 import {
   filterMarkersBySaveState,
   getCharmDisplayProgress,
@@ -39,11 +38,6 @@ type PopupTextLinkTarget =
 
 const escapeRegExp = (text: string) =>
   text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const MARKER_IMAGE_GUIDES = popupImageGuides as Record<
-  string,
-  { note: string | null; imageFile: string | null; imageAlt: string | null }
->;
-
 const HIGHLIGHT_LEADING_ICONS: Record<
   string,
   { src: string; alt: string; displaySize?: "small" }
@@ -1584,8 +1578,6 @@ export default function MapViewer() {
   const popupVisibilityFrameRef = useRef<number | null>(null);
   const popupVisibilityReleaseTimerRef = useRef<number | null>(null);
   const allowPopupVisibilityCorrectionRef = useRef(false);
-  const previewTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const previewCloseButtonRef = useRef<HTMLButtonElement | null>(null);
   const [transform, setTransform] = useState<ViewTransform>({ x: 0, y: 0, scale: 1 });
   const [viewportWidth, setViewportWidth] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
@@ -1600,7 +1592,7 @@ export default function MapViewer() {
     relations: [],
   });
   const [regionInfos, setRegionInfos] = useState<RegionInfo[]>([]);
-  const [filterCollapsed, setFilterCollapsed] = useState(true);
+  const [filterCollapsed, setFilterCollapsed] = useState(false);
   const [isResettingFilters, setIsResettingFilters] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -1625,10 +1617,6 @@ export default function MapViewer() {
   } | null>(null);
   const [popupTextLinks, setPopupTextLinks] = useState<PopupTextLinkTarget[]>([]);
   const [popupTab, setPopupTab] = useState<"description" | "offers">("description");
-  const [previewImage, setPreviewImage] = useState<{
-    src: string;
-    alt: string;
-  } | null>(null);
   const saveInputRef = useRef<HTMLInputElement>(null);
   const [saveSlots, setSaveSlots] = useState<ParsedSaveSlot[]>([]);
   const [selectedSaveSlot, setSelectedSaveSlot] = useState<string | null>(null);
@@ -1641,30 +1629,6 @@ export default function MapViewer() {
     saveInputRef.current?.setAttribute("webkitdirectory", "");
   }, []);
 
-  const closePreviewImage = useCallback(() => {
-    setPreviewImage(null);
-    window.requestAnimationFrame(() => {
-      previewTriggerRef.current?.focus();
-      previewTriggerRef.current = null;
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!previewImage) return;
-
-    const focusFrame = window.requestAnimationFrame(() => {
-      previewCloseButtonRef.current?.focus();
-    });
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closePreviewImage();
-    };
-
-    window.addEventListener("keydown", closeOnEscape);
-    return () => {
-      window.cancelAnimationFrame(focusFrame);
-      window.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [previewImage, closePreviewImage]);
   const constrainTransform = useCallback((next: ViewTransform) => {
     const viewport = viewportRef.current;
     if (!viewport) return next;
@@ -1799,9 +1763,15 @@ export default function MapViewer() {
       viewport.clientWidth / MAP_WIDTH,
       viewport.clientHeight / MAP_HEIGHT,
     );
+    const filterPanelWidth =
+      viewport.clientWidth > 620 ? (filterPanelRef.current?.offsetWidth ?? 0) : 0;
+    const scaledMapWidth = MAP_WIDTH * scale;
+    const centeredBesideFilterX =
+      (viewport.clientWidth - scaledMapWidth + filterPanelWidth) / 2;
+    const rightEdgeSafeX = viewport.clientWidth - scaledMapWidth;
     minimumScaleRef.current = scale * MIN_SCALE_FACTOR;
     updateTransform({
-      x: (viewport.clientWidth - MAP_WIDTH * scale) / 2,
+      x: Math.min(centeredBesideFilterX, rightEdgeSafeX),
       y: (viewport.clientHeight - MAP_HEIGHT * scale) / 2,
       scale,
     });
@@ -2268,9 +2238,6 @@ export default function MapViewer() {
     : [];
   const selectedPopupHighlight = selectedMarker
     ? getMarkerHighlight(selectedMarker)
-    : undefined;
-  const selectedImageGuide = selectedMarker
-    ? MARKER_IMAGE_GUIDES[selectedMarker.id]
     : undefined;
   const selectedHighlightLeadingIcon = selectedMarker
     ? HIGHLIGHT_LEADING_ICONS[selectedMarker.name]
@@ -3911,7 +3878,7 @@ export default function MapViewer() {
             {(selectedMerchantSections.length === 0 || popupTab === "description") &&
               (!hideUnmatchedDescription || Boolean(selectedPopupHighlight)) && (
               <div
-                className={`marker-description${selectedDescriptionParagraphs.length || selectedPopupHighlight || selectedImageGuide ? "" : " is-empty"}`}
+                className={`marker-description${selectedDescriptionParagraphs.length || selectedPopupHighlight ? "" : " is-empty"}`}
               >
                 {selectedPopupHighlight && (
                   <aside
@@ -3972,39 +3939,6 @@ export default function MapViewer() {
                         </div>
                       )}
                   </aside>
-                )}
-                {!hideUnmatchedDescription && selectedImageGuide && (
-                  <section className="marker-image-guide" aria-label="位置图片说明">
-                    {selectedImageGuide.note && (
-                      <p className="marker-image-guide-note">
-                        {renderPopupLinkedText(selectedImageGuide.note)}
-                      </p>
-                    )}
-                    {selectedImageGuide.imageFile && (
-                      <button
-                        type="button"
-                        className="marker-image-guide-preview-button"
-                        aria-label="放大查看位置说明图片"
-                        onClick={(event) => {
-                          previewTriggerRef.current = event.currentTarget;
-                          setPreviewImage({
-                            src: selectedImageGuide.imageFile!,
-                            alt: selectedImageGuide.imageAlt ?? "位置说明",
-                          });
-                        }}
-                      >
-                        <img
-                          className="marker-image-guide-image"
-                          src={selectedImageGuide.imageFile}
-                          alt={selectedImageGuide.imageAlt ?? "位置说明"}
-                          draggable={false}
-                        />
-                      </button>
-                    )}
-                    {selectedDescriptionParagraphs.length > 0 && (
-                      <div className="marker-image-guide-divider" aria-hidden="true" />
-                    )}
-                  </section>
                 )}
                 {!hideUnmatchedDescription && selectedDescriptionParagraphs.length ? (
                   <>
@@ -4273,42 +4207,6 @@ export default function MapViewer() {
             )}
           </div>
         </section>
-      )}
-      {previewImage && (
-        <div
-          className="marker-image-preview-backdrop"
-          role="dialog"
-          aria-modal="true"
-          aria-label="位置说明图片预览"
-          onClick={closePreviewImage}
-          onPointerDown={(event) => event.stopPropagation()}
-          onWheel={(event) => event.stopPropagation()}
-          onKeyDown={(event) => {
-            if (event.key === "Tab") {
-              event.preventDefault();
-              previewCloseButtonRef.current?.focus();
-            }
-          }}
-        >
-          <div
-            className="marker-image-preview-panel"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              ref={previewCloseButtonRef}
-              className="marker-image-preview-close"
-              aria-label="关闭图片预览"
-              onClick={closePreviewImage}
-            />
-            <img
-              className="marker-image-preview-image"
-              src={previewImage.src}
-              alt={previewImage.alt}
-              draggable={false}
-            />
-          </div>
-        </div>
       )}
     </main>
   );
