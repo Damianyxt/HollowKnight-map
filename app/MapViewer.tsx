@@ -1,13 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import SelectedClassChip from "./SelectedClassChip";
 import {
-  filterMarkersBySaveState,
+  filterMarkersByCompletionVisibility,
   getCharmDisplayProgress,
-  getMarkerSaveMatches,
   getSaveGroupProgress,
   getSaveMappingProgress,
-  type SaveFilterMode,
 } from "./save-parser/entity-map";
 import { parseSaveDirectory } from "./save-parser";
 import type { ParsedSaveSlot } from "./save-parser/types";
@@ -21,6 +20,8 @@ const FOCUS_TRANSITION_MS = 220;
 const MAX_BATCH_BREATHING_GLOW_MARKERS = 64;
 const MAP_EDGE_DRAG_ALLOWANCE = 400;
 const MAP_DRAG_RIGHT_ALLOWANCE = 400;
+const EXPANDED_SIDEBAR_MAP_SCALE_FACTOR = 1.05;
+const EXPANDED_SIDEBAR_MAP_OFFSET_X = 0;
 const COMPLETABLE_PRIMARY_CATEGORIES = new Set(["装备", "收集物", "Boss"]);
 const INFORMATION_ONLY_MARKER_IDS = new Set([
   "marker_custom_sly_crossroads_57466_35094",
@@ -1593,6 +1594,13 @@ export default function MapViewer() {
   });
   const [regionInfos, setRegionInfos] = useState<RegionInfo[]>([]);
   const [filterCollapsed, setFilterCollapsed] = useState(false);
+  const sidebarReservedWidth = !filterCollapsed && viewportWidth > 620 ? 366 : 0;
+  const expandedSidebarMapScaleFactor = sidebarReservedWidth > 0
+    ? EXPANDED_SIDEBAR_MAP_SCALE_FACTOR
+    : 1;
+  const minimumMapScale = viewportWidth && viewportHeight
+    ? Math.min((viewportWidth - sidebarReservedWidth) / MAP_WIDTH, viewportHeight / MAP_HEIGHT) * MIN_SCALE_FACTOR * expandedSidebarMapScaleFactor
+    : 1;
   const [isResettingFilters, setIsResettingFilters] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -1620,7 +1628,10 @@ export default function MapViewer() {
   const saveInputRef = useRef<HTMLInputElement>(null);
   const [saveSlots, setSaveSlots] = useState<ParsedSaveSlot[]>([]);
   const [selectedSaveSlot, setSelectedSaveSlot] = useState<string | null>(null);
-  const [saveFilterMode, setSaveFilterMode] = useState<SaveFilterMode>("all");
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<"categories" | "regions">("categories");
+  const [selectedClassesExpanded, setSelectedClassesExpanded] = useState(false);
+  const [openSidebarMenu, setOpenSidebarMenu] = useState<string | null>(null);
   const [saveFailures, setSaveFailures] = useState<{ slot: number; message: string }[]>([]);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isParsingSave, setIsParsingSave] = useState(false);
@@ -1629,20 +1640,56 @@ export default function MapViewer() {
     saveInputRef.current?.setAttribute("webkitdirectory", "");
   }, []);
 
+  useEffect(() => {
+    if (!openSidebarMenu) return;
+    const dismiss = (event: PointerEvent) => {
+      if (event.target instanceof Element && !event.target.closest(".sidebar-menu")) setOpenSidebarMenu(null);
+    };
+    const dismissOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpenSidebarMenu(null);
+    };
+    document.addEventListener("pointerdown", dismiss);
+    document.addEventListener("keydown", dismissOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", dismiss);
+      document.removeEventListener("keydown", dismissOnEscape);
+    };
+  }, [openSidebarMenu]);
+
+  const getMapFrame = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return null;
+    const reserved = !filterCollapsed && viewport.clientWidth > 620
+      ? (filterPanelRef.current?.offsetWidth ?? 350) + 16 : 0;
+    const width = viewport.clientWidth - reserved;
+    const height = viewport.clientHeight;
+    const scale = Math.min(width / MAP_WIDTH, height / MAP_HEIGHT) *
+      (reserved > 0 ? EXPANDED_SIDEBAR_MAP_SCALE_FACTOR : 1);
+    const mapWidth = MAP_WIDTH * scale;
+    const offset = reserved > 0 ? EXPANDED_SIDEBAR_MAP_OFFSET_X : 0;
+    // Preserve the current default position, including its right-edge adjustment.
+    const restingX = Math.min((viewport.clientWidth - mapWidth + reserved) / 2 + offset,
+      viewport.clientWidth - mapWidth + offset);
+    const centerX = restingX + mapWidth / 2;
+    return { width, height, scale, centerX, centerY: height / 2,
+      left: centerX - width / 2, right: centerX + width / 2 };
+  }, [filterCollapsed]);
+
   const constrainTransform = useCallback((next: ViewTransform) => {
     const viewport = viewportRef.current;
-    if (!viewport) return next;
+    const frame = getMapFrame();
+    if (!viewport || !frame) return next;
 
     const scaledWidth = MAP_WIDTH * next.scale;
     const scaledHeight = MAP_HEIGHT * next.scale;
     const horizontalRestingX =
-      scaledWidth <= viewport.clientWidth
-        ? (viewport.clientWidth - scaledWidth) / 2
-        : 0;
+      scaledWidth <= frame.width
+        ? frame.centerX - scaledWidth / 2
+        : frame.left;
     const horizontalMinX =
-      scaledWidth <= viewport.clientWidth
+      scaledWidth <= frame.width
         ? horizontalRestingX - MAP_EDGE_DRAG_ALLOWANCE
-        : viewport.clientWidth - scaledWidth - MAP_EDGE_DRAG_ALLOWANCE;
+        : frame.right - scaledWidth - MAP_EDGE_DRAG_ALLOWANCE;
     const horizontalMaxX = horizontalRestingX + MAP_DRAG_RIGHT_ALLOWANCE;
     const x = Math.min(horizontalMaxX, Math.max(horizontalMinX, next.x));
     const verticalRestingY =
@@ -1657,7 +1704,7 @@ export default function MapViewer() {
     const y = Math.min(verticalMaxY, Math.max(verticalMinY, next.y));
 
     return { ...next, x, y };
-  }, []);
+  }, [getMapFrame]);
 
   const selectedSaveDetail = useMemo(
     () => saveSlots.find((slot) => slot.slotId === selectedSaveSlot)?.detail ?? null,
@@ -1668,11 +1715,12 @@ export default function MapViewer() {
     setIsParsingSave(true);
     try {
       const result = await parseSaveDirectory(files);
+      setShowCompleted(false);
       setSaveSlots(result.slots);
       setSaveFailures(result.failures);
       setSaveError(result.error ?? null);
       setSelectedSaveSlot(result.slots[0]?.slotId ?? null);
-      setSaveFilterMode("all");
+      setOpenSidebarMenu(null);
     } finally {
       setIsParsingSave(false);
     }
@@ -1759,23 +1807,17 @@ export default function MapViewer() {
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    const scale = Math.min(
-      viewport.clientWidth / MAP_WIDTH,
-      viewport.clientHeight / MAP_HEIGHT,
-    );
-    const filterPanelWidth =
-      viewport.clientWidth > 620 ? (filterPanelRef.current?.offsetWidth ?? 0) : 0;
-    const scaledMapWidth = MAP_WIDTH * scale;
-    const centeredBesideFilterX =
-      (viewport.clientWidth - scaledMapWidth + filterPanelWidth) / 2;
-    const rightEdgeSafeX = viewport.clientWidth - scaledMapWidth;
-    minimumScaleRef.current = scale * MIN_SCALE_FACTOR;
+    const frame = getMapFrame();
+    if (!frame) return;
+    minimumScaleRef.current = frame.scale * MIN_SCALE_FACTOR;
     updateTransform({
-      x: Math.min(centeredBesideFilterX, rightEdgeSafeX),
-      y: (viewport.clientHeight - MAP_HEIGHT * scale) / 2,
-      scale,
+      x: frame.centerX - MAP_WIDTH * frame.scale / 2,
+      y: frame.centerY - MAP_HEIGHT * frame.scale / 2,
+      scale: frame.scale,
     });
-  }, [updateTransform]);
+  }, [getMapFrame, updateTransform]);
+
+  const previousMapFrameRef = useRef<ReturnType<typeof getMapFrame>>(null);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -1784,13 +1826,32 @@ export default function MapViewer() {
     const syncViewport = () => {
       setViewportWidth(viewport.clientWidth);
       setViewportHeight(viewport.clientHeight);
-      fitMap();
+      const frame = getMapFrame();
+      if (!frame) return;
+      const previous = previousMapFrameRef.current;
+      const current = transformRef.current;
+      previousMapFrameRef.current = frame;
+      const wasDefault = previous &&
+        Math.abs(current.scale - previous.scale) < 0.0001 &&
+        Math.abs(current.x - (previous.centerX - MAP_WIDTH * previous.scale / 2)) < 1 &&
+        Math.abs(current.y - (previous.centerY - MAP_HEIGHT * previous.scale / 2)) < 1;
+      if (!previous || wasDefault) {
+        fitMap();
+        return;
+      }
+      minimumScaleRef.current = frame.scale * MIN_SCALE_FACTOR;
+      const scale = Math.max(current.scale, minimumScaleRef.current);
+      updateTransform({
+        scale,
+        x: frame.centerX - ((previous.centerX - current.x) / current.scale) * scale,
+        y: frame.centerY - ((previous.centerY - current.y) / current.scale) * scale,
+      });
     };
     syncViewport();
     const observer = new ResizeObserver(syncViewport);
     observer.observe(viewport);
     return () => observer.disconnect();
-  }, [fitMap]);
+  }, [fitMap, getMapFrame, updateTransform]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -1932,6 +1993,20 @@ export default function MapViewer() {
   };
 
   const closeSelectedMarker = () => {
+    if (focusNavigationTimerRef.current !== null) {
+      window.clearTimeout(focusNavigationTimerRef.current);
+      focusNavigationTimerRef.current = null;
+    }
+    if (popupVisibilityFrameRef.current !== null) {
+      window.cancelAnimationFrame(popupVisibilityFrameRef.current);
+      popupVisibilityFrameRef.current = null;
+    }
+    if (popupVisibilityReleaseTimerRef.current !== null) {
+      window.clearTimeout(popupVisibilityReleaseTimerRef.current);
+      popupVisibilityReleaseTimerRef.current = null;
+    }
+    allowPopupVisibilityCorrectionRef.current = false;
+    setSmoothFocusMoving(false);
     setSelectedMarker(null);
     setGlowFocusMarkerId(null);
     setGlowFocusRegionName(null);
@@ -1984,6 +2059,21 @@ export default function MapViewer() {
       scale: nextScale,
       x: pointerX - mapX * nextScale,
       y: pointerY - mapY * nextScale,
+    });
+  };
+
+  const zoomToScale = (scale: number) => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const current = transformRef.current;
+    const nextScale = Math.min(MAX_SCALE, Math.max(minimumScaleRef.current, scale));
+    const frame = getMapFrame();
+    if (!frame) return;
+    const { centerX, centerY } = frame;
+    updateTransform({
+      scale: nextScale,
+      x: centerX - ((centerX - current.x) / current.scale) * nextScale,
+      y: centerY - ((centerY - current.y) / current.scale) * nextScale,
     });
   };
 
@@ -2095,24 +2185,6 @@ export default function MapViewer() {
           .includes(normalizedFocusSearch),
       )
     : [];
-  const isSaveFilterFocus = Boolean(
-    selectedSaveDetail && saveFilterMode !== "all",
-  );
-  const selectedSaveFilterMatches =
-    selectedMarker && selectedSaveDetail && saveFilterMode !== "all"
-      ? getMarkerSaveMatches(selectedMarker, selectedSaveDetail, saveFilterMode)
-      : [];
-  const saveFilterFocusLabel = isSaveFilterFocus
-    ? `${saveFilterMode === "collected" ? "已完成" : "未完成"}${
-        normalizedFocusSearch
-          ? ` + “${searchQuery.trim()}”`
-          : activeCategoryKeys.length === 1
-            ? ` + ${activeCategoryKeys[0].split("\u0000")[1]}`
-            : activeCategoryKeys.length > 1
-              ? ` + ${activeCategoryKeys.length}类图标`
-              : ""
-      }`
-    : "";
   const activeCategoryPopupItemNames = new Set(
     activeCategoryEntries.map((entry) => normalizeItemName(entry.name)),
   );
@@ -2120,11 +2192,6 @@ export default function MapViewer() {
     [...activeSearchEntries.map((entry) => entry.name), ...activeSearchPopupItemNames].map(
       (name) => normalizeItemName(name),
     ),
-  );
-  const activeSavePopupItemNames = new Set(
-    selectedSaveFilterMatches
-      .flatMap((mapping) => [mapping.groupName, mapping.displayName])
-      .map((name) => normalizeItemName(name)),
   );
   const isPopupLinkFocus =
     Boolean(popupLinkFocus) &&
@@ -2137,10 +2204,6 @@ export default function MapViewer() {
       ...activeCategoryEntries.map((entry) => entry.name),
       ...activeSearchEntries.map((entry) => entry.name),
       ...activeSearchPopupItemNames,
-      ...selectedSaveFilterMatches.flatMap((mapping) => [
-        mapping.groupName,
-        mapping.displayName,
-      ]),
       ...(isPopupLinkFocus && popupLinkFocus ? [popupLinkFocus.itemName] : []),
     ].map((name) => normalizeItemName(name)),
   );
@@ -2155,20 +2218,16 @@ export default function MapViewer() {
       (activeMarkerCategoryKeys.length === 0 ||
         normalizedNames.some((name) => activeCategoryPopupItemNames.has(name))) &&
       (!normalizedFocusSearch ||
-        normalizedNames.some((name) => activeSearchPopupNames.has(name))) &&
-      (!isSaveFilterFocus ||
-        normalizedNames.some((name) => activeSavePopupItemNames.has(name)))
+        normalizedNames.some((name) => activeSearchPopupNames.has(name)))
     );
   };
   const isMaskFragmentFocus =
     activeRegionNames.size > 0 ||
     activeMarkerCategoryKeys.length > 0 ||
-    Boolean(normalizedFocusSearch) ||
-    isSaveFilterFocus;
+    Boolean(normalizedFocusSearch);
   const isSingleCategoryFocus =
     activeMarkerCategoryKeys.length > 0 ||
-    Boolean(normalizedFocusSearch) ||
-    isSaveFilterFocus;
+    Boolean(normalizedFocusSearch);
   const selectedMarkerDirectlyMatchesFilter = selectedMarker
     ? [...activeCategoryEntries, ...activeSearchEntries].some(
         (entry) =>
@@ -2193,8 +2252,7 @@ export default function MapViewer() {
       ((activeMarkerCategoryKeys.length > 0 &&
         !selectedMarkerDirectlyMatchesFilter) ||
         (Boolean(normalizedFocusSearch) &&
-          selectedMarkerContainsFilteredPopupItem) ||
-        (isSaveFilterFocus && selectedMarkerContainsFilteredPopupItem)));
+          selectedMarkerContainsFilteredPopupItem)));
   const selectedMerchantSectionsBase = selectedMarker
     ? INFORMATION_ONLY_MARKER_IDS.has(selectedMarker.id)
       ? []
@@ -2242,14 +2300,7 @@ export default function MapViewer() {
   const selectedHighlightLeadingIcon = selectedMarker
     ? HIGHLIGHT_LEADING_ICONS[selectedMarker.name]
     : undefined;
-  const selectedSaveFilteredEmbeddedIcon =
-    selectedMarker && isSaveFilterFocus
-      ? getPopupEmbeddedItemIcons(selectedMarker.name).find((icon) =>
-          popupItemMatchesActiveFilters(icon.alt),
-        )
-      : undefined;
-  const displayedHighlightLeadingIcon =
-    selectedSaveFilteredEmbeddedIcon ?? selectedHighlightLeadingIcon;
+  const displayedHighlightLeadingIcon = selectedHighlightLeadingIcon;
   const selectedClassifications = selectedMarker
     ? classification.entries.filter(
         (entry) =>
@@ -2333,7 +2384,14 @@ export default function MapViewer() {
           return priority(left.primary) - priority(right.primary);
         })
         .map((entry) =>
-          entry.primary === "Boss" && entry.secondary
+          entry.secondary &&
+          (entry.primary === "Boss" || entry.primary === "NPC" ||
+            new Set(
+              selectedClassifications
+                .filter((classification) => classification.primary === entry.primary)
+                .map((classification) => classification.secondary)
+                .filter(Boolean),
+            ).size > 1)
             ? entry.secondary
             : entry.primary,
         )
@@ -2837,8 +2895,8 @@ export default function MapViewer() {
   }, [categoryFilter, classification, markers, normalizedSearch]);
 
   const visibleMarkers = useMemo(
-    () => filterMarkersBySaveState(categoryVisibleMarkers, selectedSaveDetail, saveFilterMode),
-    [categoryVisibleMarkers, saveFilterMode, selectedSaveDetail],
+    () => filterMarkersByCompletionVisibility(categoryVisibleMarkers, selectedSaveDetail, showCompleted),
+    [categoryVisibleMarkers, selectedSaveDetail, showCompleted],
   );
 
   const renderedMarkers = useMemo(() => {
@@ -2909,6 +2967,8 @@ export default function MapViewer() {
       const viewport = viewportRef.current;
       if (!viewport || targetMarkers.length === 0) return;
 
+      const frame = getMapFrame();
+      if (!frame) return;
       const padding = 110;
       const minX = Math.min(...targetMarkers.map((marker) => (marker.x / 100) * MAP_WIDTH));
       const maxX = Math.max(...targetMarkers.map((marker) => (marker.x / 100) * MAP_WIDTH));
@@ -2922,7 +2982,7 @@ export default function MapViewer() {
         Math.max(
           minimumScaleRef.current,
           Math.min(
-            (viewport.clientWidth - padding * 2) / contentWidth,
+            (frame.width - padding * 2) / contentWidth,
             (viewport.clientHeight - padding * 2) / contentHeight,
           ),
         ),
@@ -2935,15 +2995,15 @@ export default function MapViewer() {
       setSmoothFocusMoving(true);
       updateTransform({
         scale: nextScale,
-        x: viewport.clientWidth / 2 - centerX * nextScale,
-        y: viewport.clientHeight / 2 - centerY * nextScale,
+        x: frame.centerX - centerX * nextScale,
+        y: frame.centerY - centerY * nextScale,
       });
       focusNavigationTimerRef.current = window.setTimeout(() => {
         setSmoothFocusMoving(false);
         focusNavigationTimerRef.current = null;
       }, FOCUS_TRANSITION_MS);
     },
-    [updateTransform],
+    [getMapFrame, updateTransform],
   );
 
   const openMarker = useCallback((marker: Marker) => {
@@ -2967,12 +3027,11 @@ export default function MapViewer() {
     const popupHeight = Math.min(400, viewport.clientHeight - 32);
     const markerScreenHalf = 24 * nextScale;
 
-    // 水平：始终以整个屏幕为范围居中。弹窗打开后如果实际被筛选栏遮挡，
-    // ensurePopupVisible 会再按实际边界轻微移动地图。
-    const availableCenterX = viewport.clientWidth / 2;
+    const frame = getMapFrame();
+    if (!frame) return { x: 0, y: 0 };
     const targetScreenX = Math.min(
-      Math.max(availableCenterX, margin + markerScreenHalf),
-      viewport.clientWidth - margin - markerScreenHalf,
+      Math.max(frame.centerX, frame.left + margin + markerScreenHalf),
+      frame.right - margin - markerScreenHalf,
     );
 
     // 垂直：优先让弹窗（默认显示在图标上方）完整可见
@@ -2991,7 +3050,7 @@ export default function MapViewer() {
       x: targetScreenX - (percentX / 100) * MAP_WIDTH * nextScale,
       y: targetScreenY - (percentY / 100) * MAP_HEIGHT * nextScale,
     };
-  }, []);
+  }, [getMapFrame]);
 
   const focusMaskFragment = useCallback(
     (nextIndex: number, forcePopup = false) => {
@@ -3077,9 +3136,33 @@ export default function MapViewer() {
     return () => observer.disconnect();
   }, [selectedMarker, schedulePopupVisibilityCheck]);
 
+  const lastAutoFocusKeyRef = useRef<string | null>(null);
+  const previousAutoFocusInputsRef = useRef<string | null>(null);
+  const autoFocusKey = JSON.stringify([
+    categoryFilter,
+    normalizedFocusSearch,
+    selectedSaveSlot,
+    showCompleted,
+    focusNavigationItems.map((marker) => marker.id),
+  ]);
+
   useEffect(() => {
-    if (!isMaskFragmentFocus || focusNavigationItems.length === 0) return;
+    const inputsChanged = previousAutoFocusInputsRef.current !== autoFocusKey;
+    previousAutoFocusInputsRef.current = autoFocusKey;
+    if (inputsChanged && focusNavigationTimerRef.current !== null) {
+      window.clearTimeout(focusNavigationTimerRef.current);
+      focusNavigationTimerRef.current = null;
+      setSmoothFocusMoving(false);
+    }
+    if (!isMaskFragmentFocus || focusNavigationItems.length === 0) {
+      lastAutoFocusKeyRef.current = null;
+      return;
+    }
+    // Layout changes update navigation callbacks, but are not a new filter.
+    if (lastAutoFocusKeyRef.current === autoFocusKey) return;
+    setSmoothFocusMoving(false);
     const frame = window.requestAnimationFrame(() => {
+      lastAutoFocusKeyRef.current = autoFocusKey;
       setMaskFragmentCursor(0);
       setSelectedMarker(null);
       if (visibleMarkers.length === 1 || focusNavigationItems.length === 1) {
@@ -3090,6 +3173,7 @@ export default function MapViewer() {
     });
     return () => window.cancelAnimationFrame(frame);
   }, [
+    autoFocusKey,
     isMaskFragmentFocus,
     normalizedFocusSearch,
     visibleMarkers.length,
@@ -3111,6 +3195,10 @@ export default function MapViewer() {
 
   const toggleSecondaryCategory = (primary: string, secondary: string) => {
     const selectionKey = `${primary}\u0000${secondary}`;
+    if (!categoryFilter?.secondaries?.length ||
+      (categoryFilter.secondaries.length === 1 && categoryFilter.secondaries[0] === selectionKey)) {
+      setSelectedClassesExpanded(false);
+    }
     setCategoryFilter((current) => {
       const selected = new Set(current?.secondaries ?? []);
       if (selected.has(selectionKey)) {
@@ -3126,10 +3214,15 @@ export default function MapViewer() {
 
   const resetFilters = () => {
     setIsResettingFilters(true);
+    setSelectedClassesExpanded(false);
+    setShowCompleted(false);
     setCategoryFilter(null);
     setSearchInput("");
     setSearchQuery("");
-    setSaveFilterMode("all");
+    setOpenSidebarMenu(null);
+    setMaskFragmentCursor(0);
+    closeSelectedMarker();
+    fitMap();
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setIsResettingFilters(false));
     });
@@ -3138,8 +3231,7 @@ export default function MapViewer() {
   const hasActiveFilters = Boolean(
     categoryFilter ||
     searchInput.trim() ||
-    searchQuery.trim() ||
-    saveFilterMode !== "all",
+    searchQuery.trim(),
   );
 
   const openRegionLabel = (region: RegionInfo, layout: RegionLabelLayout) => {
@@ -3279,6 +3371,22 @@ export default function MapViewer() {
     });
   };
 
+  const selectedClassItems = activeCategoryKeys.map((key) => {
+    const [primary, name] = key.split("\u0000");
+    const secondary = categoryGroups.find((group) => group.primary === primary)?.secondary.find((item) => item.name === name);
+    return { key, primary, name, iconFile: secondary?.iconFile };
+  });
+  const uniqueProgress = useMemo(() => {
+    const mappedProgress = selectedSaveDetail ? getSaveMappingProgress(selectedSaveDetail) : [];
+    return [...new Map(mappedProgress.map((item) => [item.parserId, item])).values()];
+  }, [selectedSaveDetail]);
+  const mapCompletion = uniqueProgress.length
+    ? Math.round(100 * uniqueProgress.filter((item) => item.state === "collected").length / uniqueProgress.length)
+    : 0;
+  const popupFilterIndex = selectedMarker
+    ? focusNavigationItems.findIndex((marker) => marker.id === selectedMarker.id)
+    : -1;
+
   return (
     <main
       ref={viewportRef}
@@ -3320,24 +3428,17 @@ export default function MapViewer() {
           <img src="/assets/hollow-knight-logo.png" alt="" aria-hidden="true" />
           <div className="map-filter-brand-copy">
             <h1>空洞骑士·地图攻略</h1>
-            <div className="map-filter-status-row">
-              <p>当前显示图标 {visibleMarkers.length}/{markers.length}</p>
-              <button
-                type="button"
-                className="map-filter-brand-reset"
-                disabled={!hasActiveFilters}
-                onClick={resetFilters}
-              >
-                重置
-              </button>
-            </div>
           </div>
         </div>
         <div className="map-filter-search">
           <input
             type="search"
             value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
+            onChange={(event) => {
+              const value = event.target.value;
+              setSearchInput(value);
+              if (!value.trim()) setSearchQuery("");
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 setSearchQuery(searchInput);
@@ -3355,39 +3456,24 @@ export default function MapViewer() {
             搜索
           </button>
         </div>
+        {searchInput.trim() && normalizedSearch && focusNavigationItems.length === 0 && (
+          <p className="map-filter-search-empty">没有找到搜索内容</p>
+        )}
         <div className="map-filter-save-panel" aria-busy={isParsingSave} aria-live="polite">
-          <div className={`map-filter-save-toolbar${saveSlots.length === 0 ? " has-save-hint" : ""}`}>
-            <button
-              type="button"
-              className="map-filter-save-upload"
-              disabled={isParsingSave}
-              aria-busy={isParsingSave}
-              onClick={() => saveInputRef.current?.click()}
-            >
-              {isParsingSave ? "解析中" : saveSlots.length > 0 ? "重新导入" : "导入存档"}
-            </button>
-            {saveSlots.length > 0 && (
-              <div className="map-filter-save-slots" role="group" aria-label="选择存档槽位">
-                {saveSlots.map((slot) => (
-                  <button
-                    type="button"
-                    key={slot.slotId}
-                    className={selectedSaveSlot === slot.slotId ? "is-active" : ""}
-                    aria-pressed={selectedSaveSlot === slot.slotId}
-                    onClick={() => setSelectedSaveSlot(slot.slotId)}
-                  >
-                    槽位 {slot.slotNumber}
-                  </button>
-                ))}
-              </div>
-            )}
-            {saveSlots.length === 0 && (
-              <span className="map-filter-save-hint">
-                <span>存档默认路径：</span>
-                <span>%USERPROFILE%\AppData\LocalLow\Team Cherry\Hollow Knight</span>
-                <span>上传整个 Hollow Knight 文件夹</span>
-              </span>
-            )}
+          <div className="sidebar-save-row">
+            {saveSlots.length === 0 ? <>
+              <span className="sidebar-save-hint">上传存档可将解析后的内容同步到地图中</span>
+              <button type="button" disabled={isParsingSave} title="选择 Hollow Knight 文件夹；默认路径：%USERPROFILE%\AppData\LocalLow\Team Cherry\Hollow Knight" onClick={() => saveInputRef.current?.click()}>{isParsingSave ? "解析中…" : "上传存档"}</button>
+            </> : <>
+              <details className="sidebar-menu" open={openSidebarMenu === "slots"} onToggle={(event) => { if (!event.currentTarget.open && openSidebarMenu === "slots") setOpenSidebarMenu(null); }}>
+                <summary onClick={(event) => { event.preventDefault(); setOpenSidebarMenu(openSidebarMenu === "slots" ? null : "slots"); }}>槽位{saveSlots.find((slot) => slot.slotId === selectedSaveSlot)?.slotNumber}<span className="sidebar-slot-arrow" aria-hidden="true">›</span></summary>
+                <div className="sidebar-menu-options">
+                  {saveSlots.map((slot) => <button type="button" key={slot.slotId} className={selectedSaveSlot === slot.slotId ? "is-active" : ""} onClick={() => { setSelectedSaveSlot(slot.slotId); setOpenSidebarMenu(null); closeSelectedMarker(); }}>槽位{slot.slotNumber}</button>)}
+                  <button type="button" disabled={isParsingSave} onClick={() => { setOpenSidebarMenu(null); saveInputRef.current?.click(); }}>重新上传</button>
+                </div>
+              </details>
+              <span className="sidebar-save-completion" title={`已完成 ${uniqueProgress.filter((item) => item.state === "collected").length}/${uniqueProgress.length} 个可解析项目；未知状态不计为已完成`}>地图完成度：{mapCompletion}%</span>
+            </>}
           </div>
           {saveError && <p className="map-filter-save-error">{saveError}</p>}
           {saveFailures.length > 0 && (
@@ -3396,74 +3482,36 @@ export default function MapViewer() {
             </p>
           )}
         </div>
+        <nav className="sidebar-view-tabs" aria-label="筛选视图">
+          <button type="button" aria-pressed={sidebarTab === "categories"} onClick={() => { setSidebarTab("categories"); setOpenSidebarMenu(null); }}>
+            <img src="/filter-icons/sidebar-categories.webp" alt="" aria-hidden="true" draggable={false} />
+            类目
+          </button>
+          <button type="button" aria-pressed={sidebarTab === "regions"} onClick={() => { setSidebarTab("regions"); setOpenSidebarMenu(null); }}>
+            <img src="/filter-icons/sidebar-regions.png" alt="" aria-hidden="true" draggable={false} />
+            地区
+          </button>
+        </nav>
         {saveSlots.length > 0 && (
-          <div className="map-filter-completion-tabs" aria-label="完成状态筛选">
-            {(["all", "collected", "missing"] as const).map((mode) => (
-                <button
-                  type="button"
-                  key={mode}
-                  className={saveFilterMode === mode ? "is-active" : ""}
-                  aria-pressed={saveFilterMode === mode}
-                  onClick={() => {
-                    if (mode === "all") resetFilters();
-                    setSaveFilterMode(mode);
-                  }}
-                >
-                  {mode === "all" ? "全部" : mode === "collected" ? "已完成" : "未完成"}
-                </button>
-            ))}
+          <div className="sidebar-completed-toggle-row">
+            <span id="show-completed-label">显示已完成</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={showCompleted}
+              aria-labelledby="show-completed-label"
+              className="sidebar-completed-switch"
+              onClick={() => {
+                setShowCompleted((current) => !current);
+                setMaskFragmentCursor(0);
+              }}
+            ><span aria-hidden="true" /></button>
           </div>
         )}
-        {normalizedSearch && focusNavigationItems.length === 0 && (
-          <p className="map-filter-search-empty">没有找到搜索内容</p>
-        )}
-        {isMaskFragmentFocus && focusNavigationItems.length > 0 && (
-          <div className="map-filter-focus-nav" aria-label="筛选结果定位">
-            <span>
-              {isSaveFilterFocus
-                ? saveFilterFocusLabel
-                : normalizedFocusSearch
-                ? activeCategoryKeys.length > 0
-                  ? `筛选 + “${searchQuery.trim()}”`
-                  : `搜索：“${searchQuery.trim()}”`
-                : activeCategoryKeys.length === 1
-                  ? activeCategoryKeys[0].split("\u0000")[1]
-                  : `${activeCategoryKeys.length}类图标`}
-            </span>
-            <div>
-              <button
-                type="button"
-                className="map-filter-focus-arrow"
-                aria-label="上一个筛选结果"
-                onClick={() => focusMaskFragment(maskFragmentCursor - 1)}
-              >
-                ‹
-              </button>
-              <strong>{maskFragmentCursor + 1}/{focusNavigationItems.length}</strong>
-              <button
-                type="button"
-                className="map-filter-focus-arrow"
-                aria-label="下一个筛选结果"
-                onClick={() => focusMaskFragment(maskFragmentCursor + 1)}
-              >
-                ›
-              </button>
-              <button
-                type="button"
-                className="map-filter-focus-locate map-filter-text-action"
-                onClick={() => focusMaskFragment(maskFragmentCursor)}
-              >
-                定位
-              </button>
-            </div>
-          </div>
-        )}
-        <div className="map-filter-categories">
-          {categoryGroups.map((group) => (
+        <div className={`map-filter-categories${sidebarTab === "regions" ? " is-region-view" : ""}`}>
+          {categoryGroups.filter((group) => sidebarTab === "regions" ? group.primary === "区域" : group.primary !== "区域").map((group) => (
             <section className="map-filter-category-page" key={group.primary}>
-              <header>
-                <h2>{group.primary}</h2>
-              </header>
+              {group.primary !== "区域" && <header><h2>{group.primary}</h2></header>}
               <div className="map-filter-secondary-grid">
                 {group.secondary.map((secondary) => (
                   <button
@@ -3515,10 +3563,35 @@ export default function MapViewer() {
             </section>
           ))}
         </div>
-        {categoryFilter && !normalizedSearch && visibleMarkers.length === 0 && (
-          <p className="map-filter-empty">没有找到符合条件的图标</p>
-        )}
+        <footer className="sidebar-footer">
+          <button type="button" className="sidebar-selection-toggle" disabled={selectedClassItems.length === 0} aria-expanded={selectedClassItems.length > 0 && selectedClassesExpanded} onClick={() => setSelectedClassesExpanded((current) => !current)}>
+            <span>当前选中{selectedClassItems.length}类{visibleMarkers.length === 0 ? "，没有找到符合条件的图标" : isMaskFragmentFocus ? `，显示${visibleMarkers.length}/${markers.length}个图标` : ""}</span>
+            {selectedClassItems.length > 0 && <span className="sidebar-selection-arrow" aria-hidden="true" />}
+          </button>
+          {selectedClassesExpanded && selectedClassItems.length > 0 && <div className="sidebar-selected-classes" aria-label="已选择的类目与地区">
+            {selectedClassItems.map((item) => (
+              <SelectedClassChip
+                key={item.key}
+                name={item.name}
+                iconFile={item.iconFile}
+                onRemove={() => toggleSecondaryCategory(item.primary, item.name)}
+              />
+            ))}
+          </div>}
+          <div className="sidebar-bottom-actions">
+            <button type="button" className="sidebar-reset" aria-label="重置地图和筛选" title="重置地图和筛选" onClick={resetFilters}>
+              <img src="/filter-icons/reset-arrows.png" alt="" aria-hidden="true" draggable={false} />
+            </button>
+            <button type="button" className="sidebar-locate" disabled={focusNavigationItems.length === 0} onClick={() => focusMaskFragment(maskFragmentCursor)}>定位</button>
+          </div>
+          <span className="sr-only">{hasActiveFilters ? "筛选已启用" : "显示全部地图图标"}</span>
+        </footer>
       </aside>
+      <div className="map-zoom-control" onPointerDown={(event) => event.stopPropagation()} onWheel={(event) => event.stopPropagation()}>
+        <button type="button" aria-label="放大地图" onClick={() => zoomToScale(transform.scale * 1.2)}><span className="map-zoom-arrow map-zoom-arrow-up" aria-hidden="true" /></button>
+        <input type="range" aria-label="地图缩放" min="0" max="100" step="0.1" value={Math.max(0, Math.min(100, 100 * Math.log(transform.scale / minimumMapScale) / Math.log(MAX_SCALE / minimumMapScale)))} onChange={(event) => zoomToScale(minimumMapScale * Math.pow(MAX_SCALE / minimumMapScale, Number(event.target.value) / 100))} />
+        <button type="button" aria-label="缩小地图" onClick={() => zoomToScale(transform.scale / 1.2)}><span className="map-zoom-arrow map-zoom-arrow-down" aria-hidden="true" /></button>
+      </div>
       <div
         className={`map-canvas${smoothFocusMoving ? " is-smooth-focus-moving" : ""}`}
         style={
@@ -3911,8 +3984,7 @@ export default function MapViewer() {
                     {displayedHighlightLeadingIcon &&
                       isPopupItemCollected([displayedHighlightLeadingIcon.alt]) &&
                       popupItemCompletedStamp}
-                    {HIGHLIGHT_ITEM_NOTES[selectedMarker.name] &&
-                      !selectedSaveFilteredEmbeddedIcon && (
+                    {HIGHLIGHT_ITEM_NOTES[selectedMarker.name] && (
                         <div
                           className={`marker-highlight-item-note${isPopupItemCollected([HIGHLIGHT_ITEM_NOTES[selectedMarker.name].alt]) ? " has-completed-stamp" : ""}`}
                         >
@@ -4206,6 +4278,13 @@ export default function MapViewer() {
               </section>
             )}
           </div>
+          {isMaskFragmentFocus && popupFilterIndex >= 0 && (
+            <nav className="popup-peer-navigation" aria-label="筛选结果导航">
+              <button type="button" disabled={popupFilterIndex < 0 || focusNavigationItems.length < 2} onClick={() => focusMaskFragment(popupFilterIndex - 1, true)}><span className="popup-peer-arrow" aria-hidden="true">‹</span><span>上一个</span></button>
+              <span>{popupFilterIndex >= 0 ? `${popupFilterIndex + 1} / ${focusNavigationItems.length}` : "—"}</span>
+              <button type="button" disabled={popupFilterIndex < 0 || focusNavigationItems.length < 2} onClick={() => focusMaskFragment(popupFilterIndex + 1, true)}><span>下一个</span><span className="popup-peer-arrow" aria-hidden="true">›</span></button>
+            </nav>
+          )}
         </section>
       )}
     </main>

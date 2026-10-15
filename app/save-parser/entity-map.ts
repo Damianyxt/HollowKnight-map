@@ -162,6 +162,15 @@ export function filterMarkersBySaveState<T extends MarkerLike>(
   );
 }
 
+export function filterMarkersByCompletionVisibility<T extends MarkerLike>(
+  markers: T[],
+  detail: Record<string, unknown> | null,
+  showCompleted: boolean,
+) {
+  if (!detail || showCompleted) return markers;
+  return markers.filter((marker) => getMarkerSaveState(marker, detail) !== "collected");
+}
+
 export function getSaveGroupProgress(detail: Record<string, unknown> | null) {
   const progress: Record<string, { collected: number; total: number }> = {};
 

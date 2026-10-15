@@ -5,6 +5,7 @@ import { parseSaveDirectory } from "../app/save-parser/index.ts";
 import type { SaveFileLike } from "../app/save-parser/types.ts";
 import {
   filterMarkersBySaveState,
+  filterMarkersByCompletionVisibility,
   getCharmDisplayProgress,
   getMarkerSaveMatches,
   getMarkerSaveState,
@@ -407,4 +408,29 @@ test("ships the complete confirmed parser-mapid mapping", () => {
       ].includes(mapping.module),
     ),
   );
+});
+
+test("completion visibility hides only confirmed completed markers and retains missing or unknown evidence", () => {
+  const grub = { id: parserMap.find((item) => item.parserId === "grub-028")!.markerId };
+  const compound = { id: "marker_1785402327761_huubjv" };
+  const unknown = { id: "unmapped-review-fixture" };
+  const markers = [grub, compound, unknown];
+  const detail = {
+    collectionProgress: {
+      grubs: { items: [{ id: "grub-028", status: "owned" }] },
+      charms: { items: [
+        { id: "charm-023", status: "owned" },
+        { id: "charm-024", status: "missing" },
+        { id: "charm-025", status: "owned" },
+      ] },
+    },
+  };
+  assert.deepEqual(filterMarkersByCompletionVisibility(markers, detail, false), [compound, unknown]);
+  assert.equal(filterMarkersByCompletionVisibility(markers, detail, true), markers);
+  assert.equal(filterMarkersByCompletionVisibility(markers, null, false), markers);
+  assert.deepEqual(filterMarkersByCompletionVisibility(markers, {}, false), markers);
+  detail.collectionProgress.charms.items[1].status = "unknown";
+  assert.deepEqual(filterMarkersByCompletionVisibility(markers, detail, false), [compound, unknown]);
+  detail.collectionProgress.charms.items[1].status = "owned";
+  assert.deepEqual(filterMarkersByCompletionVisibility(markers, detail, false), [unknown]);
 });
