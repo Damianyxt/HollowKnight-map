@@ -1,53 +1,60 @@
 {
   "entries": [
     {
+      "iconId": "custom_mender_bug",
+      "name": "维修虫(Mender Bug)",
+      "location": "地图",
+      "primary": "NPC",
+      "secondary": "对话型NPC"
+    },
+    {
       "iconId": "5Zyw5qCHK25wYy_pmL_luIPvvIhDbG90aO-8iS53ZWJw",
       "name": "阿布(Cloth)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_lt7TkuJzvvIhCYXJkb29u77yJLndlYnA",
       "name": "巴东(Bardoon)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_nmb3oibLlpKvkurrvvIhXaGl0ZSBMYWR577yJLndlYnA",
       "name": "白色夫人(White Lady)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_luIPolb7loZTvvIhCcmV0dGHvvIkud2VicA",
       "name": "布蕾塔(Bretta)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "奖励型NPC"
     },
     {
       "iconId": "icon_1785483728809_sl9hbu",
       "name": "布鲁姆-深巢",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "icon_1785403195308_f58xvu",
       "name": "苍白潜伏者(Pale Lurker)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "奖励型"
+      "secondary": "奖励型NPC"
     },
     {
       "iconId": "icon_1785401943917_10gapu",
       "name": "苍白之王(The Pale King)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "奖励型"
+      "secondary": "奖励型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_lv4_mgpTluIjlkInlkInvvIhDb25mZXNzb3IgSmlqae-8iS53ZWJw",
@@ -61,7 +68,7 @@
       "name": "虫爷爷(Grubfather)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "奖励型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_ov6rkuIfvvIhEaXZpbmXvvIkud2VicA",
@@ -72,17 +79,17 @@
     },
     {
       "iconId": "icon_1785469745958_xjg2yy",
-      "name": "第二次救左特",
+      "name": "伟大的左特(Zote the Mighty)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "icon_1785469745960_np2xoe",
-      "name": "第一次救左特",
+      "name": "伟大的左特(Zote the Mighty)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy9waW5fdHJhbV9sb2NhdGlvbiAjNjM4Mi5wbmc",
@@ -96,14 +103,14 @@
       "name": "钉子匠(Nailsmith)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_onILlt6LlpbPnjovnu7Tmlq_luJXvvIhIaXZlIFF1ZWVuIFZlc3Bh77yJLndlYnA",
       "name": "蜂巢女王维斯帕(Hive Queen Vespa)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_pkqLpk4HkuYvprYLlkInmganvvIhTdGVlbCBTb3VsIEppbm7vvIkud2VicA",
@@ -117,21 +124,21 @@
       "name": "骨钉大师奥罗(Nailmaster Oro)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "奖励型"
+      "secondary": "奖励型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_pqqjpkonlpKfluIjpqazmiZjvvIhOYWlsbWFzdGVyIE1hdG_vvIkud2VicA",
       "name": "骨钉大师马托(Nailmaster Mato)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "奖励型"
+      "secondary": "奖励型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_pqqjpkonlpKfluIjluK3lpaXvvIhOYWlsbWFzdGVyIFNoZW_vvIkud2VicA",
       "name": "骨钉大师席奥(Nailmaster Sheo)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "奖励型"
+      "secondary": "奖励型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_miqTnrKbniLHlpb3ogIXokKjpsoHlt7TvvIhDaGFybSBMb3ZlciBTYWx1YnJh77yJLnBuZw",
@@ -145,14 +152,14 @@
       "name": "灰色哀悼者(Grey Mourner)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_mlZnluIjojqvor7rokpnvvIhNb25vbW9uIHRoZSBUZWFjaGVy77yJLnBuZw",
       "name": "教师莫诺蒙(Monomon the Teacher)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_mn6_lsLzms5XvvIhDb3JuaWZlcu-8iS53ZWJw",
@@ -162,60 +169,81 @@
       "secondary": "地图"
     },
     {
+      "iconId": "5Zyw5qCHK25wYy_mn6_lsLzms5XvvIhDb3JuaWZlcu-8iS53ZWJw",
+      "name": "柯尼法(Cornifer)",
+      "location": "人物",
+      "primary": "NPC",
+      "secondary": "商人"
+    },
+    {
       "iconId": "5Zyw5qCHK25wYy_lpY7oi6XvvIhRdWlycmVs77yJMi53ZWJw",
       "name": "奎若(Quirrel)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_ok53oibLkuYvlrZDkuZTlsLzvvIhCbHVlIENoaWxkIEpvbmnvvIkud2VicA",
       "name": "蓝色之子乔尼(Blue Child Joni)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "奖励型"
+      "secondary": "奖励型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_njI7kurrvvIhUaGUgSHVudGVy77yJLndlYnA",
       "name": "猎人(The Hunter)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "popup:icons/地标+npc/鹿角虫车站图标.png",
       "name": "鹿角虫道图标",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
+    },
+    {
+      "iconId": "popup:icons/地标+npc/长椅图标.png",
+      "name": "长椅图标",
+      "location": "弹窗",
+      "primary": "收集物",
+      "secondary": "道具"
+    },
+    {
+      "iconId": "popup:icons/地标+npc/电车图标.png",
+      "name": "电车图标",
+      "location": "弹窗",
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_njpvkuL3ojo7vvIhNYXJpc3Nh77yJLndlYnA",
       "name": "玛丽莎(Marissa)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_nsbPmi4nvvIhNeWxh77yJLndlYnA",
       "name": "米拉(Myla)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_pnaLlhbfliLbkvZzluIjvvIhNYXNrIE1ha2Vy77yJLndlYnA",
       "name": "面具制作师(Mask Maker)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_lsLzlp4bvvIhOeW1t77yJLndlYnA",
       "name": "明子(Nymm)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "奖励型"
+      "secondary": "奖励型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_omJHoj4flhYjnlJ_vvIhNaXN0ZXIgTXVzaHJvb23vvIkud2VicA",
@@ -229,21 +257,21 @@
       "name": "叛徒之女(The Traitors’ Child)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_nkZ7nu7TlhYvvvIhSZXZla--8iS53ZWJw",
       "name": "瑞维克(Revek)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "popup:icons/地标+npc/生命血茧图标.png",
       "name": "生命血茧图标",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_po5_ohb_ogIXvvIhMZWcgRWF0ZXLvvIkud2VicA",
@@ -257,7 +285,7 @@
       "name": "守望者卢瑞恩(Lurien the Watcher)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_mlq_ojrHvvIhTbHnvvIkud2VicA",
@@ -271,7 +299,7 @@
       "name": "苔藓预言家(Moss Prophet)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_lm77lhYvvvIhUdWvvvIkud2VicA",
@@ -285,14 +313,14 @@
       "name": "维洛(Willoh)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "popup:icons/地标+npc/温泉图标.png",
       "name": "温泉图标",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_mlofnianmkJzlr7vogIXph4zlp4bvvIhSZWxpYyBTZWVrZXIgTGVtbe-8iS53ZWJw",
@@ -306,21 +334,21 @@
       "name": "蜗牛萨满(Snail Shaman)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "奖励型"
+      "secondary": "奖励型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_lkLjomavpmpDlo6vvvIhGbHVrZSBIZXJtaXTvvIkud2VicA",
       "name": "吸虫隐士(Fluke Hermit)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_lhYjnn6XvvIhTZWVy77yJLndlYnA",
       "name": "先知(Seer)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_lsI_mhJrkurrvvIhMaXR0bGUgRm9vbO-8iS53ZWJw",
@@ -334,14 +362,14 @@
       "name": "寻神者(Godseeker)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_ph47lhb3otavmi4nvvIhIZXJyYWggdGhlIEJlYXN077yJLnBuZw",
       "name": "野兽赫拉(Herrah the Beast)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA",
@@ -362,7 +390,7 @@
       "name": "永恒的艾米丽塔(Eternal Emilitia)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "5Zyw5qCHK25wYy_plb_mpIXlm77moIcucG5n",
@@ -376,7 +404,7 @@
       "name": "助产士(Midwife)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "5oqk56ymK-aKpOespuanveWbvuaghy_lt7TlvrflsJTkuYvlo7PvvIhCYWxkdXIgU2hlbGzvvIkucG5n",
@@ -661,7 +689,7 @@
     {
       "iconId": "5oqk56ymK-aKpOespuanveWbvuaghy_lkLjomavkuYvlt6LvvIhGbHVrZW5lc3TvvIkucG5n",
       "name": "吸虫之巢(Flukenest)",
-      "location": "地图",
+      "location": "弹窗",
       "primary": "技能",
       "secondary": "护符"
     },
@@ -731,7 +759,7 @@
     {
       "iconId": "5oqA6IO9L-WkjeS7h-S5i-mtgu-8iFZlbmdlZnVsIFNwaXJpdO-8iS5wbmc",
       "name": "复仇之魂(Vengeful Spirit)",
-      "location": "地图",
+      "location": "弹窗",
       "primary": "技能",
       "secondary": "法术"
     },
@@ -785,21 +813,21 @@
       "secondary": "位移能力"
     },
     {
-      "iconId": "popup:icons/剑技/冲刺劈砍（Dash Slash）.png",
+      "iconId": "popup:icons/剑技/冲刺劈砍.webp",
       "name": "冲刺劈砍(Dash Slash)",
       "location": "弹窗",
       "primary": "技能",
       "secondary": "骨钉技艺"
     },
     {
-      "iconId": "popup:icons/剑技/强力劈砍（Great Slash）.png",
+      "iconId": "popup:icons/剑技/强力劈砍.webp",
       "name": "强力劈砍(Great Slash)",
       "location": "弹窗",
       "primary": "技能",
       "secondary": "骨钉技艺"
     },
     {
-      "iconId": "popup:icons/剑技/旋风劈砍（Cyclone Slash）.png",
+      "iconId": "popup:icons/剑技/旋风劈砍.webp",
       "name": "旋风劈砍(Cyclone Slash)",
       "location": "弹窗",
       "primary": "技能",
@@ -809,8 +837,8 @@
       "iconId": "popup:icons/商店商品/贝壳标记.webp",
       "name": "贝壳标记",
       "location": "弹窗",
-      "primary": "",
-      "secondary": "商店物品"
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/商店商品/成就-升天.png",
@@ -879,43 +907,43 @@
       "iconId": "popup:icons/商店商品/SHINING标记.webp",
       "name": "闪亮标记",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/商店商品/商贩图针.png",
       "name": "商人图标",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/商店商品/圣甲虫标记.webp",
       "name": "圣甲虫标记",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/商店商品/TOKEN标记.webp",
       "name": "铜币标记",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/商店商品/羽毛笔.webp",
       "name": "羽毛笔",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/商店商品/战士之墓图针.png",
       "name": "战士陵墓图标",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "5pS26ZuG54mpL2ludl9Mb3ZlX0tleSAjNTQwNy5wbmc",
@@ -935,8 +963,8 @@
       "iconId": "popup:icons/收集物/梦之树图标.png",
       "name": "低语之根图标",
       "location": "弹窗",
-      "primary": "",
-      "secondary": ""
+      "primary": "收集物",
+      "secondary": "道具"
     },
     {
       "iconId": "popup:icons/收集物/典雅的钥匙.webp",
@@ -974,6 +1002,13 @@
       "secondary": "道具"
     },
     {
+      "iconId": "popup:icons/收集物/收藏家的地图.webp",
+      "name": "收藏家的地图",
+      "location": "弹窗",
+      "primary": "收集物",
+      "secondary": "道具"
+    },
+    {
       "iconId": "5pS26ZuG54mpL2ludl9pdGVtX18wMDEwX0tpbmdzX2lkb2wgIzQ2NjQucG5n",
       "name": "国王神像(King's Idol)",
       "location": "地图 + 弹窗",
@@ -983,16 +1018,23 @@
     {
       "iconId": "5pS26ZuG54mpL-WbveeOi-S5i-mtgi3lj7MucG5n",
       "name": "国王之魂(Kingsoul)-右",
-      "location": "地图",
+      "location": "弹窗",
       "primary": "收集物",
-      "secondary": "国王之魂"
+      "secondary": "国王之魂碎片"
     },
     {
       "iconId": "5pS26ZuG54mpL-WbveeOi-S5i-mtgi3lt6YucG5n",
       "name": "国王之魂(Kingsoul)-左",
-      "location": "地图",
+      "location": "弹窗",
       "primary": "收集物",
-      "secondary": "国王之魂"
+      "secondary": "国王之魂碎片"
+    },
+    {
+      "iconId": "custom_kingsoul_complete",
+      "name": "国王之魂(Kingsoul)",
+      "location": "地图",
+      "primary": "技能",
+      "secondary": "护符"
     },
     {
       "iconId": "popup:icons/收集物/护符槽图标.png",
@@ -1074,7 +1116,7 @@
     {
       "iconId": "icon_1785985552640_y3ajsn",
       "name": "城市纹章(City Crest)",
-      "location": "地图",
+      "location": "弹窗",
       "primary": "收集物",
       "secondary": "道具"
     },
@@ -1083,7 +1125,7 @@
       "name": "虫长者(Elderbug)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "对话型"
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "asset_6Ieq5a6a5LmJL-WbveeOi-WNsOiusC53ZWJw",
@@ -1132,7 +1174,7 @@
       "name": "乌恩(Unn)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "奖励型"
+      "secondary": "奖励型NPC"
     },
     {
       "iconId": "asset_6Ieq5a6a5LmJL-iZmuepuuS5i-W_g--8iFZvaWQgSGVhcnTvvIkucG5n",
@@ -1227,7 +1269,7 @@
     },
     {
       "iconId": "Qk9TUy_ngbDoibLnjovlrZDlt6bnibnvvIhHcmV5IFByaW5jZSBab3Rl77yJLnBuZw",
-      "name": "灰色王子左特(Grey Prince Zote)",
+      "name": "伟大的左特(Zote the Mighty)",
       "location": "地图",
       "primary": "Boss",
       "secondary": "梦境Boss"
@@ -1247,11 +1289,39 @@
       "secondary": "主线Boss"
     },
     {
+      "iconId": "custom_failed_champion",
+      "name": "失败冠军(Failed Champion)",
+      "location": "地图",
+      "primary": "Boss",
+      "secondary": "梦境Boss"
+    },
+    {
+      "iconId": "custom_soul_tyrant",
+      "name": "灵魂暴君(Soul Tyrant)",
+      "location": "地图",
+      "primary": "Boss",
+      "secondary": "梦境Boss"
+    },
+    {
       "iconId": "Qk9TUy_liaflm6Llm6Lplb_moLzmnpfvvIhUcm91cGUgTWFzdGVyIEdyaW1t77yJLnBuZw",
       "name": "剧团团长格林(Troupe Master Grimm)",
       "location": "地图",
       "primary": "NPC",
-      "secondary": "任务型"
+      "secondary": "任务型NPC"
+    },
+    {
+      "iconId": "Qk9TUy_liaflm6Llm6Lplb_moLzmnpfvvIhUcm91cGUgTWFzdGVyIEdyaW1t77yJLnBuZw",
+      "name": "剧团团长格林(Troupe Master Grimm)",
+      "location": "地图",
+      "primary": "Boss",
+      "secondary": "非主线Boss"
+    },
+    {
+      "iconId": "custom_old_stag",
+      "name": "老鹿角虫(Old Stag)",
+      "location": "地图",
+      "primary": "NPC",
+      "secondary": "对话型NPC"
     },
     {
       "iconId": "Qk9TUy_nqbrmtJ7pqpHlo6vvvIhUaGUgSG9sbG93IEtuaWdodO-8iS5wbmc",
@@ -1286,7 +1356,7 @@
       "name": "梦魇之王格林(Nightmare King Grimm)",
       "location": "地图",
       "primary": "Boss",
-      "secondary": "非主线Boss"
+      "secondary": "梦境Boss"
     },
     {
       "iconId": "Qk9TUy_or7rmlq_lhYvvvIhOb3Nr77yJLnBuZw",
@@ -1392,12 +1462,105 @@
       "location": "地图",
       "primary": "技能",
       "secondary": "其他能力"
+    },
+    {
+      "iconId": "Qk9TUy_liaflm6Llm6Lplb_moLzmnpfvvIhUcm91cGUgTWFzdGVyIEdyaW1t77yJLnBuZw",
+      "name": "剧团团长格林(Troupe Master Grimm)",
+      "location": "地图",
+      "primary": "NPC",
+      "secondary": "多结局NPC"
+    },
+    {
+      "iconId": "icon_1785469745960_np2xoe",
+      "name": "伟大的左特(Zote the Mighty)",
+      "location": "地图",
+      "primary": "NPC",
+      "secondary": "多结局NPC"
+    },
+    {
+      "iconId": "icon_1785469745958_xjg2yy",
+      "name": "伟大的左特(Zote the Mighty)",
+      "location": "地图",
+      "primary": "NPC",
+      "secondary": "多结局NPC"
+    },
+    {
+      "iconId": "5Zyw5qCHK25wYy_pmL_luIPvvIhDbG90aO-8iS53ZWJw",
+      "name": "阿布(Cloth)",
+      "location": "地图",
+      "primary": "NPC",
+      "secondary": "多结局NPC"
+    },
+    {
+      "iconId": "5Zyw5qCHK25wYy_pqqjpkonljKDvvIhOYWlsc21pdGjvvIkud2VicA",
+      "name": "钉子匠(Nailsmith)",
+      "location": "地图",
+      "primary": "NPC",
+      "secondary": "多结局NPC"
+    },
+    {
+      "iconId": "custom_zote_dirtmouth",
+      "name": "伟大的左特(Zote the Mighty)",
+      "location": "地图",
+      "primary": "NPC",
+      "secondary": "任务型NPC"
+    },
+    {
+      "iconId": "custom_zote_dirtmouth",
+      "name": "伟大的左特(Zote the Mighty)",
+      "location": "地图",
+      "primary": "NPC",
+      "secondary": "多结局NPC"
+    },
+    {
+      "iconId": "custom_zote_colosseum",
+      "name": "伟大的左特(Zote the Mighty)",
+      "location": "地图",
+      "primary": "NPC",
+      "secondary": "多结局NPC"
+    },
+    {
+      "iconId": "custom_nightmare_lantern",
+      "name": "梦魇之灯(Nightmare Lantern)",
+      "location": "地图",
+      "primary": "地点",
+      "secondary": "格林剧团内容"
+    },
+    {
+      "iconId": "custom_large_bug_corpse",
+      "name": "格林剧团追随者(Grimm Troupe acolyte corpse)",
+      "location": "地图",
+      "primary": "地点",
+      "secondary": "格林剧团内容"
+    },
+    {
+      "iconId": "custom_shade_gate",
+      "name": "暗影之门(Shade Gate)",
+      "location": "地图",
+      "primary": "地点",
+      "secondary": "暗影之门"
     }
   ],
   "relations": [
     {
+      "itemName": "面具碎片",
+      "ownerIconId": "Qk9TUy_ouoHpg4HnmoTmr5vph4zlhYvvvIhCcm9vZGluZyBNYXdsZWvvvIkucG5n"
+    },
+    {
+      "itemName": "城市纹章",
+      "ownerIconId": "Qk9TUy_lgYfpqpHlo6vvvIhGYWxzZSBLbmlnaHTvvIkucG5n"
+    },
+    {
+      "itemName": "复仇之魂",
+      "ownerIconId": "5Zyw5qCHK25wYy_onJfniZvokKjmu6HvvIhTbmFpbCBTaGFtYW7vvIkud2VicA"
+    },
+    {
       "itemName": "苍白矿石(Pale Ore)",
       "ownerIconId": "5Zyw5qCHK25wYy_omavniLfniLfvvIhHcnViZmF0aGVy77yJLndlYnA"
+    },
+    {
+      "itemName": "苍白矿石(Pale Ore)",
+      "ownerIconId": "Qk9TUy_or7rmlq_lhYvvvIhOb3Nr77yJLnBuZw"
     },
     {
       "itemName": "腐臭蛋",
@@ -1546,6 +1709,10 @@
     {
       "itemName": "简单钥匙",
       "ownerIconId": "5Zyw5qCHK25wYy_mlq_ojrHvvIhTbHnvvIkud2VicA"
+    },
+    {
+      "itemName": "简单钥匙",
+      "ownerIconId": "icon_1785403195308_f58xvu"
     },
     {
       "itemName": "面具碎片",

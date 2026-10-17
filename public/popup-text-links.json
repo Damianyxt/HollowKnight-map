@@ -1,0 +1,1286 @@
+{
+  "links": [
+    {
+      "name": "阿布",
+      "type": "marker",
+      "markerId": "marker_1785470611423_mo38d9"
+    },
+    {
+      "name": "柯尼法",
+      "type": "marker",
+      "markerId": "marker_1785404411269_2k2kya"
+    },
+    {
+      "name": "灵魂暴君",
+      "type": "marker",
+      "markerId": "custom_soul_tyrant"
+    },
+    {
+      "name": "失败冠军",
+      "type": "marker",
+      "markerId": "custom_failed_champion"
+    },
+    {
+      "name": "斯莱",
+      "type": "marker",
+      "markerId": "marker_1785400049577_qkp7zb"
+    },
+    {
+      "name": "伟大的左特",
+      "type": "marker",
+      "markerId": "custom_zote_dirtmouth_marker"
+    },
+    {
+      "name": "护符爱好者萨鲁巴",
+      "type": "marker",
+      "markerId": "marker_1785394615034_hpwpqz"
+    },
+    {
+      "name": "结局二：幸福成双",
+      "type": "popup-item",
+      "itemName": "结局二：幸福成双",
+      "ownerMarkerId": "marker_1785484062835_85cpqs",
+      "ownerIconId": "5Zyw5qCHK25wYy_pqqjpkonljKDvvIhOYWlsc21pdGjvvIkud2VicA"
+    },
+    {
+      "name": "大型苔藓冲锋者",
+      "type": "marker",
+      "markerId": "marker_1785470300760_18qk22"
+    },
+    {
+      "name": "文物搜寻者里姆",
+      "type": "marker",
+      "markerId": "marker_1785484017297_0dn6ll"
+    },
+    {
+      "name": "格林剧团追随者",
+      "type": "marker",
+      "markerId": "marker_custom_large_bug_corpse_30281_18733"
+    },
+    {
+      "name": "永恒的艾米丽塔",
+      "type": "marker",
+      "markerId": "marker_1785487015319_m6mabo"
+    },
+    {
+      "name": "蜂巢女王维斯帕",
+      "type": "marker",
+      "markerId": "marker_1785478857515_sz2hmg"
+    },
+    {
+      "name": "银行家米莉贝利",
+      "type": "marker",
+      "markerId": "marker_1785484212585_az7a3t"
+    },
+    {
+      "name": "长满植物的山丘",
+      "type": "region",
+      "regionName": "长满植物的山丘"
+    },
+    {
+      "name": "骨钉大师的荣耀",
+      "type": "popup-item",
+      "itemName": "骨钉大师的荣耀",
+      "ownerMarkerId": "marker_1785400049577_qkp7zb",
+      "ownerIconId": "5Zyw5qCHK25wYy_mlq_ojrHvvIhTbHnvvIkud2VicA"
+    },
+    {
+      "name": "乔尼的长眠处",
+      "type": "region",
+      "regionName": "乔尼的长眠处"
+    },
+    {
+      "name": "任性的指南针",
+      "type": "popup-item",
+      "itemName": "任性的指南针",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "伊思玛的树林",
+      "type": "region",
+      "regionName": "伊思玛的树林"
+    },
+    {
+      "name": "伊思玛的眼泪",
+      "type": "marker",
+      "markerId": "marker_1785468998601_z24bn0"
+    },
+    {
+      "name": "低语之根图标",
+      "type": "popup-item",
+      "itemName": "低语之根图标",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "剧团团长格林",
+      "type": "marker",
+      "markerId": "marker_1785402284549_90n97d"
+    },
+    {
+      "name": "守护者大黄蜂",
+      "type": "marker",
+      "markerId": "marker_1785467056763_6e7kjf"
+    },
+    {
+      "name": "守望者卢瑞恩",
+      "type": "marker",
+      "markerId": "marker_1785484446612_vk1sbo"
+    },
+    {
+      "name": "守望者的尖塔",
+      "type": "region",
+      "regionName": "守望者的尖塔"
+    },
+    {
+      "name": "守望者骑士团",
+      "type": "marker",
+      "markerId": "marker_1785477748169_0s4vo1"
+    },
+    {
+      "name": "布鲁姆-深巢",
+      "type": "marker",
+      "markerId": "marker_1785483731751_mstlx0"
+    },
+    {
+      "name": "带螺纹的骨钉",
+      "type": "popup-item",
+      "itemName": "带螺纹的骨钉",
+      "ownerMarkerId": "marker_1785484062835_85cpqs",
+      "ownerIconId": "5Zyw5qCHK25wYy_pqqjpkonljKDvvIhOYWlsc21pdGjvvIkud2VicA"
+    },
+    {
+      "name": "废弃电车轨道",
+      "type": "region",
+      "regionName": "废弃电车轨道"
+    },
+    {
+      "name": "征服者的试炼",
+      "type": "popup-item",
+      "itemName": "征服者的试炼",
+      "ownerMarkerId": "marker_1785401602207_2r23yb",
+      "ownerIconId": "5Zyw5qCHK25wYy_lsI_mhJrkurrvvIhMaXR0bGUgRm9vbO-8iS53ZWJw"
+    },
+    {
+      "name": "战士陵墓图标",
+      "type": "popup-item",
+      "itemName": "战士陵墓图标",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "收藏家的地图",
+      "type": "popup-item",
+      "itemName": "收藏家的地图",
+      "ownerMarkerId": "marker_1785477790414_h5g22e",
+      "ownerIconId": "Qk9TUy_mlLbol4_lrrbvvIhUaGUgQ29sbGVjdG9y77yJLnBuZw"
+    },
+    {
+      "name": "格林亲族大师",
+      "type": "marker",
+      "markerId": "marker_1785479326652_x5uaon"
+    },
+    {
+      "name": "格林亲族梦魇",
+      "type": "marker",
+      "markerId": "marker_1785468342634_m11ekx"
+    },
+    {
+      "name": "梦魇之王格林",
+      "type": "marker",
+      "markerId": "marker_1785402289341_aq56yz"
+    },
+    {
+      "name": "生命血茧图标",
+      "type": "popup-item",
+      "itemName": "生命血茧图标",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "结局一：仪式",
+      "type": "popup-item",
+      "itemName": "结局一：仪式",
+      "ownerMarkerId": "marker_1785402284549_90n97d",
+      "ownerIconId": "Qk9TUy_liaflm6Llm6Lplb_moLzmnpfvvIhUcm91cGUgTWFzdGVyIEdyaW1t77yJLnBuZw"
+    },
+    {
+      "name": "结局一：纯粹",
+      "type": "popup-item",
+      "itemName": "结局一：纯粹",
+      "ownerMarkerId": "marker_1785484062835_85cpqs",
+      "ownerIconId": "5Zyw5qCHK25wYy_pqqjpkonljKDvvIhOYWlsc21pdGjvvIkud2VicA"
+    },
+    {
+      "name": "结局二：驱逐",
+      "type": "popup-item",
+      "itemName": "结局二：驱逐",
+      "ownerMarkerId": "marker_1785402284549_90n97d",
+      "ownerIconId": "Qk9TUy_liaflm6Llm6Lplb_moLzmnpfvvIhUcm91cGUgTWFzdGVyIEdyaW1t77yJLnBuZw"
+    },
+    {
+      "name": "萨鲁巴的祝福",
+      "type": "popup-item",
+      "itemName": "萨鲁巴的祝福",
+      "ownerMarkerId": "marker_1785394615034_hpwpqz",
+      "ownerIconId": "5Zyw5qCHK25wYy_miqTnrKbniLHlpb3ogIXokKjpsoHlt7TvvIhDaGFybSBMb3ZlciBTYWx1YnJh77yJLnBuZw"
+    },
+    {
+      "name": "蓝色之子乔尼",
+      "type": "marker",
+      "markerId": "marker_1785479159958_uhxg0a"
+    },
+    {
+      "name": "觉醒的梦之钉",
+      "type": "popup-item",
+      "itemName": "觉醒的梦之钉",
+      "ownerMarkerId": "marker_1785399959737_9jlc8i",
+      "ownerIconId": "5Zyw5qCHK25wYy_lhYjnn6XvvIhTZWVy77yJLndlYnA"
+    },
+    {
+      "name": "解锁灵魂沼地",
+      "type": "popup-item",
+      "itemName": "解锁灵魂沼地",
+      "ownerMarkerId": "marker_1785399959737_9jlc8i",
+      "ownerIconId": "5Zyw5qCHK25wYy_lhYjnn6XvvIhTZWVy77yJLndlYnA"
+    },
+    {
+      "name": "躁郁的毛里克",
+      "type": "marker",
+      "markerId": "marker_1785400598416_g5ferj"
+    },
+    {
+      "name": "钢铁之魂吉恩",
+      "type": "marker",
+      "markerId": "marker_1785484081632_rt0dx3"
+    },
+    {
+      "name": "隐藏的鹿角站",
+      "type": "region",
+      "regionName": "隐藏的鹿角站"
+    },
+    {
+      "name": "骨钉大师奥罗",
+      "type": "marker",
+      "markerId": "marker_1785469197319_s6qfqe"
+    },
+    {
+      "name": "骨钉大师席奥",
+      "type": "marker",
+      "markerId": "marker_1785469134625_t0gemc"
+    },
+    {
+      "name": "骨钉大师马托",
+      "type": "marker",
+      "markerId": "marker_1785469282087_ergixm"
+    },
+    {
+      "name": "鹿角虫道图标",
+      "type": "popup-item",
+      "itemName": "鹿角虫道图标",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "乔尼的祝福",
+      "type": "marker",
+      "markerId": "marker_1785479141357_38bwwg"
+    },
+    {
+      "name": "典雅的钥匙",
+      "type": "popup-item",
+      "itemName": "典雅的钥匙",
+      "ownerMarkerId": "marker_1785400049577_qkp7zb",
+      "ownerIconId": "5Zyw5qCHK25wYy_mlq_ojrHvvIhTbHnvvIkud2VicA"
+    },
+    {
+      "name": "勇士的试炼",
+      "type": "popup-item",
+      "itemName": "勇士的试炼",
+      "ownerMarkerId": "marker_1785401602207_2r23yb",
+      "ownerIconId": "5Zyw5qCHK25wYy_lsI_mhJrkurrvvIhMaXR0bGUgRm9vbO-8iS53ZWJw"
+    },
+    {
+      "name": "圣甲虫标记",
+      "type": "popup-item",
+      "itemName": "圣甲虫标记",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "岗哨大黄蜂",
+      "type": "marker",
+      "markerId": "marker_1785749394355_56qbrg"
+    },
+    {
+      "name": "巴德尔之壳",
+      "type": "marker",
+      "markerId": "marker_1785479615909_6rcl25"
+    },
+    {
+      "name": "店主的钥匙",
+      "type": "marker",
+      "markerId": "marker_1785403408967_peotwy"
+    },
+    {
+      "name": "开槽的骨钉",
+      "type": "popup-item",
+      "itemName": "开槽的骨钉",
+      "ownerMarkerId": "marker_1785484062835_85cpqs",
+      "ownerIconId": "5Zyw5qCHK25wYy_pqqjpkonljKDvvIhOYWlsc21pdGjvvIkud2VicA"
+    },
+    {
+      "name": "忏悔师吉吉",
+      "type": "marker",
+      "markerId": "marker_1785402387114_m1jvma"
+    },
+    {
+      "name": "愚人斗兽场",
+      "type": "region",
+      "regionName": "愚人斗兽场"
+    },
+    {
+      "name": "愚人的试炼",
+      "type": "popup-item",
+      "itemName": "愚人的试炼",
+      "ownerMarkerId": "marker_1785401602207_2r23yb",
+      "ownerIconId": "5Zyw5qCHK25wYy_lsI_mhJrkurrvvIhMaXR0bGUgRm9vbO-8iS53ZWJw"
+    },
+    {
+      "name": "成就：升天",
+      "type": "popup-item",
+      "itemName": "成就：升天",
+      "ownerMarkerId": "marker_1785399959737_9jlc8i",
+      "ownerIconId": "5Zyw5qCHK25wYy_lhYjnn6XvvIhTZWVy77yJLndlYnA"
+    },
+    {
+      "name": "教师档案馆",
+      "type": "region",
+      "regionName": "教师档案馆"
+    },
+    {
+      "name": "教师莫诺蒙",
+      "type": "marker",
+      "markerId": "marker_1785470224532_6wbvop"
+    },
+    {
+      "name": "格鲁兹之母",
+      "type": "marker",
+      "markerId": "marker_1785477955090_1s3hyl"
+    },
+    {
+      "name": "法术扭曲者",
+      "type": "marker",
+      "markerId": "marker_1785480468855_gyn4gu"
+    },
+    {
+      "name": "灰色哀悼者",
+      "type": "marker",
+      "markerId": "marker_1785401246762_hbydtt"
+    },
+    {
+      "name": "生命血之心",
+      "type": "popup-item",
+      "itemName": "生命血之心",
+      "ownerMarkerId": "marker_1785394615034_hpwpqz",
+      "ownerIconId": "5Zyw5qCHK25wYy_miqTnrKbniLHlpb3ogIXokKjpsoHlt7TvvIhDaGFybSBMb3ZlciBTYWx1YnJh77yJLnBuZw"
+    },
+    {
+      "name": "生命血核心",
+      "type": "marker",
+      "markerId": "marker_1785488975797_esj23s"
+    },
+    {
+      "name": "电车通行证",
+      "type": "marker",
+      "markerId": "marker_1785470071954_oboxkt"
+    },
+    {
+      "name": "白色防御者",
+      "type": "marker",
+      "markerId": "marker_1785478440144_jnbtzn"
+    },
+    {
+      "name": "石之庇护所",
+      "type": "region",
+      "regionName": "石之庇护所"
+    },
+    {
+      "name": "神明调谐器",
+      "type": "marker",
+      "markerId": "marker_custom_godtuner_47941_67670"
+    },
+    {
+      "name": "粪虫防御者",
+      "type": "marker",
+      "markerId": "marker_1785478421723_czghw9"
+    },
+    {
+      "name": "编织者之歌",
+      "type": "marker",
+      "markerId": "marker_1785481036108_tgx1kg"
+    },
+    {
+      "name": "苍白潜伏者",
+      "type": "marker",
+      "markerId": "marker_1785403197566_2kfjga"
+    },
+    {
+      "name": "苔藓预言家",
+      "type": "marker",
+      "markerId": "marker_1785479920008_ivj9fe"
+    },
+    {
+      "name": "遗忘十字路",
+      "type": "region",
+      "regionName": "遗忘十字路"
+    },
+    {
+      "name": "遥远的村庄",
+      "type": "region",
+      "regionName": "遥远的村庄"
+    },
+    {
+      "name": "锋利的骨钉",
+      "type": "popup-item",
+      "itemName": "锋利的骨钉",
+      "ownerMarkerId": "marker_1785484062835_85cpqs",
+      "ownerIconId": "5Zyw5qCHK25wYy_pqqjpkonljKDvvIhOYWlsc21pdGjvvIkud2VicA"
+    },
+    {
+      "name": "防御者纹章",
+      "type": "marker",
+      "markerId": "marker_1785478467528_9r0w9a"
+    },
+    {
+      "name": "面具制作师",
+      "type": "marker",
+      "markerId": "marker_1785470051002_b8oghq"
+    },
+    {
+      "name": "鹿角虫巢穴",
+      "type": "region",
+      "regionName": "鹿角虫巢穴"
+    },
+    {
+      "name": "世界感知",
+      "type": "marker",
+      "markerId": "marker_custom_world_sense_48800_24080"
+    },
+    {
+      "name": "乌恩之形",
+      "type": "popup-item",
+      "itemName": "乌恩之形",
+      "ownerMarkerId": "marker_1785469636308_k02bhl",
+      "ownerIconId": "asset_6Ieq5a6a5LmJL-S5jOaBqe-8iFVubu-8iS53ZWJw"
+    },
+    {
+      "name": "乌恩之湖",
+      "type": "region",
+      "regionName": "乌恩之湖"
+    },
+    {
+      "name": "亡者之怒",
+      "type": "marker",
+      "markerId": "marker_1785479309037_9hpyy5"
+    },
+    {
+      "name": "伊塞尔达",
+      "type": "marker",
+      "markerId": "marker_1785400076322_0qr7st"
+    },
+    {
+      "name": "修长之钉",
+      "type": "popup-item",
+      "itemName": "修长之钉",
+      "ownerMarkerId": "marker_1785394615034_hpwpqz",
+      "ownerIconId": "5Zyw5qCHK25wYy_miqTnrKbniLHlpb3ogIXokKjpsoHlt7TvvIhDaGFybSBMb3ZlciBTYWx1YnJh77yJLnBuZw"
+    },
+    {
+      "name": "光蝇灯笼",
+      "type": "popup-item",
+      "itemName": "光蝇灯笼",
+      "ownerMarkerId": "marker_1785400049577_qkp7zb",
+      "ownerIconId": "5Zyw5qCHK25wYy_mlq_ojrHvvIhTbHnvvIkud2VicA"
+    },
+    {
+      "name": "冲刺劈砍",
+      "type": "popup-item",
+      "itemName": "冲刺劈砍",
+      "ownerMarkerId": "marker_1785469197319_s6qfqe",
+      "ownerIconId": "5Zyw5qCHK25wYy_pqqjpkonlpKfluIjlpaXnvZfvvIhOYWlsbWFzdGVyIE9yb--8iS53ZWJw"
+    },
+    {
+      "name": "冲刺大师",
+      "type": "marker",
+      "markerId": "marker_1785480340909_9qi76d"
+    },
+    {
+      "name": "发光子宫",
+      "type": "marker",
+      "markerId": "marker_1785480553008_1njdhn"
+    },
+    {
+      "name": "叛徒之女",
+      "type": "marker",
+      "markerId": "marker_1785482962358_s2dqng"
+    },
+    {
+      "name": "叛徒领主",
+      "type": "marker",
+      "markerId": "marker_1785470591572_6rds4g"
+    },
+    {
+      "name": "古老盆地",
+      "type": "region",
+      "regionName": "古老盆地"
+    },
+    {
+      "name": "吸虫之巢",
+      "type": "popup-item",
+      "itemName": "吸虫之巢",
+      "ownerMarkerId": "marker_1785470490628_uukf91",
+      "ownerIconId": "Qk9TUy_lkLjomavkuYvmr43vvIhGbHVrZW1hcm3vvIkucG5n"
+    },
+    {
+      "name": "吸虫之母",
+      "type": "marker",
+      "markerId": "marker_1785470490628_uukf91"
+    },
+    {
+      "name": "吸虫隐士",
+      "type": "marker",
+      "markerId": "marker_1785483085259_61144r"
+    },
+    {
+      "name": "呼啸悬崖",
+      "type": "region",
+      "regionName": "呼啸悬崖"
+    },
+    {
+      "name": "商人图标",
+      "type": "popup-item",
+      "itemName": "商人图标",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "嚎叫幽灵",
+      "type": "marker",
+      "markerId": "marker_1785466710494_bwkdeh"
+    },
+    {
+      "name": "国王之魂",
+      "type": "marker",
+      "markerId": "custom_kingsoul_complete"
+    },
+    {
+      "name": "国王印记",
+      "type": "marker",
+      "markerId": "marker_1785754769504_9pv72i"
+    },
+    {
+      "name": "国王山道",
+      "type": "region",
+      "regionName": "国王山道"
+    },
+    {
+      "name": "国王驿站",
+      "type": "region",
+      "regionName": "国王驿站"
+    },
+    {
+      "name": "圣巢之冠",
+      "type": "region",
+      "regionName": "圣巢之冠"
+    },
+    {
+      "name": "坚固力量",
+      "type": "popup-item",
+      "itemName": "坚固力量",
+      "ownerMarkerId": "marker_1785402327761_huubjv",
+      "ownerIconId": "5Zyw5qCHK25wYy_ov6rkuIfvvIhEaXZpbmXvvIkud2VicA"
+    },
+    {
+      "name": "坚固心脏",
+      "type": "popup-item",
+      "itemName": "坚固心脏",
+      "ownerMarkerId": "marker_1785402327761_huubjv",
+      "ownerIconId": "5Zyw5qCHK25wYy_ov6rkuIfvvIhEaXZpbmXvvIkud2VicA"
+    },
+    {
+      "name": "坚固贪婪",
+      "type": "popup-item",
+      "itemName": "坚固贪婪",
+      "ownerMarkerId": "marker_1785402327761_huubjv",
+      "ownerIconId": "5Zyw5qCHK25wYy_ov6rkuIfvvIhEaXZpbmXvvIkud2VicA"
+    },
+    {
+      "name": "坚硬外壳",
+      "type": "popup-item",
+      "itemName": "坚硬外壳",
+      "ownerMarkerId": "marker_1785400049577_qkp7zb",
+      "ownerIconId": "5Zyw5qCHK25wYy_mlq_ojrHvvIhTbHnvvIkud2VicA"
+    },
+    {
+      "name": "城市纹章",
+      "type": "popup-item",
+      "itemName": "城市纹章",
+      "ownerMarkerId": "marker_1785470326386_etxoau",
+      "ownerIconId": "Qk9TUy_lgYfpqpHlo6vvvIhGYWxzZSBLbmlnaHTvvIkucG5n"
+    },
+    {
+      "name": "复仇之魂",
+      "type": "popup-item",
+      "itemName": "复仇之魂",
+      "ownerMarkerId": "marker_1785405109839_dwb5tm",
+      "ownerIconId": "5Zyw5qCHK25wYy_onJfniZvokKjmu6HvvIhTbmFpbCBTaGFtYW7vvIkud2VicA"
+    },
+    {
+      "name": "娇嫩的花",
+      "type": "popup-item",
+      "itemName": "娇嫩的花",
+      "ownerMarkerId": "marker_1785482962358_s2dqng",
+      "ownerIconId": "5Zyw5qCHK25wYy_lj5vlvpLkuYvlpbPvvIhUaGUgVHJhaXRvcnPigJkgQ2hpbGTvvIkud2VicA"
+    },
+    {
+      "name": "安息之地",
+      "type": "region",
+      "regionName": "安息之地"
+    },
+    {
+      "name": "宫殿广场",
+      "type": "region",
+      "regionName": "宫殿广场"
+    },
+    {
+      "name": "帝王之翼",
+      "type": "marker",
+      "markerId": "marker_1785466912675_oeofw6"
+    },
+    {
+      "name": "幼虫之歌",
+      "type": "popup-item",
+      "itemName": "幼虫之歌",
+      "ownerMarkerId": "marker_1785400642811_c8oi3p",
+      "ownerIconId": "5Zyw5qCHK25wYy_omavniLfniLfvvIhHcnViZmF0aGVy77yJLndlYnA"
+    },
+    {
+      "name": "强力劈砍",
+      "type": "popup-item",
+      "itemName": "强力劈砍",
+      "ownerMarkerId": "marker_1785469134625_t0gemc",
+      "ownerIconId": "5Zyw5qCHK25wYy_pqqjpkonlpKfluIjluK3lpaXvvIhOYWlsbWFzdGVyIFNoZW_vvIkud2VicA"
+    },
+    {
+      "name": "德特茅斯",
+      "type": "region",
+      "regionName": "德特茅斯"
+    },
+    {
+      "name": "快速劈砍",
+      "type": "marker",
+      "markerId": "marker_1785478916919_yha4gd"
+    },
+    {
+      "name": "快速聚集",
+      "type": "popup-item",
+      "itemName": "快速聚集",
+      "ownerMarkerId": "marker_1785394615034_hpwpqz",
+      "ownerIconId": "5Zyw5qCHK25wYy_miqTnrKbniLHlpb3ogIXokKjpsoHlt7TvvIhDaGFybSBMb3ZlciBTYWx1YnJh77yJLnBuZw"
+    },
+    {
+      "name": "忽视成就",
+      "type": "popup-item",
+      "itemName": "忽视成就",
+      "ownerMarkerId": "marker_1785469750648_1qrjgg",
+      "ownerIconId": "icon_1785469745960_np2xoe"
+    },
+    {
+      "name": "恩怨成就",
+      "type": "popup-item",
+      "itemName": "恩怨成就",
+      "ownerMarkerId": "custom_zote_colosseum_marker",
+      "ownerIconId": "custom_zote_colosseum"
+    },
+    {
+      "name": "旋风劈砍",
+      "type": "popup-item",
+      "itemName": "旋风劈砍",
+      "ownerMarkerId": "marker_1785469282087_ergixm",
+      "ownerIconId": "5Zyw5qCHK25wYy_pqqjpkonlpKfluIjpqazmiZjvvIhOYWlsbWFzdGVyIE1hdG_vvIkud2VicA"
+    },
+    {
+      "name": "无忧旋律",
+      "type": "popup-item",
+      "itemName": "无忧旋律",
+      "ownerMarkerId": "marker_1785483318567_z6pfsh",
+      "ownerIconId": "5Zyw5qCHK25wYy_lsLzlp4bvvIhOeW1t77yJLndlYnA"
+    },
+    {
+      "name": "暗影之魂",
+      "type": "marker",
+      "markerId": "marker_1785405258803_x1kuy1"
+    },
+    {
+      "name": "暗影披风",
+      "type": "marker",
+      "markerId": "marker_1785467648334_xhmne8"
+    },
+    {
+      "name": "暴怒守卫",
+      "type": "marker",
+      "markerId": "marker_1785401048342_92ckal"
+    },
+    {
+      "name": "梦魇之灯",
+      "type": "marker",
+      "markerId": "marker_custom_nightmare_lantern_28428_18133"
+    },
+    {
+      "name": "欢乐之屋",
+      "type": "region",
+      "regionName": "欢乐之屋"
+    },
+    {
+      "name": "残破容器",
+      "type": "marker",
+      "markerId": "marker_1785468877869_lku7pu"
+    },
+    {
+      "name": "水晶之心",
+      "type": "marker",
+      "markerId": "marker_1785468720850_9kygtz"
+    },
+    {
+      "name": "水晶守卫",
+      "type": "marker",
+      "markerId": "marker_1785401030515_ejn1lv"
+    },
+    {
+      "name": "水晶山峰",
+      "type": "region",
+      "regionName": "水晶山峰"
+    },
+    {
+      "name": "沉重之击",
+      "type": "popup-item",
+      "itemName": "沉重之击",
+      "ownerMarkerId": "marker_1785400049577_qkp7zb",
+      "ownerIconId": "5Zyw5qCHK25wYy_mlq_ojrHvvIhTbHnvvIkud2VicA"
+    },
+    {
+      "name": "泪水之城",
+      "type": "region",
+      "regionName": "泪水之城"
+    },
+    {
+      "name": "深度聚集",
+      "type": "marker",
+      "markerId": "marker_1785480770526_ti7jhs"
+    },
+    {
+      "name": "深渊尖啸",
+      "type": "marker",
+      "markerId": "marker_1785466795989_ho4hr9"
+    },
+    {
+      "name": "深邃巢穴",
+      "type": "region",
+      "regionName": "深邃巢穴"
+    },
+    {
+      "name": "温泉图标",
+      "type": "popup-item",
+      "itemName": "温泉图标",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "灵魂圣所",
+      "type": "region",
+      "regionName": "灵魂圣所"
+    },
+    {
+      "name": "灵魂大师",
+      "type": "marker",
+      "markerId": "marker_1785466326926_86b8ac"
+    },
+    {
+      "name": "灵魂捕手",
+      "type": "marker",
+      "markerId": "marker_1785480573965_yukt6g"
+    },
+    {
+      "name": "灵魂沼地",
+      "type": "region",
+      "regionName": "灵魂沼地"
+    },
+    {
+      "name": "王后花园",
+      "type": "region",
+      "regionName": "王后花园"
+    },
+    {
+      "name": "王后驿站",
+      "type": "region",
+      "regionName": "王后驿站"
+    },
+    {
+      "name": "王国边缘",
+      "type": "region",
+      "regionName": "王国边缘"
+    },
+    {
+      "name": "电车图标",
+      "type": "popup-item",
+      "itemName": "电车图标",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "白色夫人",
+      "type": "marker",
+      "markerId": "marker_1785401752422_zn1pl2"
+    },
+    {
+      "name": "皇家水道",
+      "type": "region",
+      "regionName": "皇家水道"
+    },
+    {
+      "name": "真菌核心",
+      "type": "region",
+      "regionName": "真菌核心"
+    },
+    {
+      "name": "真菌荒地",
+      "type": "region",
+      "regionName": "真菌荒地"
+    },
+    {
+      "name": "祖先山丘",
+      "type": "region",
+      "regionName": "祖先山丘"
+    },
+    {
+      "name": "稳定之体",
+      "type": "popup-item",
+      "itemName": "稳定之体",
+      "ownerMarkerId": "marker_1785394615034_hpwpqz",
+      "ownerIconId": "5Zyw5qCHK25wYy_miqTnrKbniLHlpb3ogIXokKjpsoHlt7TvvIhDaGFybSBMb3ZlciBTYWx1YnJh77yJLnBuZw"
+    },
+    {
+      "name": "空洞骑士",
+      "type": "marker",
+      "markerId": "marker_1785478557268_y8skn4"
+    },
+    {
+      "name": "纯粹骨钉",
+      "type": "popup-item",
+      "itemName": "纯粹骨钉",
+      "ownerMarkerId": "marker_1785484062835_85cpqs",
+      "ownerIconId": "5Zyw5qCHK25wYy_pqqjpkonljKDvvIhOYWlsc21pdGjvvIkud2VicA"
+    },
+    {
+      "name": "结晶山丘",
+      "type": "region",
+      "regionName": "结晶山丘"
+    },
+    {
+      "name": "老鹿角虫",
+      "type": "marker",
+      "markerId": "marker_custom_old_stag_26975_10651"
+    },
+    {
+      "name": "苍白之王",
+      "type": "marker",
+      "markerId": "marker_1785401965884_mivnhb"
+    },
+    {
+      "name": "苍绿之径",
+      "type": "region",
+      "regionName": "苍绿之径"
+    },
+    {
+      "name": "苦痛荆棘",
+      "type": "marker",
+      "markerId": "marker_1785479641544_7gqq81"
+    },
+    {
+      "name": "荒芜俯冲",
+      "type": "marker",
+      "markerId": "marker_1785466314838_2uagdn"
+    },
+    {
+      "name": "萨满之石",
+      "type": "popup-item",
+      "itemName": "萨满之石",
+      "ownerMarkerId": "marker_1785394615034_hpwpqz",
+      "ownerIconId": "5Zyw5qCHK25wYy_miqTnrKbniLHlpb3ogIXokKjpsoHlt7TvvIhDaGFybSBMb3ZlciBTYWx1YnJh77yJLnBuZw"
+    },
+    {
+      "name": "蘑菇孢子",
+      "type": "marker",
+      "markerId": "marker_1785480044641_36ld1h"
+    },
+    {
+      "name": "虚空之心",
+      "type": "marker",
+      "markerId": "marker_1785756096055_rn2aaa"
+    },
+    {
+      "name": "蛾翼披风",
+      "type": "marker",
+      "markerId": "marker_1785467018875_nfkxkz"
+    },
+    {
+      "name": "蜂巢之血",
+      "type": "marker",
+      "markerId": "marker_1785478897147_kzz3uo"
+    },
+    {
+      "name": "蜂巢骑士",
+      "type": "marker",
+      "markerId": "marker_1785478814064_v02qw4"
+    },
+    {
+      "name": "蜂群集结",
+      "type": "popup-item",
+      "itemName": "蜂群集结",
+      "ownerMarkerId": "marker_1785400049577_qkp7zb",
+      "ownerIconId": "5Zyw5qCHK25wYy_mlq_ojrHvvIhTbHnvvIkud2VicA"
+    },
+    {
+      "name": "蜕变挽歌",
+      "type": "popup-item",
+      "itemName": "蜕变挽歌",
+      "ownerMarkerId": "marker_1785400642811_c8oi3p",
+      "ownerIconId": "5Zyw5qCHK25wYy_omavniLfniLfvvIhHcnViZmF0aGVy77yJLndlYnA"
+    },
+    {
+      "name": "蜗牛萨满",
+      "type": "marker",
+      "markerId": "marker_1785405109839_dwb5tm"
+    },
+    {
+      "name": "螳螂领主",
+      "type": "marker",
+      "markerId": "marker_1785468315188_db5pgk"
+    },
+    {
+      "name": "见证成就",
+      "type": "popup-item",
+      "itemName": "见证成就",
+      "ownerMarkerId": "marker_1785484569953_pg55vz",
+      "ownerIconId": "5Zyw5qCHK25wYy_lpY7oi6XvvIhRdWlycmVs77yJMi53ZWJw"
+    },
+    {
+      "name": "贝壳标记",
+      "type": "popup-item",
+      "itemName": "贝壳标记",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "遗弃外壳",
+      "type": "region",
+      "regionName": "遗弃外壳"
+    },
+    {
+      "name": "野兽赫拉",
+      "type": "marker",
+      "markerId": "marker_1785395564710_befq2l"
+    },
+    {
+      "name": "铜币标记",
+      "type": "popup-item",
+      "itemName": "铜币标记",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "锋利之影",
+      "type": "marker",
+      "markerId": "marker_1785480144962_ufy89h"
+    },
+    {
+      "name": "长椅图标",
+      "type": "popup-item",
+      "itemName": "长椅图标",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "闪亮标记",
+      "type": "popup-item",
+      "itemName": "闪亮标记",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "雾之峡谷",
+      "type": "region",
+      "regionName": "雾之峡谷"
+    },
+    {
+      "name": "骄傲印记",
+      "type": "marker",
+      "markerId": "marker_1785488669239_gvtbb4"
+    },
+    {
+      "name": "黑卵圣殿",
+      "type": "region",
+      "regionName": "黑卵圣殿"
+    },
+    {
+      "name": "黑暗降临",
+      "type": "marker",
+      "markerId": "marker_1785466539511_o7p090"
+    },
+    {
+      "name": "假骑士",
+      "type": "marker",
+      "markerId": "marker_1785470326386_etxoau"
+    },
+    {
+      "name": "加利安",
+      "type": "marker",
+      "markerId": "marker_1785470094405_qqjset"
+    },
+    {
+      "name": "助产士",
+      "type": "marker",
+      "markerId": "marker_1785481073013_gm5hmn"
+    },
+    {
+      "name": "噬魂者",
+      "type": "marker",
+      "markerId": "marker_1785480395113_8dpj34"
+    },
+    {
+      "name": "垃圾坑",
+      "type": "region",
+      "regionName": "垃圾坑"
+    },
+    {
+      "name": "寻神者",
+      "type": "marker",
+      "markerId": "marker_1785483134860_kcriqg"
+    },
+    {
+      "name": "小愚人",
+      "type": "marker",
+      "markerId": "marker_1785401602207_2r23yb"
+    },
+    {
+      "name": "布蕾塔",
+      "type": "marker",
+      "markerId": "marker_1785400427609_q9sb59"
+    },
+    {
+      "name": "收藏家",
+      "type": "marker",
+      "markerId": "marker_1785477790414_h5g22e"
+    },
+    {
+      "name": "梦之盾",
+      "type": "marker",
+      "markerId": "marker_1785481779565_9qrlp8"
+    },
+    {
+      "name": "梦之钉",
+      "type": "marker",
+      "markerId": "marker_1785478218946_85h5g2"
+    },
+    {
+      "name": "梦之门",
+      "type": "popup-item",
+      "itemName": "梦之门",
+      "ownerMarkerId": "marker_1785399959737_9jlc8i",
+      "ownerIconId": "5Zyw5qCHK25wYy_lhYjnn6XvvIhTZWVy77yJLndlYnA"
+    },
+    {
+      "name": "爱之匙",
+      "type": "marker",
+      "markerId": "marker_1785479706230_54y866"
+    },
+    {
+      "name": "爱之塔",
+      "type": "region",
+      "regionName": "爱之塔"
+    },
+    {
+      "name": "玛丽莎",
+      "type": "marker",
+      "markerId": "marker_1785484304146_1lnqx2"
+    },
+    {
+      "name": "瑞维克",
+      "type": "marker",
+      "markerId": "marker_1785486612605_0ej73m"
+    },
+    {
+      "name": "羽毛笔",
+      "type": "popup-item",
+      "itemName": "羽毛笔",
+      "ownerMarkerId": "marker_1785400076322_0qr7st",
+      "ownerIconId": "5Zyw5qCHK25wYy_kvIrloZ7lsJTovr7vvIhJc2VsZGHvvIkud2VicA"
+    },
+    {
+      "name": "胡长老",
+      "type": "marker",
+      "markerId": "marker_1785470157963_1dihkt"
+    },
+    {
+      "name": "舞梦者",
+      "type": "popup-item",
+      "itemName": "舞梦者",
+      "ownerMarkerId": "marker_1785399959737_9jlc8i",
+      "ownerIconId": "5Zyw5qCHK25wYy_lhYjnn6XvvIhTZWVy77yJLndlYnA"
+    },
+    {
+      "name": "虫爷爷",
+      "type": "marker",
+      "markerId": "marker_1785400642811_c8oi3p"
+    },
+    {
+      "name": "虫长者",
+      "type": "marker",
+      "markerId": "marker_1785996901546_j17pa8"
+    },
+    {
+      "name": "螳螂村",
+      "type": "region",
+      "regionName": "螳螂村"
+    },
+    {
+      "name": "螳螂爪",
+      "type": "marker",
+      "markerId": "marker_1785468288521_fq9ukr"
+    },
+    {
+      "name": "诺斯克",
+      "type": "marker",
+      "markerId": "marker_1785401511467_mp67hm"
+    },
+    {
+      "name": "钉子匠",
+      "type": "marker",
+      "markerId": "marker_1785484062835_85cpqs"
+    },
+    {
+      "name": "飞毛腿",
+      "type": "popup-item",
+      "itemName": "飞毛腿",
+      "ownerMarkerId": "marker_1785400049577_qkp7zb",
+      "ownerIconId": "5Zyw5qCHK25wYy_mlq_ojrHvvIhTbHnvvIkud2VicA"
+    },
+    {
+      "name": "食腿者",
+      "type": "marker",
+      "markerId": "marker_1785481357163_8d26qa"
+    },
+    {
+      "name": "马尔穆",
+      "type": "marker",
+      "markerId": "marker_1785470017950_daoonz"
+    },
+    {
+      "name": "马科斯",
+      "type": "marker",
+      "markerId": "marker_1785478933746_tkhq39"
+    },
+    {
+      "name": "乌姆",
+      "type": "marker",
+      "markerId": "marker_1785470208570_hom4m0"
+    },
+    {
+      "name": "乌恩",
+      "type": "marker",
+      "markerId": "marker_1785469636308_k02bhl"
+    },
+    {
+      "name": "先知",
+      "type": "marker",
+      "markerId": "marker_1785399959737_9jlc8i"
+    },
+    {
+      "name": "图克",
+      "type": "marker",
+      "markerId": "marker_1785484002624_3zxzff"
+    },
+    {
+      "name": "奎若",
+      "type": "marker",
+      "markerId": "marker_1785484569953_pg55vz"
+    },
+    {
+      "name": "巴东",
+      "type": "marker",
+      "markerId": "marker_1785483489010_nbql7o"
+    },
+    {
+      "name": "戈布",
+      "type": "marker",
+      "markerId": "marker_1785469383604_lb6z89"
+    },
+    {
+      "name": "无眼",
+      "type": "marker",
+      "markerId": "marker_1785400881260_srlpdo"
+    },
+    {
+      "name": "明子",
+      "type": "marker",
+      "markerId": "marker_1785483318567_z6pfsh"
+    },
+    {
+      "name": "泽若",
+      "type": "marker",
+      "markerId": "marker_1785478021127_uihoj4"
+    },
+    {
+      "name": "深渊",
+      "type": "region",
+      "regionName": "深渊"
+    },
+    {
+      "name": "猎人",
+      "type": "marker",
+      "markerId": "marker_1785486795928_ltjwl4"
+    },
+    {
+      "name": "米拉",
+      "type": "marker",
+      "markerId": "marker_1785484282959_5jyte5"
+    },
+    {
+      "name": "维洛",
+      "type": "marker",
+      "markerId": "marker_1785484139882_d4xw57"
+    },
+    {
+      "name": "蓝湖",
+      "type": "region",
+      "regionName": "蓝湖"
+    },
+    {
+      "name": "蜂巢",
+      "type": "region",
+      "regionName": "蜂巢"
+    },
+    {
+      "name": "辐光",
+      "type": "marker",
+      "markerId": "marker_1785478754052_co8sjq"
+    },
+    {
+      "name": "迪万",
+      "type": "marker",
+      "markerId": "marker_1785402327761_huubjv"
+    }
+  ]
+}

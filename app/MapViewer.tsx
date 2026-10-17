@@ -1,40 +1,82 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import SelectedClassChip from "./SelectedClassChip";
+import {
+  filterMarkersByCompletionVisibility,
+  getCharmDisplayProgress,
+  getSaveGroupProgress,
+  getSaveMappingProgress,
+} from "./save-parser/entity-map";
+import { parseSaveDirectory } from "./save-parser";
+import type { ParsedSaveSlot } from "./save-parser/types";
 
 const MAP_WIDTH = 4498;
 const MAP_HEIGHT = 2901;
 const MIN_SCALE_FACTOR = 1;
 const MAX_SCALE = 4;
-const MAP_EDGE_DRAG_ALLOWANCE = 180;
-const MAP_DRAG_RIGHT_ALLOWANCE = 220;
-const COMPLETION_STORAGE_KEY = "hk-map-client-completed-markers-v1";
+const AUTO_FOCUS_MAX_SCALE_FACTOR = 2.5;
+const FOCUS_TRANSITION_MS = 220;
+const MAX_BATCH_BREATHING_GLOW_MARKERS = 64;
+const MAP_EDGE_DRAG_ALLOWANCE = 400;
+const MAP_DRAG_RIGHT_ALLOWANCE = 400;
+const EXPANDED_SIDEBAR_MAP_SCALE_FACTOR = 1.05;
+const EXPANDED_SIDEBAR_MAP_OFFSET_X = 0;
 const COMPLETABLE_PRIMARY_CATEGORIES = new Set(["装备", "收集物", "Boss"]);
-const HIGHLIGHT_LEADING_ICONS: Record<string, { src: string; alt: string }> = {
+const INFORMATION_ONLY_MARKER_IDS = new Set([
+  "marker_custom_sly_crossroads_57466_35094",
+]);
+type PopupTextLinkTarget =
+  | { name: string; type: "marker"; markerId: string }
+  | { name: string; type: "region"; regionName: string }
+  | {
+      name: string;
+      type: "popup-item";
+      itemName: string;
+      ownerMarkerId: string;
+      ownerIconId: string;
+    };
+
+const escapeRegExp = (text: string) =>
+  text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const HIGHLIGHT_LEADING_ICONS: Record<
+  string,
+  { src: string; alt: string; displaySize?: "small" }
+> = {
+  "躁郁的毛里克(Brooding Mawlek)": {
+    src: "/icons/收集物/面具碎片.png",
+    alt: "面具碎片",
+    displaySize: "small",
+  },
   "收藏家(The Collector)": {
     src: "/icons/收集物/收藏家的地图.webp",
     alt: "收藏家的地图",
   },
   "布蕾塔(Bretta)": { src: "/icons/收集物/面具碎片.png", alt: "面具碎片" },
+  "暴怒守卫(Enraged Guardian)": {
+    src: "/icons/收集物/面具碎片.png",
+    alt: "面具碎片",
+  },
   "灰色哀悼者(Grey Mourner)": {
-    src: "/icons/弹窗装饰/娇嫩的花.png",
-    alt: "娇嫩的花",
+    src: "/icons/收集物/面具碎片.png",
+    alt: "面具碎片",
+  },
+  "诺斯克(Nosk)": {
+    src: "/icons/收集物/苍白矿石.png",
+    alt: "苍白矿石",
   },
   "叛徒之女(The Traitors’ Child)": {
     src: "/icons/弹窗装饰/娇嫩的花.png",
     alt: "娇嫩的花",
+    displaySize: "small",
   },
-  "骨钉大师席奥(Nailmaster Sheo)": {
-    src: "/icons/剑技/强力劈砍（Great Slash）.png",
-    alt: "强力劈砍",
+  "忏悔师吉吉(Confessor Jiji)": {
+    src: "/icons/收集物/腐臭蛋.png",
+    alt: "腐臭蛋",
   },
-  "骨钉大师奥罗(Nailmaster Oro)": {
-    src: "/icons/剑技/冲刺劈砍（Dash Slash）.png",
-    alt: "冲刺劈砍",
-  },
-  "骨钉大师马托(Nailmaster Mato)": {
-    src: "/icons/剑技/旋风劈砍（Cyclone Slash）.png",
-    alt: "旋风劈砍",
+  "图克(Tuk)": {
+    src: "/icons/收集物/腐臭蛋.png",
+    alt: "腐臭蛋",
   },
 };
 
@@ -42,6 +84,20 @@ const HIGHLIGHT_ITEM_NOTES: Record<
   string,
   { src: string; alt: string; paragraphs: string[] }
 > = {
+  "蜗牛萨满(Snail Shaman)": {
+    src: "/icons/技能/复仇之魂（Vengeful Spirit）.png",
+    alt: "复仇之魂",
+    paragraphs: [
+      "召唤一个向前飞行的魂灵，对路径上的敌人造成伤害。可以升级为暗影之魂。",
+    ],
+  },
+  "假骑士(False Knight)": {
+    src: "/icons/收集物/城市纹章.png",
+    alt: "城市纹章",
+    paragraphs: [
+      "调查泪水之城大门前，五骑士之一海格默的雕像，会提示：“一个巨大的骑士雕像。它的胸前有个插槽。插入城市纹章？”插入纹章可以打开从真菌荒地前往泪水之城的大门，使用后无法回收。",
+    ],
+  },
   "明子(Nymm)": {
     src: "/icons/护符+护符槽图标/无忧旋律（Carefree Melody）.png",
     alt: "无忧旋律",
@@ -55,13 +111,310 @@ const HIGHLIGHT_ITEM_NOTES: Record<
     alt: "乌恩之形",
     paragraphs: ["装备该护符可以让小骑士在凝聚灵魂时移动。"],
   },
+  "吸虫之母(Flukemarm)": {
+    src: "/icons/护符+护符槽图标/吸虫之巢（Flukenest）.png",
+    alt: "吸虫之巢",
+    paragraphs: ["将复仇之魂与暗影之魂变成一群能造成伤害的幼小吸虫。"],
+  },
+  "苍白潜伏者(Pale Lurker)": {
+    src: "/icons/收集物/简单钥匙.png",
+    alt: "简单钥匙",
+    paragraphs: ["可以打开简单锁，但是由于做工粗糙、磨损严重，只能使用一次。"],
+  },
+  "骨钉大师奥罗(Nailmaster Oro)": {
+    src: "/icons/剑技/冲刺劈砍.webp",
+    alt: "冲刺劈砍",
+    paragraphs: ["经过蓄力，可以在冲刺后释放攻击距离更长，伤害更高的一击。"],
+  },
+  "骨钉大师席奥(Nailmaster Sheo)": {
+    src: "/icons/剑技/强力劈砍.webp",
+    alt: "强力劈砍",
+    paragraphs: ["经过蓄力，释放范围更广，伤害更高的一击。"],
+  },
+  "骨钉大师马托(Nailmaster Mato)": {
+    src: "/icons/剑技/旋风劈砍.webp",
+    alt: "旋风劈砍",
+    paragraphs: ["经过蓄力，可以旋转释放连续多次伤害更高的攻击。"],
+  },
+  "白色夫人(White Lady)": {
+    src: "/icons/收集物/国王之魂-左.png",
+    alt: "国王之魂(Kingsoul)-左",
+    paragraphs: [
+      "两片国王之魂碎片可以合成护符国王之魂，它使小骑士每2秒获得4灵魂。",
+      "国王之魂也能打开通往深渊之底的道路，在出生地，它可以转变为虚空之心。",
+    ],
+  },
+  "苍白之王(The Pale King)": {
+    src: "/icons/收集物/国王之魂-右.png",
+    alt: "国王之魂(Kingsoul)-右",
+    paragraphs: [
+      "两片国王之魂碎片可以合成护符国王之魂，它使小骑士每2秒获得4灵魂。",
+      "国王之魂也能打开通往深渊之底的道路，在出生地，它可以转变为虚空之心。",
+    ],
+  },
+};
+
+const DESCRIPTION_INLINE_ICONS: Record<
+  string,
+  { paragraphIncludes: string; src: string; alt: string }[]
+> = {
+  "marker_1785469750648_1qrjgg": [
+    {
+      paragraphIncludes: "成就“忽视”",
+      src: "/icons/弹窗装饰/成就-忽视.png",
+      alt: "忽视成就",
+    },
+  ],
+  "custom_zote_colosseum_marker": [
+    {
+      paragraphIncludes: "成就“恩怨”",
+      src: "/icons/弹窗装饰/成就-恩怨.png",
+      alt: "恩怨成就",
+    },
+  ],
+  "marker_1785484569953_pg55vz": [
+    {
+      paragraphIncludes: "成就“见证”",
+      src: "/icons/弹窗装饰/成就-见证.png",
+      alt: "见证成就",
+    },
+  ],
+};
+
+const CHARACTER_ENDINGS: Record<
+  string,
+  { title: string; iconFile: string; description: string }[]
+> = {
+  "钉子匠(Nailsmith)": [
+    {
+      title: "结局一：纯粹",
+      iconFile: "/icons/弹窗装饰/成就-纯粹.png",
+      description:
+        "如果选择按它所说杀了它，它的尸体会落入下方的水中，并获得“纯粹”成就。最终，在完成两个万神殿并聆听寻神者后，可以在垃圾坑的岸边找到它漂浮在水面的尸体。",
+    },
+    {
+      title: "结局二：幸福成双",
+      iconFile: "/icons/弹窗装饰/成就-幸福成双.png",
+      description:
+        "如果拒绝它的请求，选择不杀它，离开区域，它起初感到恼怒，但思考后认同了小骑士的决定，踏上了探索世界，寻找新人生目标的旅途。之后，可以在苍绿之径席奥的小屋里找到它，聆听它之后能获得“幸福成双”成就，该成就的名称表明了它和席奥的恋爱关系。接下来，它一直会和席奥在一起搞艺术，给席奥做绘画模特或是一同制作小尺寸模型。每次进入房间刷新，它和席奥可能在做这两件事之一。它们彼此陪伴，幸福快乐。",
+    },
+  ],
+  "剧团团长格林(Troupe Master Grimm)": [
+    {
+      title: "结局一：仪式",
+      iconFile: "/icons/弹窗装饰/成就-仪式.png",
+      description:
+        "如果小骑士成功杀死了梦魇之王，剧团完成了仪式，在小骑士醒来之前就会离开圣巢。",
+    },
+    {
+      title: "结局二：驱逐",
+      iconFile: "/icons/弹窗装饰/成就-驱逐.png",
+      description:
+        "如果小骑士没有面对梦魇之王，而是帮助布鲁姆摧毁梦魇之灯，那么会放逐剧团，随后布鲁姆会与格林剧团一同消失。",
+    },
+  ],
+};
+
+const CHARACTER_ENDING_NOTES: Record<string, string> = {
+  "剧团团长格林(Troupe Master Grimm)":
+    "注：格林团长和梦魇之王格林的战斗都需要携带格林之子才能触发。",
+};
+
+const CHARACTER_DESCRIPTION_SECTIONS: Record<
+  string,
+  { title: string; paragraphs: string[] }[]
+> = {
+  "苍白之王(The Pale King)": [
+    {
+      title: "圣巢王国",
+      paragraphs: [
+        "沃姆转变成苍白之王之后，在圣巢扩张了部分虫子的思想，并赋予他们智慧。他想让虫子们臣服于他，向他奉献，而作为回报，他保证圣巢王国将会永恒延续。",
+        "有关苍白之王的记载说他仪表堂堂、遍体生光，王冠上有凶猛的尖角。他容光焕发，神采奕奕，娇嫩的花的纯洁光环也无法和他的光辉媲美。",
+        "尽管苍白之王是一个难以捉摸的存在，并且深居简出，很少看到他出现在宫殿外，臣民还是将他奉若神明。圣巢的虫子相信，这个世界的造物主就是他，并且用国王神像来崇拜他，连飞蛾部落也背叛了他们的造物主——辐光，转而崇拜苍白之王。苍白之王拥有预见能力，使得真菌荒地的蘑菇们欣然接受了他的统治。",
+        "遍布在圣巢各地的建筑大多是他建立的，其中大部分都有圣巢印章的标记。鹿角虫道和电车也都是他下令建造的。",
+        "在小骑士的记忆中也可以看到苍白之王的身影。在记忆中，苍白之王带着空洞骑士离开深渊，然后封印了深渊的大门。",
+      ],
+    },
+    {
+      title: "感染",
+      paragraphs: [
+        "辐光几乎完全被遗忘了。她想让虫子们重新记起她的存在，结果造成了感染。为了解决感染，苍白之王打算利用容器封印辐光。所谓容器，是指苍白之王和白色夫人结合所生出的后代，它们出生于深渊，内部充满了虚空。",
+        "为了封印住容器，他请了三只虫子成为守梦者，共同组成黑卵圣殿的封印。赫拉是其中的一位，她要求苍白之王和她做一个交易，两者结合生出了一个孩子，也就是后来的大黄蜂。",
+        "被选中的容器是空洞骑士。然而，苍白之王和白色夫人的判断出现了差错，容器出现了污点，因此它无法彻底地封印感染。空洞骑士之所以出现污点，可能是因为苍白之王在养育它时与它产生了羁绊。",
+        "后来，感染重新出现，苍白之王和白色宫殿也消失了。",
+      ],
+    },
+  ],
+};
+
+const SHARED_MARKER_DESCRIPTIONS: Record<string, string> = {
+  "暗影之门(Shade Gate)":
+    "暗影之门是圣巢各处由虚空制成的门。它们无法被破坏或解除。小骑士碰到它时，会被往后弹，但不会受到伤害。法术不会被暗影之门阻挡。\n大多数暗影之门是由两个带刺的装置中黑色的虚空部分相连而成的。但深渊出生地内的两个暗影之门并没有这样的装置。",
+  "长椅":
+    "在长椅上休息可以使小骑士：\n存档游戏。\n在退出游戏或死亡后在长椅上重生。（不包括神居的万神殿中的温泉长椅，它永远不会更新重生点。）\n回满全部血量。（包括护符给予的生命血，但会移除所有在生命血茧处获得的生命血量。）\n刷新非本房间的已破坏的生命血茧。\n刷新灵魂图腾。\n购买获得萨鲁巴的祝福后，能缓慢回复灵魂。\n若已购买获得地图和羽毛笔，则能将新探索的区域房间在地图上更新。\n刷新大部分不包括当前长椅房间内的敌人。当前长椅房间内的敌人不会立即刷新，但会在小骑士再次进入该房间时刷新。\n小骑士在长椅上休息时还可以装备或卸下物品栏菜单中的护符。\n在伊塞尔达处可以花费100[GEO]购买长椅图针。",
+  "生命血茧(Lifeblood Cocoon)":
+    "生命血茧是一个含有生命血的大囊，分布在圣巢各处。用骨钉破坏它会生成2至5个生命籽。一个生命籽能给予一格生命血，杀死生命籽，就能吸收生命血，获得额外的生命血面具血量。\n通向隐藏的茧的道路旁，会生长着蓝色蝴蝶状的植物，暗示生命血茧的存在。此外，茧本身也会不时发出声音。可以从伊塞尔达处以100[GEO]购买虫茧图针，能显示目前所有已发现的生命血茧的位置。",
+  "温泉(Hot Spring)":
+    "温泉是热气腾腾的水潭，分布在圣巢各处。站在其中，小骑士会每秒回复50灵魂，血量也会缓慢回复。\n可以从伊塞尔达处以100[GEO]购买温泉图针，购买对应区域地图后，就会在其上显示所有已发现的温泉。\n获得萨鲁巴的祝福后，长椅的灵魂回复效果与温泉等同，因此周围有长椅的时候也可以选择长椅。",
+  "鹿角虫道(Old Stag)":
+    "鹿角虫道是贯穿整个圣巢的互相联通的隧道系统，通过鹿角站将不同区域连接在一起。小骑士可以乘坐老鹿角虫，在他的帮助下使用鹿角虫道旅行。他还会在谈话时提供有关每个位置的一些信息。\n大多数站点需要向收费机缴一定数量的吉欧以激活。不是每个区域都有一个鹿角站。\n解锁一个鹿角虫车站后，用骨钉击打铃铛就能召唤老鹿角虫。每次小骑士在上次使用的鹿角站以外的鹿角站想唤来鹿角虫的话，也必须敲铃。\n可以在伊塞尔达的商店花费100[GEO]购买鹿角虫道图针，购买对应区域地图后，就会显示此地的鹿角站位置。",
+  "电车(Tram)":
+    "电车可以让小骑士在鹿角虫站无法到达的深层隧道中快速旅行。使用位于深邃巢穴的废弃电车轨道中的电车通行证即可自由乘车。如果小骑士在拿到电车通行证前检查电车，只会出现这样的描述：“一个带凹槽的装置，需要某种通行证。”获得通行证之后，则会额外出现选项：“插入电车通行证？”\n在第一次检查电车门后，小骑士可以在伊塞尔达的商店花费100[GEO]购买电车图针，购买相应区域地图后，就会标记出该区域内的电车位置。",
+  "护符槽":
+    "装备护符需要占用护符槽，每个护符占用的凹槽数量不尽相同。小骑士开始时拥有3个护符槽，在游戏中一共还能额外获得8个，最多拥有11个。",
+  "面具碎片(Mask Shard)":
+    "面具碎片是远古面具的碎片，每四片能拼成一个远古面具，增加血量。\n游戏中共有16个面具碎片，所以小骑士能增加4格面具血量。不算护符和生命血的话，小骑士最多能拥有9格血量。",
+  "容器碎片(Vessel Fragment)":
+    "容器碎片是灵魂容器的碎片。3片容器碎片能拼成一个完整的灵魂容器，增加小骑士的最大灵魂容量，每个可额外容纳33灵魂。主灵魂仪空时，容器中的灵魂会在短暂延迟后自动注入主灵魂仪。\n游戏中共有9个容器碎片，所以可以额外获得3个灵魂容器，使小骑士的最大灵魂容量加倍，从99增加至198灵魂。",
+  "苍白矿石(Pale Ore)":
+    "小骑士可以在圣巢各处收集到苍白矿石。将苍白矿石交给钉子匠，并支付一定数量的吉欧，他就可以升级小骑士的骨钉。第一次升级不需要苍白矿石，第二次需要一块，第三次需要两块，最后一次需要三块，总共需要六块。",
+  "柯尼法(Cornifer)":
+    "柯尼法一出生就立刻离开了他的兄弟姐妹与母亲，去探索世界。后来他得知了圣巢的存在，和他的妻子伊塞尔达一起搬到了德特茅斯。\n开始时，可以在遗忘十字路底部遇到柯尼法，向他购买地图。他建议小骑士光临他的妻子伊塞尔达在德特茅斯的店铺。这个店铺将在小骑士购买一次地图，或者进入通往祖先山丘的房间后开张。\n直到柯尼法介绍他自己之前，他的名字都不会在屏幕下方显示。只有在再次聆听，他自我介绍后，他的名字才会显现。\n在大多数区域都可以找到柯尼法。在接近他所在的房间时可以听见他正在哼歌，跟随地上四处散落的纸就可以找到他的方位。不过有一处例外，那就是在深邃巢穴，柯尼法不再哼歌，而是害怕地躲在石头后方。此时也无法阅读其梦语。在此区域，可以在两个不同的地方遇到柯尼法。这取决于小骑士从哪个入口进入深邃巢穴，在一处遇到他的话就无法在另一处遇到。如果小骑士是在这里与柯尼法第一次相识，将会有特别的对话。\n在古老盆地，如果在购买了地图之后继续和他对话，他会表示他不想继续让妻子担心了，自己会在稍微休息一下之后回到店铺。\n当所有的地图都已经被购买或者能够在德特茅斯的商店被买到后，柯尼法就会回到店铺，在一张阁楼床上呼呼大睡。",
+  "蘑菇先生(Mister Mushroom)":
+    "王国边缘右下角的密室中，有一块发光的石碑。通向它的入口也通向巨大吉欧堆。进入该区域后，使用荒芜俯冲或黑暗降临打开通路三次，它位于第三次的路径的右边。装备蘑菇孢子后，阅读石碑时会显示一首诗，提示了可以找到蘑菇先生的地点。\n1. 我们述说使者大人的道路，他会宣告一个时代的结束。\n2. 由自我产生，他们的思想联合在一起。（真菌荒地）\n3. 在酸液肆意的源头一旁停歇。（王国边缘，伊思玛的树林附近）\n4. 在最黑暗曲折的深邃中发光。（深邃巢穴，加利安附近）\n5. 狂风在化石险崖上呼啸。（呼啸悬崖）\n6. 空中的帝王蝶静止不动。（古老盆地，帝王之翼的地点附近）\n7. 通往“根”的领域，蜗牛曾高声嚎叫处。（雾之峡谷，长满植物的山丘附近）\n8. 沃姆的山道，新土地的入口。（国王山道）\n9. 旅程在此结束，王国的冒险完成。\n接近对应区域时，从远处就能听到他的念叨声，引导小骑士找到他。他起初总是背对着小骑士，攻击他一下后他会转过来，之后才能聆听。如果在他转过来后离开他足够远的距离，他会再转过身去。必须装备蘑菇孢子才能理解他的对话，否则小骑士难以理解他的蘑菇语言，他也不会前往下一地点。然而，即便不装备蘑菇孢子，也能明白他的梦语。对话完后，他会短暂停止自言自语，表示打扰了，然后缩进地里。\n蘑菇先生大部分时间没有理睬小骑士，而似乎在和别人说话或是自言自语。最后一次相遇时，他终于意识到小骑士在他旅行时一直跟随着他，并对小骑士说了话。之后，他飞向空中。",
+};
+
+const APPEND_SHARED_DESCRIPTION_MARKERS = new Set([
+  "护符槽",
+  "面具碎片(Mask Shard)",
+  "容器碎片(Vessel Fragment)",
+  "苍白矿石(Pale Ore)",
+]);
+
+const SHARED_MARKER_HIGHLIGHTS: Record<
+  string,
+  { text: string; iconFiles: string[] }
+> = {
+  "暗影之门(Shade Gate)": {
+    text: "获得暗影披风后进行暗影冲刺，才能穿过暗影之门。",
+    iconFiles: [],
+  },
+  "柯尼法(Cornifer)": {
+    text: "柯尼法是一名制图师，致力于绘制整个圣巢的地图。",
+    iconFiles: [],
+  },
+  "巴德尔之壳(Baldur Shell)": {
+    text: "佩戴后，小骑士凝聚时会在周围生成一个最多抵挡4次攻击的保护壳，在长椅上休息时次数重置。",
+    iconFiles: [],
+  },
+  "编织者之歌(Weaversong)": {
+    text: "佩戴后能召唤三只编织者幼体攻击敌人，每次攻击造成3伤害。",
+    iconFiles: [],
+  },
+  "冲刺大师(Dashmaster)": {
+    text: "佩戴后减少蛾翼披风的冷却时间，并允许小骑士向下冲刺。",
+    iconFiles: [],
+  },
+  "发光子宫(Glowing Womb)": {
+    text: "佩戴后能消耗灵魂产生幼体；幼体平常跟随小骑士，发现敌人后会飞向敌人并造成碰撞伤害。",
+    iconFiles: [],
+  },
+  "法术扭曲者(Spell Twister)": {
+    text: "佩戴后能使伤害性法术的灵魂消耗从33降至24。",
+    iconFiles: [],
+  },
+  "防御者纹章(Defender's Crest)": {
+    text: "佩戴后会在小骑士身边持续产生臭气云，每0.3秒造成1伤害。",
+    iconFiles: [],
+  },
+  "锋利之影(Sharp Shadow)": {
+    text: "佩戴后将暗影披风的冲刺速度由20提升至28，冲刺时长不变，并伤害冲刺时穿过的敌人。",
+    iconFiles: [],
+  },
+  "蜂巢之血(Hiveblood)": {
+    text: "佩戴后无需凝聚就能恢复失去的最后一格面具血量，也能使蜂巢中的敌人不再对小骑士有敌意。",
+    iconFiles: [],
+  },
+  "骄傲印记(Mark of Pride)": {
+    text: "佩戴后能增加骨钉25%的攻击范围。",
+    iconFiles: [],
+  },
+  "苦痛荆棘(Thorns of Agony)": {
+    text: "佩戴后使小骑士在受到伤害时伸出荆棘藤蔓，伤害周围的敌人。",
+    iconFiles: [],
+  },
+  "快速劈砍(Quick Slash)": {
+    text: "佩戴后能让小骑士的攻击频率变快，在相同时间内造成更高输出。",
+    iconFiles: [],
+  },
+  "灵魂捕手(Soul Catcher)": {
+    text: "佩戴后增加用骨钉攻击敌人时获得的灵魂。",
+    iconFiles: [],
+  },
+  "梦之盾(Dreamshield)": {
+    text: "佩戴后生成一面围绕小骑士旋转的盾牌，能够阻挡特定投射物并对敌人造成伤害。",
+    iconFiles: [],
+  },
+  "蘑菇孢子(Spore Shroom)": {
+    text: "佩戴后进行凝聚，会在小骑士周围释放一片能造成伤害的孢子云。",
+    iconFiles: [],
+  },
+  "乔尼的祝福(Joni's Blessing)": {
+    text: "佩戴后使血量增长40%，向上取整，并使所有血量变成生命血。",
+    iconFiles: [],
+  },
+  "深度聚集(Deep Focus)": {
+    text: "佩戴后将凝聚回复的面具血量翻倍为两格，但使凝聚时间延长约0.55秒。",
+    iconFiles: [],
+  },
+  "生命血核心(Lifeblood Core)": {
+    text: "佩戴后，在长椅上休息时给予小骑士4格生命血血量。",
+    iconFiles: [],
+  },
+  "噬魂者(Soul Eater)": {
+    text: "佩戴后能极大增加使用骨钉攻击敌人时获得的灵魂。",
+    iconFiles: [],
+  },
+  "亡者之怒(Fury of the Fallen)": {
+    text: "佩戴后，在小骑士只有一格面具血量时，将所有骨钉伤害提升至175%。",
+    iconFiles: [],
+  },
+  "虚空之心(Void Heart)": {
+    text: "获得后无法卸下且不占用护符槽，并能使同胞与暗影不再攻击小骑士，使虚空卷须不再出现。",
+    iconFiles: [],
+  },
 };
 
 const normalizeItemName = (name: string) =>
   name.replace(/[（(].*$/, "").trim();
 
+const MARKER_VISIT_NUMBERS: Record<string, number> = {
+  custom_cloth_visit_1: 1,
+  custom_cloth_visit_2: 2,
+  custom_cloth_visit_3: 3,
+  marker_1785470611423_mo38d9: 4,
+  marker_1785469750648_1qrjgg: 1,
+  marker_1785485109491_mzw6s3: 2,
+  custom_zote_colosseum_marker: 3,
+  custom_zote_dirtmouth_marker: 4,
+  custom_quirrel_visit_1: 1,
+  custom_quirrel_visit_2: 2,
+  custom_quirrel_visit_3: 3,
+  custom_quirrel_visit_4: 4,
+  custom_quirrel_visit_5: 5,
+  custom_quirrel_visit_6: 6,
+  custom_quirrel_visit_7: 7,
+  custom_quirrel_visit_8: 8,
+  marker_1785484569953_pg55vz: 9,
+};
+
+const getMarkerVisitNumber = (marker: Marker) => {
+  const configuredVisitNumber = MARKER_VISIT_NUMBERS[marker.id];
+  if (configuredVisitNumber) return configuredVisitNumber;
+  if (marker.name !== "蘑菇先生(Mister Mushroom)") return null;
+  const description = marker.description?.trim() ?? "";
+  if (description.includes("初次见面")) return 1;
+  if (description.includes("第二次见面")) return 2;
+  if (description.includes("第三次见面")) return 3;
+  if (description.includes("第四次见面")) return 4;
+  if (description.includes("第五次见面")) return 5;
+  if (description.includes("第六次见面")) return 6;
+  if (description.includes("最后一次见面")) return 7;
+  return null;
+};
+
 function getPopupEmbeddedItemIcons(markerName: string) {
-  const icons: { src: string; alt: string }[] = [];
+  const icons: { src: string; alt: string; displaySize?: "small" }[] = [];
   const leadingIcon = HIGHLIGHT_LEADING_ICONS[markerName];
   if (leadingIcon) icons.push(leadingIcon);
   const itemNote = HIGHLIGHT_ITEM_NOTES[markerName];
@@ -88,7 +441,16 @@ const MAP_REGION_LABELS = [
   { name: "真菌荒地", x: 47.57314590450625, y: 52.47152762578902, width: 160.49061167533208 },
 ] as const;
 
-const MAP_REGION_CHINESE_LABELS = [
+type RegionTextLabel = {
+  name: string;
+  x: number;
+  y: number;
+  size: number;
+  edgeGlow: string;
+  fogGlow: string;
+};
+
+const MAP_REGION_CHINESE_LABELS: RegionTextLabel[] = [
   {
     name: "安息之地",
     x: 85.3521074513571,
@@ -217,7 +579,35 @@ const MAP_REGION_CHINESE_LABELS = [
     edgeGlow: "#C8A65A",
     fogGlow: "#75652E",
   },
-] as const;
+  {
+    name: "遥远的村庄",
+    x: 7.463493485256741,
+    y: 60.3063819957649,
+    size: 18.5035,
+    edgeGlow: "#665584",
+    fogGlow: "#30283F",
+  },
+  {
+    name: "圣巢之冠",
+    x: 67.41855274566814,
+    y: 2.898217223854959,
+    size: 18.5035,
+    edgeGlow: "#B67AD2",
+    fogGlow: "#713F91",
+  },
+  {
+    name: "愚人斗兽场",
+    x: 84.51850821683638,
+    y: 43.73724977919316,
+    size: 18.5035,
+    edgeGlow: "#AE8553",
+    fogGlow: "#5D4632",
+  },
+];
+
+const BASE_REGION_LABEL_NAMES = new Set(
+  MAP_REGION_CHINESE_LABELS.map((region) => region.name),
+);
 
 const getRgbChannels = (hexColor: string) => {
   const value = Number.parseInt(hexColor.slice(1), 16);
@@ -238,15 +628,28 @@ const INITIAL_REGION_LABEL_LAYOUTS: RegionLabelLayouts = Object.fromEntries([
   ]),
 ]);
 
+const MATCHED_NEW_REGION_LABELS = new Set([
+  "遥远的村庄",
+  "圣巢之冠",
+  "愚人斗兽场",
+]);
+
 const FILTER_CATEGORY_ICON_OVERRIDES: Record<
   string,
   { iconFile?: string; iconScale?: number }
 > = {
-  "NPC\u0000任务型": { iconFile: "/filter-icons/npc-quest.webp" },
+  "NPC\u0000任务型NPC": { iconFile: "/filter-icons/npc-quest.webp" },
   "NPC\u0000商人": { iconFile: "/filter-icons/npc-merchant.png" },
-  "NPC\u0000奖励型": { iconFile: "/filter-icons/npc-reward.webp" },
+  "NPC\u0000奖励型NPC": { iconFile: "/filter-icons/npc-reward.webp" },
+  "NPC\u0000多结局NPC": {
+    iconFile: "/icons/地标+npc/骨钉匠（Nailsmith）.webp",
+  },
   "地点\u0000地图": {
-    iconFile: "/filter-icons/location-map.png",
+    iconFile: "/filter-icons/location-map-cornifer.webp",
+  },
+  "地点\u0000格林剧团内容": {
+    iconFile: "/icons/自定义/大虫尸体.webp",
+    iconScale: 0.82,
   },
   "技能\u0000护符": {
     iconFile: "/icons/护符+护符槽图标/快速聚集（Quick Focus）.png",
@@ -255,7 +658,10 @@ const FILTER_CATEGORY_ICON_OVERRIDES: Record<
     iconFile: "/icons/技能/帝王之翼（Monarch Wings）.png",
   },
   "技能\u0000骨钉技艺": {
-    iconFile: "/icons/剑技/强力劈砍（Great Slash）.png",
+    iconFile: "/icons/剑技/强力劈砍.webp",
+  },
+  "收集物\u0000国王之魂碎片": {
+    iconFile: "/icons/收集物/国王之魂-左.png",
   },
   "技能\u0000梦之钉能力": {
     iconFile: "/icons/商店商品/梦之门.webp",
@@ -281,17 +687,6 @@ type DragState = {
   originY: number;
 };
 
-type RegionLabelInteraction = {
-  pointerId: number;
-  labelId: string;
-  mode: "move" | "resize";
-  startClientX: number;
-  startClientY: number;
-  startLayout: RegionLabelLayout;
-  directionX: -1 | 0 | 1;
-  directionY: -1 | 0 | 1;
-};
-
 type Marker = {
   id: string;
   name: string;
@@ -302,6 +697,7 @@ type Marker = {
   x: number;
   y: number;
   size: number;
+  region?: string;
   highlight?: {
     text: string;
     iconFiles: string[];
@@ -310,6 +706,45 @@ type Marker = {
 
 type ProjectData = {
   markers: Marker[];
+};
+
+type RegionInfo = {
+  name: string;
+  englishName: string;
+  parent: string | null;
+  x: number | null;
+  y: number | null;
+  highlight: string;
+  description: string;
+};
+
+type RegionInfoData = {
+  regions: RegionInfo[];
+};
+
+const getMarkerDescription = (marker: Marker) => {
+  const sharedDescription = SHARED_MARKER_DESCRIPTIONS[marker.name];
+  const markerDescription = marker.description?.trim() ?? "";
+  if (sharedDescription && APPEND_SHARED_DESCRIPTION_MARKERS.has(marker.name)) {
+    return markerDescription && markerDescription !== "暂无描述"
+      ? `${sharedDescription}\n${markerDescription}`
+      : sharedDescription;
+  }
+  return sharedDescription ?? markerDescription;
+};
+
+const getMarkerHighlight = (marker: Marker) => {
+  if (marker.name === "蘑菇先生(Mister Mushroom)") {
+    const visitNumber = getMarkerVisitNumber(marker);
+    const visitOrdinal = visitNumber
+      ? ["", "一", "二", "三", "四", "五", "六", "七"][visitNumber]
+      : "X";
+    return {
+      text: `蘑菇先生是一个会说话的蘑菇。杀死三位守梦者后，他会出现在圣巢各处。他也被称作使者或者使者大人，并以某种方式联系到蘑菇部落。\n在全部七个地区找到他并对话，游戏进入结局时，正常结局后会播放一段额外的短动画，并获得“时代的终结”成就，这预示他将在《空洞骑士：丝之歌》中回归。\n此处为第${visitOrdinal}次与它对话。`,
+      iconFiles: [],
+    };
+  }
+  return SHARED_MARKER_HIGHLIGHTS[marker.name] ?? marker.highlight;
 };
 
 type IconClassification = {
@@ -359,6 +794,7 @@ type MerchantOffer = {
 
 type MerchantOfferSection = {
   title: string;
+  layout?: "price-table";
   description?: string;
   iconFile?: string;
   unlockPrice?: number;
@@ -389,6 +825,10 @@ const TROUPE_MASTER_GRIMM_ICON_ID =
   "Qk9TUy_liaflm6Llm6Lplb_moLzmnpfvvIhUcm91cGUgTWFzdGVyIEdyaW1t77yJLnBuZw";
 const LITTLE_FOOL_ICON_ID =
   "5Zyw5qCHK25wYy_lsI_mhJrkurrvvIhMaXR0bGUgRm9vbO-8iS53ZWJw";
+const CORNIFER_ICON_ID =
+  "5Zyw5qCHK25wYy_mn6_lsLzms5XvvIhDb3JuaWZlcu-8iS53ZWJw";
+const RELIC_SEEKER_LEMM_ICON_ID =
+  "5Zyw5qCHK25wYy_mlofnianmkJzlr7vogIXph4zlp4bvvIhSZWxpYyBTZWVrZXIgTGVtbe-8iS53ZWJw";
 const GRUB_ICON_FILE = "/icons/收集物/Grub.webp";
 const ESSENCE_ICON_FILE = "/icons/商店商品/梦之精华.png";
 const OFFER_TAB_LABELS: Record<string, string> = {
@@ -397,9 +837,68 @@ const OFFER_TAB_LABELS: Record<string, string> = {
   [NAILSMITH_ICON_ID]: "骨钉升级",
   [TROUPE_MASTER_GRIMM_ICON_ID]: "集火奖励",
   [LITTLE_FOOL_ICON_ID]: "试炼信息",
+  [CORNIFER_ICON_ID]: "出售地图",
+  [RELIC_SEEKER_LEMM_ICON_ID]: "文物收购",
 };
 
 const MERCHANT_OFFERS: Record<string, MerchantOfferSection[]> = {
+  [RELIC_SEEKER_LEMM_ICON_ID]: [
+    {
+      title: "文物收购",
+      hideHeader: true,
+      offers: [
+        {
+          name: "漫游者日记",
+          price: 200,
+          iconFile: "/icons/收集物/漫游者日记.png",
+          detail:
+            "“这些日志给我们展现了以前的虫子身心的有趣一面。\n这些很常见，所以我不会出太高的价格。”",
+        },
+        {
+          name: "圣巢印章",
+          price: 450,
+          iconFile: "/icons/收集物/圣巢印章.png",
+          detail:
+            "“这些华丽的印章是国王和他的骑士的官方标志，那些携带的虫子很珍惜它们。\n国王和他的骑士已经逝去，但印章作为古董仍然很有价值。我会为它们支付适中的价格。”",
+        },
+        {
+          name: "国王神像",
+          price: 800,
+          iconFile: "/icons/收集物/国王神像.png",
+          detail:
+            "“圣巢的国王神像，他被尊为神和统治者。这些圣像由一种神秘的白色材料制成，十分罕见，非常有价值。\n如果你把它卖给我，我会出一个好价钱。”",
+        },
+        {
+          name: "神秘蛋",
+          price: 1200,
+          iconFile: "/icons/收集物/神秘蛋.webp",
+          detail:
+            "“啊！它看起来像一个普通的蛋，但实际上是个圣巢诞生前的珍贵遗物！\n请把它卖给我！我会给你一大笔钱的。”",
+        },
+      ],
+    },
+  ],
+  [CORNIFER_ICON_ID]: [
+    {
+      title: "出售地图",
+      layout: "price-table",
+      hideHeader: true,
+      offers: [
+        { name: "遗忘十字路", price: 30 },
+        { name: "皇家水道", price: 75 },
+        { name: "苍绿之径", price: 60 },
+        { name: "雾之峡谷", price: 150 },
+        { name: "真菌荒地", price: 75 },
+        { name: "王后花园", price: 150 },
+        { name: "水晶山峰", price: 112 },
+        { name: "古老盆地", price: 112 },
+        { name: "泪水之城", price: 90 },
+        { name: "王国边缘", price: 112 },
+        { name: "深邃巢穴", price: 38 },
+        { name: "呼啸悬崖", price: 75 },
+      ],
+    },
+  ],
   [TROUPE_MASTER_GRIMM_ICON_ID]: [
     {
       title: "格林之子",
@@ -541,6 +1040,7 @@ const MERCHANT_OFFERS: Record<string, MerchantOfferSection[]> = {
           name: "简单钥匙",
           price: 950,
           iconFile: "/icons/收集物/简单钥匙.png",
+          detail: "可以打开简单锁，但是由于做工粗糙、磨损严重，只能使用一次。",
         },
       ],
     },
@@ -748,6 +1248,8 @@ const MERCHANT_OFFERS: Record<string, MerchantOfferSection[]> = {
           name: "舞梦者",
           requirement: 500,
           iconFile: "/icons/护符+护符槽图标/舞梦者（Dream Wielder）.png",
+          detail:
+            "使梦之钉击中敌人时获得的灵魂从33增长至66，还能使梦之钉攻击速度加快，所用时间从2.4秒降至0.9秒。此外，还能增加杀死敌人时随机获得精华的可能性。",
         },
         {
           name: "容器碎片",
@@ -758,6 +1260,8 @@ const MERCHANT_OFFERS: Record<string, MerchantOfferSection[]> = {
           name: "梦之门",
           requirement: 900,
           iconFile: "/icons/商店商品/梦之门.webp",
+          detail:
+            "小骑士可以长按梦之钉+下键建立梦之门，之后在几乎任何地方都能长按梦之钉+上键使用1梦境精华传送至梦之门所在的位置。同一时间只能存在一个梦之门，放置新的梦之门会使之前的消失。",
         },
         {
           name: "神秘蛋",
@@ -773,6 +1277,8 @@ const MERCHANT_OFFERS: Record<string, MerchantOfferSection[]> = {
           name: "觉醒的梦之钉",
           requirement: 1800,
           iconFile: "/icons/商店商品/觉醒的梦之钉.png",
+          detail:
+            "对宫殿广场的国王傀儡尸体使用，可以进入白色宫殿。\n可以查看深渊中手捧使小骑士获得暗影披风的虚空盆的暗影野兽的梦语。获得虚空之心后，它的梦语会产生变化。",
         },
         {
           name: "成就：升天",
@@ -839,7 +1345,8 @@ const MERCHANT_OFFERS: Record<string, MerchantOfferSection[]> = {
         },
         {
           name: "萨鲁巴的祝福",
-          detail: "获得所有护符",
+          detail:
+            "获得全部护符。\n坐在长椅上休息时，两秒后上方会出现一个舞动的萨鲁巴的幻影，使小骑士每秒回复50点灵魂，直到小骑士回复至满魂状态。",
           price: 800,
           iconFile: "/icons/商店商品/萨鲁巴的祝福.webp",
         },
@@ -963,7 +1470,22 @@ const MERCHANT_OFFERS: Record<string, MerchantOfferSection[]> = {
   ],
 };
 
-function getMarkerGlow(marker: Marker) {
+function getMarkerGlow(marker: Marker, primaryCategory?: string) {
+  if (marker.iconId === "custom_shade_gate") {
+    return "drop-shadow(0 0 2px rgba(255, 255, 255, 0.96)) drop-shadow(0 0 6px rgba(214, 230, 255, 0.74))";
+  }
+  if (
+    marker.iconId === "custom_nightmare_lantern" ||
+    marker.iconId === "custom_large_bug_corpse"
+  ) {
+    return "drop-shadow(0 0 2px rgba(255, 255, 255, 0.96)) drop-shadow(0 0 6px rgba(214, 230, 255, 0.74))";
+  }
+  if (primaryCategory === "地点") {
+    return "drop-shadow(0 0 2px rgba(184, 200, 214, 0.9)) drop-shadow(0 0 6px rgba(102, 127, 150, 0.66))";
+  }
+  if (primaryCategory === "收集物") {
+    return "drop-shadow(0 0 2px rgba(184, 200, 214, 0.9)) drop-shadow(0 0 6px rgba(102, 127, 150, 0.66))";
+  }
   if (
     marker.iconId === "5Zyw5qCHK25wYy_plb_mpIXlm77moIcucG5n" ||
     marker.iconId === "5pS26ZuG54mpL-aipuS5i-agkeWbvuaghy5wbmc" ||
@@ -997,13 +1519,12 @@ function getMarkerGlow(marker: Marker) {
 
   if (
     marker.iconId === "asset_6Ieq5a6a5LmJL-S5jOaBqe-8iFVubu-8iS53ZWJw" ||
-    marker.iconId === "icon_1785996896672_ezsbsi" ||
-    marker.iconId === TROUPE_MASTER_GRIMM_ICON_ID
+    marker.iconId === "icon_1785996896672_ezsbsi"
   ) {
     return "drop-shadow(0 0 2px rgba(255, 224, 72, 0.92)) drop-shadow(0 0 6px rgba(236, 166, 18, 0.7))";
   }
 
-  if (marker.category === "BOSS") {
+  if (marker.category === "BOSS" || primaryCategory === "Boss") {
     return "drop-shadow(0 0 2px rgba(255, 42, 52, 0.9)) drop-shadow(0 0 6px rgba(230, 8, 28, 0.65))";
   }
 
@@ -1011,7 +1532,7 @@ function getMarkerGlow(marker: Marker) {
     return "drop-shadow(0 0 2px rgba(192, 92, 255, 0.92)) drop-shadow(0 0 6px rgba(125, 42, 230, 0.7))";
   }
 
-  if (marker.category === "地标+npc") {
+  if (marker.category === "地标+npc" || primaryCategory === "NPC") {
     return "drop-shadow(0 0 2px rgba(255, 224, 72, 0.92)) drop-shadow(0 0 6px rgba(236, 166, 18, 0.7))";
   }
 
@@ -1022,48 +1543,153 @@ function getMarkerGlow(marker: Marker) {
   return undefined;
 }
 
+function getMarkerGlowColors(marker: Marker, primaryCategory?: string) {
+  const glow = getMarkerGlow(marker, primaryCategory);
+  if (!glow) return null;
+  const colors = [...glow.matchAll(/rgba\((\d+),\s*(\d+),\s*(\d+),/g)].map(
+    (match) => `${match[1]}, ${match[2]}, ${match[3]}`,
+  );
+  return colors.length
+    ? { core: colors[0], haze: colors[1] ?? colors[0] }
+    : null;
+}
+
+function markerHasPopupContent(marker: Marker) {
+  const description = getMarkerDescription(marker).trim();
+  const highlight = getMarkerHighlight(marker);
+  return Boolean(
+    (description && description !== "暂无描述") ||
+      highlight?.text?.trim() ||
+      HIGHLIGHT_ITEM_NOTES[marker.name] ||
+      (!INFORMATION_ONLY_MARKER_IDS.has(marker.id) &&
+        (MERCHANT_OFFERS[marker.iconId]?.length ?? 0) > 0),
+  );
+}
+
 export default function MapViewer() {
   const viewportRef = useRef<HTMLDivElement>(null);
+  const filterPanelRef = useRef<HTMLElement>(null);
+  const popupRef = useRef<HTMLElement>(null);
   const transformRef = useRef<ViewTransform>({ x: 0, y: 0, scale: 1 });
   const minimumScaleRef = useRef(1);
   const dragRef = useRef<DragState | null>(null);
-  const regionLabelInteractionRef = useRef<RegionLabelInteraction | null>(null);
-  const [transform, setTransform] = useState<ViewTransform>(transformRef.current);
+  const dragFrameRef = useRef<number | null>(null);
+  const pendingDragTransformRef = useRef<ViewTransform | null>(null);
+  const focusNavigationTimerRef = useRef<number | null>(null);
+  const popupVisibilityFrameRef = useRef<number | null>(null);
+  const popupVisibilityReleaseTimerRef = useRef<number | null>(null);
+  const allowPopupVisibilityCorrectionRef = useRef(false);
+  const [transform, setTransform] = useState<ViewTransform>({ x: 0, y: 0, scale: 1 });
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
+  const [markerAspectRatios, setMarkerAspectRatios] = useState(
+    () => new Map<string, number>(),
+  );
   const [dragging, setDragging] = useState(false);
+  const [smoothFocusMoving, setSmoothFocusMoving] = useState(false);
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [classification, setClassification] = useState<ClassificationData>({
     entries: [],
     relations: [],
   });
-  const [filterCollapsed, setFilterCollapsed] = useState(true);
+  const [regionInfos, setRegionInfos] = useState<RegionInfo[]>([]);
+  const [filterCollapsed, setFilterCollapsed] = useState(false);
+  const sidebarReservedWidth = !filterCollapsed && viewportWidth > 620 ? 366 : 0;
+  const expandedSidebarMapScaleFactor = sidebarReservedWidth > 0
+    ? EXPANDED_SIDEBAR_MAP_SCALE_FACTOR
+    : 1;
+  const minimumMapScale = viewportWidth && viewportHeight
+    ? Math.min((viewportWidth - sidebarReservedWidth) / MAP_WIDTH, viewportHeight / MAP_HEIGHT) * MIN_SCALE_FACTOR * expandedSidebarMapScaleFactor
+    : 1;
+  const [isResettingFilters, setIsResettingFilters] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter | null>(null);
+  const [maskFragmentCursor, setMaskFragmentCursor] = useState(0);
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
-  const [popupTab, setPopupTab] = useState<"description" | "offers">("description");
-  const [completedMarkerIds, setCompletedMarkerIds] = useState<Set<string>>(
-    () => new Set(),
-  );
-  const [regionLabelLayouts, setRegionLabelLayouts] =
-    useState<RegionLabelLayouts>(INITIAL_REGION_LABEL_LAYOUTS);
-  const [selectedRegionLabelId, setSelectedRegionLabelId] = useState<string | null>(
+  const [popupMeasuredSize, setPopupMeasuredSize] = useState<{
+    markerId: string;
+    height: number;
+  } | null>(null);
+  const [glowFocusMarkerId, setGlowFocusMarkerId] = useState<string | null>(null);
+  const [glowFocusRegionName, setGlowFocusRegionName] = useState<string | null>(
     null,
   );
+  const [hoveredRegionLabelName, setHoveredRegionLabelName] = useState<
+    string | null
+  >(null);
+  const [popupLinkSource, setPopupLinkSource] = useState<Marker | null>(null);
+  const [popupLinkFocus, setPopupLinkFocus] = useState<{
+    itemName: string;
+    ownerMarkerId: string;
+  } | null>(null);
+  const [popupTextLinks, setPopupTextLinks] = useState<PopupTextLinkTarget[]>([]);
+  const [popupTab, setPopupTab] = useState<"description" | "offers">("description");
+  const saveInputRef = useRef<HTMLInputElement>(null);
+  const [saveSlots, setSaveSlots] = useState<ParsedSaveSlot[]>([]);
+  const [selectedSaveSlot, setSelectedSaveSlot] = useState<string | null>(null);
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<"categories" | "regions">("categories");
+  const [selectedClassesExpanded, setSelectedClassesExpanded] = useState(false);
+  const [openSidebarMenu, setOpenSidebarMenu] = useState<string | null>(null);
+  const [saveFailures, setSaveFailures] = useState<{ slot: number; message: string }[]>([]);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isParsingSave, setIsParsingSave] = useState(false);
+
+  useEffect(() => {
+    saveInputRef.current?.setAttribute("webkitdirectory", "");
+  }, []);
+
+  useEffect(() => {
+    if (!openSidebarMenu) return;
+    const dismiss = (event: PointerEvent) => {
+      if (event.target instanceof Element && !event.target.closest(".sidebar-menu")) setOpenSidebarMenu(null);
+    };
+    const dismissOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpenSidebarMenu(null);
+    };
+    document.addEventListener("pointerdown", dismiss);
+    document.addEventListener("keydown", dismissOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", dismiss);
+      document.removeEventListener("keydown", dismissOnEscape);
+    };
+  }, [openSidebarMenu]);
+
+  const getMapFrame = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return null;
+    const reserved = !filterCollapsed && viewport.clientWidth > 620
+      ? (filterPanelRef.current?.offsetWidth ?? 350) + 16 : 0;
+    const width = viewport.clientWidth - reserved;
+    const height = viewport.clientHeight;
+    const scale = Math.min(width / MAP_WIDTH, height / MAP_HEIGHT) *
+      (reserved > 0 ? EXPANDED_SIDEBAR_MAP_SCALE_FACTOR : 1);
+    const mapWidth = MAP_WIDTH * scale;
+    const offset = reserved > 0 ? EXPANDED_SIDEBAR_MAP_OFFSET_X : 0;
+    // Preserve the current default position, including its right-edge adjustment.
+    const restingX = Math.min((viewport.clientWidth - mapWidth + reserved) / 2 + offset,
+      viewport.clientWidth - mapWidth + offset);
+    const centerX = restingX + mapWidth / 2;
+    return { width, height, scale, centerX, centerY: height / 2,
+      left: centerX - width / 2, right: centerX + width / 2 };
+  }, [filterCollapsed]);
 
   const constrainTransform = useCallback((next: ViewTransform) => {
     const viewport = viewportRef.current;
-    if (!viewport) return next;
+    const frame = getMapFrame();
+    if (!viewport || !frame) return next;
 
     const scaledWidth = MAP_WIDTH * next.scale;
     const scaledHeight = MAP_HEIGHT * next.scale;
     const horizontalRestingX =
-      scaledWidth <= viewport.clientWidth
-        ? (viewport.clientWidth - scaledWidth) / 2
-        : 0;
+      scaledWidth <= frame.width
+        ? frame.centerX - scaledWidth / 2
+        : frame.left;
     const horizontalMinX =
-      scaledWidth <= viewport.clientWidth
+      scaledWidth <= frame.width
         ? horizontalRestingX - MAP_EDGE_DRAG_ALLOWANCE
-        : viewport.clientWidth - scaledWidth - MAP_EDGE_DRAG_ALLOWANCE;
+        : frame.right - scaledWidth - MAP_EDGE_DRAG_ALLOWANCE;
     const horizontalMaxX = horizontalRestingX + MAP_DRAG_RIGHT_ALLOWANCE;
     const x = Math.min(horizontalMaxX, Math.max(horizontalMinX, next.x));
     const verticalRestingY =
@@ -1078,7 +1704,33 @@ export default function MapViewer() {
     const y = Math.min(verticalMaxY, Math.max(verticalMinY, next.y));
 
     return { ...next, x, y };
-  }, []);
+  }, [getMapFrame]);
+
+  const selectedSaveDetail = useMemo(
+    () => saveSlots.find((slot) => slot.slotId === selectedSaveSlot)?.detail ?? null,
+    [saveSlots, selectedSaveSlot],
+  );
+
+  const handleSaveDirectory = async (files: File[]) => {
+    setIsParsingSave(true);
+    try {
+      const result = await parseSaveDirectory(files);
+      setShowCompleted(false);
+      setSaveSlots(result.slots);
+      setSaveFailures(result.failures);
+      setSaveError(result.error ?? null);
+      setSelectedSaveSlot(result.slots[0]?.slotId ?? null);
+      setOpenSidebarMenu(null);
+    } finally {
+      setIsParsingSave(false);
+    }
+  };
+
+  const handleSaveInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    await handleSaveDirectory(files);
+    event.target.value = "";
+  };
 
   const updateTransform = useCallback(
     (next: ViewTransform) => {
@@ -1089,31 +1741,117 @@ export default function MapViewer() {
     [constrainTransform],
   );
 
+  const ensurePopupVisible = useCallback(() => {
+    const viewport = viewportRef.current;
+    const popup = popupRef.current;
+    if (!viewport || !popup) return;
+
+    const margin = 12;
+    const viewportBounds = viewport.getBoundingClientRect();
+    const popupBounds = popup.getBoundingClientRect();
+    let safeLeft = viewportBounds.left + margin;
+    const safeRight = viewportBounds.right - margin;
+    const panel = filterPanelRef.current;
+    if (!filterCollapsed && panel) {
+      const panelBounds = panel.getBoundingClientRect();
+      const panelSafeLeft = panelBounds.right + margin;
+      if (safeRight - panelSafeLeft >= popupBounds.width) {
+        safeLeft = panelSafeLeft;
+      }
+    }
+
+    let shiftX = 0;
+    let shiftY = 0;
+    if (popupBounds.left < safeLeft) {
+      shiftX = safeLeft - popupBounds.left;
+    } else if (popupBounds.right > safeRight) {
+      shiftX = safeRight - popupBounds.right;
+    }
+    if (popupBounds.top < viewportBounds.top + margin) {
+      shiftY = viewportBounds.top + margin - popupBounds.top;
+    } else if (popupBounds.bottom > viewportBounds.bottom - margin) {
+      shiftY = viewportBounds.bottom - margin - popupBounds.bottom;
+    }
+
+    if (Math.abs(shiftX) < 0.5 && Math.abs(shiftY) < 0.5) return;
+    const current = transformRef.current;
+    updateTransform({
+      ...current,
+      x: current.x + shiftX,
+      y: current.y + shiftY,
+    });
+  }, [filterCollapsed, updateTransform]);
+
+  const schedulePopupVisibilityCheck = useCallback(() => {
+    if (!allowPopupVisibilityCorrectionRef.current) return;
+    if (popupVisibilityFrameRef.current !== null) {
+      window.cancelAnimationFrame(popupVisibilityFrameRef.current);
+    }
+    if (popupVisibilityReleaseTimerRef.current !== null) {
+      window.clearTimeout(popupVisibilityReleaseTimerRef.current);
+    }
+    popupVisibilityFrameRef.current = window.requestAnimationFrame(() => {
+      ensurePopupVisible();
+      popupVisibilityFrameRef.current = window.requestAnimationFrame(() => {
+        ensurePopupVisible();
+        popupVisibilityFrameRef.current = null;
+        popupVisibilityReleaseTimerRef.current = window.setTimeout(() => {
+          allowPopupVisibilityCorrectionRef.current = false;
+          popupVisibilityReleaseTimerRef.current = null;
+        }, 120);
+      });
+    });
+  }, [ensurePopupVisible]);
+
   const fitMap = useCallback(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    const scale = Math.min(
-      viewport.clientWidth / MAP_WIDTH,
-      viewport.clientHeight / MAP_HEIGHT,
-    );
-    minimumScaleRef.current = scale * MIN_SCALE_FACTOR;
+    const frame = getMapFrame();
+    if (!frame) return;
+    minimumScaleRef.current = frame.scale * MIN_SCALE_FACTOR;
     updateTransform({
-      x: (viewport.clientWidth - MAP_WIDTH * scale) / 2,
-      y: (viewport.clientHeight - MAP_HEIGHT * scale) / 2,
-      scale,
+      x: frame.centerX - MAP_WIDTH * frame.scale / 2,
+      y: frame.centerY - MAP_HEIGHT * frame.scale / 2,
+      scale: frame.scale,
     });
-  }, [updateTransform]);
+  }, [getMapFrame, updateTransform]);
+
+  const previousMapFrameRef = useRef<ReturnType<typeof getMapFrame>>(null);
 
   useEffect(() => {
-    fitMap();
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    const observer = new ResizeObserver(fitMap);
+    const syncViewport = () => {
+      setViewportWidth(viewport.clientWidth);
+      setViewportHeight(viewport.clientHeight);
+      const frame = getMapFrame();
+      if (!frame) return;
+      const previous = previousMapFrameRef.current;
+      const current = transformRef.current;
+      previousMapFrameRef.current = frame;
+      const wasDefault = previous &&
+        Math.abs(current.scale - previous.scale) < 0.0001 &&
+        Math.abs(current.x - (previous.centerX - MAP_WIDTH * previous.scale / 2)) < 1 &&
+        Math.abs(current.y - (previous.centerY - MAP_HEIGHT * previous.scale / 2)) < 1;
+      if (!previous || wasDefault) {
+        fitMap();
+        return;
+      }
+      minimumScaleRef.current = frame.scale * MIN_SCALE_FACTOR;
+      const scale = Math.max(current.scale, minimumScaleRef.current);
+      updateTransform({
+        scale,
+        x: frame.centerX - ((previous.centerX - current.x) / current.scale) * scale,
+        y: frame.centerY - ((previous.centerY - current.y) / current.scale) * scale,
+      });
+    };
+    syncViewport();
+    const observer = new ResizeObserver(syncViewport);
     observer.observe(viewport);
     return () => observer.disconnect();
-  }, [fitMap]);
+  }, [fitMap, getMapFrame, updateTransform]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -1129,14 +1867,33 @@ export default function MapViewer() {
           return response.json() as Promise<ClassificationData>;
         },
       ),
+      fetch("/region-info.json", { signal: controller.signal }).then(
+        (response) => {
+          if (!response.ok) throw new Error("无法读取区域名称数据");
+          return response.json() as Promise<RegionInfoData>;
+        },
+      ),
     ])
-      .then(([project, classificationData]) => {
+      .then(([project, classificationData, regionInfoData]) => {
         setMarkers(project.markers ?? []);
         setClassification({
           entries: classificationData.entries ?? [],
           relations: classificationData.relations ?? [],
         });
+        setRegionInfos(regionInfoData.regions ?? []);
       })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        console.error(error);
+      });
+
+    // 弹窗文字跳转索引独立加载，失败不影响主数据（仅跳转功能降级）
+    fetch("/popup-text-links.json", { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("无法读取弹窗跳转索引");
+        return response.json() as Promise<{ links: PopupTextLinkTarget[] }>;
+      })
+      .then((linkData) => setPopupTextLinks(linkData.links ?? []))
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
         console.error(error);
@@ -1145,126 +1902,65 @@ export default function MapViewer() {
     return () => controller.abort();
   }, []);
 
-  const updateRegionLabelLayout = (
-    labelId: string,
-    layout: RegionLabelLayout,
-  ) => {
-    setRegionLabelLayouts((current) => {
-      return { ...current, [labelId]: layout };
-    });
-  };
+  const regionInfoByName = useMemo(
+    () => new Map(regionInfos.map((region) => [region.name, region])),
+    [regionInfos],
+  );
 
-  const startRegionLabelInteraction = (
-    event: React.PointerEvent<HTMLElement>,
-    labelId: string,
-    mode: "move" | "resize",
-    directionX: -1 | 0 | 1 = 0,
-    directionY: -1 | 0 | 1 = 0,
-  ) => {
-    if (event.button !== 0) return;
-    const layout = regionLabelLayouts[labelId];
-    if (!layout) return;
-    event.preventDefault();
-    event.stopPropagation();
-    regionLabelInteractionRef.current = {
-      pointerId: event.pointerId,
-      labelId,
-      mode,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      startLayout: layout,
-      directionX,
-      directionY,
-    };
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setSelectedRegionLabelId(labelId);
-  };
+  const popupTextLinkByName = useMemo(
+    () => new Map(popupTextLinks.map((link) => [link.name, link])),
+    [popupTextLinks],
+  );
 
-  const moveRegionLabelInteraction = (event: React.PointerEvent<HTMLElement>) => {
-    const interaction = regionLabelInteractionRef.current;
-    if (!interaction || interaction.pointerId !== event.pointerId) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const deltaX =
-      (event.clientX - interaction.startClientX) / transformRef.current.scale;
-    const deltaY =
-      (event.clientY - interaction.startClientY) / transformRef.current.scale;
-
-    if (interaction.mode === "move") {
-      updateRegionLabelLayout(interaction.labelId, {
-        ...interaction.startLayout,
-        x: Math.min(
-          100,
-          Math.max(0, interaction.startLayout.x + (deltaX / MAP_WIDTH) * 100),
-        ),
-        y: Math.min(
-          100,
-          Math.max(0, interaction.startLayout.y + (deltaY / MAP_HEIGHT) * 100),
-        ),
-      });
-      return;
-    }
-
-    const sizeDelta =
-      (deltaX * interaction.directionX + deltaY * interaction.directionY) / 2;
-    const isText = interaction.labelId.startsWith("text:");
-    updateRegionLabelLayout(interaction.labelId, {
-      ...interaction.startLayout,
-      size: Math.min(
-        isText ? 80 : 800,
-        Math.max(isText ? 16 : 60, interaction.startLayout.size + sizeDelta),
-      ),
-    });
-  };
-
-  const stopRegionLabelInteraction = (event: React.PointerEvent<HTMLElement>) => {
-    const interaction = regionLabelInteractionRef.current;
-    if (!interaction || interaction.pointerId !== event.pointerId) return;
-    event.preventDefault();
-    event.stopPropagation();
-    regionLabelInteractionRef.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-  };
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(
-        localStorage.getItem(COMPLETION_STORAGE_KEY) ?? "[]",
-      );
-      if (Array.isArray(saved)) {
-        setCompletedMarkerIds(
-          new Set(saved.filter((id): id is string => typeof id === "string")),
+  const allRegionChineseLabels = useMemo<RegionTextLabel[]>(() => {
+    const additions = regionInfos
+      .filter(
+        (region) =>
+          Boolean(region.parent) &&
+          region.x !== null &&
+          region.y !== null &&
+          !BASE_REGION_LABEL_NAMES.has(region.name),
+      )
+      .map((region) => {
+        const parentStyle = MAP_REGION_CHINESE_LABELS.find(
+          (candidate) => candidate.name === region.parent,
         );
+        return {
+          name: region.name,
+          x: region.x as number,
+          y: region.y as number,
+          size: 18.5035,
+          edgeGlow: parentStyle?.edgeGlow ?? "#8295A8",
+          fogGlow: parentStyle?.fogGlow ?? "#46596B",
+        };
+      });
+    return [...MAP_REGION_CHINESE_LABELS, ...additions];
+  }, [regionInfos]);
+
+  const regionLabelLayouts = useMemo<RegionLabelLayouts>(() => {
+    const next = { ...INITIAL_REGION_LABEL_LAYOUTS };
+    for (const region of allRegionChineseLabels) {
+      const labelId = `text:${region.name}`;
+      if (!next[labelId]) {
+        next[labelId] = { x: region.x, y: region.y, size: region.size };
       }
-    } catch (error) {
-      console.error("无法读取已完成点位", error);
     }
-  }, []);
-
-  const toggleMarkerCompleted = (markerId: string) => {
-    setCompletedMarkerIds((current) => {
-      const next = new Set(current);
-      if (next.has(markerId)) {
-        next.delete(markerId);
-      } else {
-        next.add(markerId);
-      }
-
-      try {
-        localStorage.setItem(COMPLETION_STORAGE_KEY, JSON.stringify([...next]));
-      } catch (error) {
-        console.error("无法保存已完成点位", error);
-      }
-      return next;
-    });
-  };
+    return next;
+  }, [allRegionChineseLabels]);
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
 
-    setSelectedRegionLabelId(null);
+    // 用户手动拖动后尊重其视角，不再为了弹窗完整显示自动回弹。
+    allowPopupVisibilityCorrectionRef.current = false;
+    if (popupVisibilityFrameRef.current !== null) {
+      window.cancelAnimationFrame(popupVisibilityFrameRef.current);
+      popupVisibilityFrameRef.current = null;
+    }
+    if (popupVisibilityReleaseTimerRef.current !== null) {
+      window.clearTimeout(popupVisibilityReleaseTimerRef.current);
+      popupVisibilityReleaseTimerRef.current = null;
+    }
 
     const current = transformRef.current;
     dragRef.current = {
@@ -1282,19 +1978,63 @@ export default function MapViewer() {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
 
-    updateTransform({
+    pendingDragTransformRef.current = {
       ...transformRef.current,
       x: drag.originX + event.clientX - drag.startX,
       y: drag.originY + event.clientY - drag.startY,
+    };
+    if (dragFrameRef.current !== null) return;
+    dragFrameRef.current = window.requestAnimationFrame(() => {
+      dragFrameRef.current = null;
+      const pending = pendingDragTransformRef.current;
+      pendingDragTransformRef.current = null;
+      if (pending) updateTransform(pending);
     });
   };
 
+  const closeSelectedMarker = () => {
+    if (focusNavigationTimerRef.current !== null) {
+      window.clearTimeout(focusNavigationTimerRef.current);
+      focusNavigationTimerRef.current = null;
+    }
+    if (popupVisibilityFrameRef.current !== null) {
+      window.cancelAnimationFrame(popupVisibilityFrameRef.current);
+      popupVisibilityFrameRef.current = null;
+    }
+    if (popupVisibilityReleaseTimerRef.current !== null) {
+      window.clearTimeout(popupVisibilityReleaseTimerRef.current);
+      popupVisibilityReleaseTimerRef.current = null;
+    }
+    allowPopupVisibilityCorrectionRef.current = false;
+    setSmoothFocusMoving(false);
+    setSelectedMarker(null);
+    setGlowFocusMarkerId(null);
+    setGlowFocusRegionName(null);
+    setPopupLinkSource(null);
+    setPopupLinkFocus(null);
+  };
+
   const stopDragging = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (dragRef.current?.pointerId !== event.pointerId) return;
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const movedDistance = Math.hypot(
+      event.clientX - drag.startX,
+      event.clientY - drag.startY,
+    );
+    if (dragFrameRef.current !== null) {
+      window.cancelAnimationFrame(dragFrameRef.current);
+      dragFrameRef.current = null;
+    }
+    const pending = pendingDragTransformRef.current;
+    pendingDragTransformRef.current = null;
+    if (pending) updateTransform(pending);
     dragRef.current = null;
     setDragging(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    if (movedDistance < 5 && selectedMarker) {
+      closeSelectedMarker();
     }
   };
 
@@ -1322,50 +2062,261 @@ export default function MapViewer() {
     });
   };
 
+  const zoomToScale = (scale: number) => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const current = transformRef.current;
+    const nextScale = Math.min(MAX_SCALE, Math.max(minimumScaleRef.current, scale));
+    const frame = getMapFrame();
+    if (!frame) return;
+    const { centerX, centerY } = frame;
+    updateTransform({
+      scale: nextScale,
+      x: centerX - ((centerX - current.x) / current.scale) * nextScale,
+      y: centerY - ((centerY - current.y) / current.scale) * nextScale,
+    });
+  };
+
   const getPopupPosition = (marker: Marker) => {
-    const viewportWidth = viewportRef.current?.clientWidth ?? 0;
-    const markerX = transform.x + (marker.x / 100) * MAP_WIDTH * transform.scale;
-    const markerY = transform.y + (marker.y / 100) * MAP_HEIGHT * transform.scale;
+    const markerX =
+      transform.x + (marker.x / 100) * MAP_WIDTH * transform.scale;
+    const markerY =
+      transform.y + (marker.y / 100) * MAP_HEIGHT * transform.scale;
+    const markerAspectRatio = markerAspectRatios.get(marker.id) ?? 1;
+    const renderedMarkerHeight = marker.size * transform.scale * markerAspectRatio;
+    const markerTop = markerY - renderedMarkerHeight / 2;
+    const markerBottom = markerY + renderedMarkerHeight / 2;
     const popupHalfWidth = Math.min(190, Math.max(0, (viewportWidth - 24) / 2));
     const left = Math.min(
       Math.max(markerX, popupHalfWidth + 12),
       Math.max(popupHalfWidth + 12, viewportWidth - popupHalfWidth - 12),
     );
-    const showBelow = markerY < 157;
-    const markerRadius = (marker.size * transform.scale) / 2;
+    const popupHeight =
+      (popupMeasuredSize?.markerId === marker.id
+        ? popupMeasuredSize.height
+        : null) ??
+      Math.min(400, Math.max(0, viewportHeight - 32));
+    const availableAbove = markerTop - 26;
+    const availableBelow = viewportHeight - markerBottom - 26;
+    const showBelow =
+      availableAbove < popupHeight && availableBelow > availableAbove;
+    const popupMargin = 12;
+    const rawTop = showBelow ? markerBottom + 14 : markerTop - 14;
+    const top = showBelow
+      ? Math.min(
+          Math.max(rawTop, popupMargin),
+          Math.max(popupMargin, viewportHeight - popupHeight - popupMargin),
+        )
+      : Math.min(
+          Math.max(rawTop, popupHeight + popupMargin),
+          Math.max(popupHeight + popupMargin, viewportHeight - popupMargin),
+        );
+    const arrowOffset = Math.min(
+      popupHalfWidth - 18,
+      Math.max(18 - popupHalfWidth, markerX - left),
+    );
 
     return {
       left,
-      top: showBelow ? markerY + markerRadius + 14 : markerY - markerRadius - 14,
+      top,
       showBelow,
+      arrowOffset,
     };
   };
 
   const popupPosition = selectedMarker ? getPopupPosition(selectedMarker) : null;
-  const selectedMerchantSections = selectedMarker
-    ? (MERCHANT_OFFERS[selectedMarker.iconId] ?? [])
+  const activeCategoryKeys = useMemo(
+    () => categoryFilter?.secondaries ?? [],
+    [categoryFilter],
+  );
+  const normalizedFocusSearch = searchQuery.trim().toLocaleLowerCase("zh-CN");
+  const categoryRegionNames = useMemo(
+    () =>
+      new Set(
+        activeCategoryKeys
+          .filter((key) => key.startsWith("区域\u0000"))
+          .map((key) => key.split("\u0000")[1]),
+      ),
+    [activeCategoryKeys],
+  );
+  const searchRegionNames = useMemo(
+    () =>
+      new Set(
+        normalizedFocusSearch
+          ? regionInfos
+              .filter((region) =>
+                normalizeItemName(region.name)
+                  .toLocaleLowerCase("zh-CN")
+                  .includes(normalizedFocusSearch),
+              )
+              .map((region) => region.name)
+          : [],
+      ),
+    [normalizedFocusSearch, regionInfos],
+  );
+  const activeRegionNames = useMemo(
+    () => new Set([...categoryRegionNames, ...searchRegionNames]),
+    [categoryRegionNames, searchRegionNames],
+  );
+  const activeMarkerCategoryKeys = activeCategoryKeys.filter(
+    (key) => !key.startsWith("区域\u0000"),
+  );
+  const activeCategoryEntries = classification.entries.filter((entry) =>
+    activeMarkerCategoryKeys.includes(`${entry.primary}\u0000${entry.secondary}`),
+  );
+  const activeSearchEntries = normalizedFocusSearch
+    ? classification.entries.filter((entry) =>
+        [entry.name, entry.primary, entry.secondary].some((value) =>
+          normalizeItemName(value ?? "")
+            .toLocaleLowerCase("zh-CN")
+            .includes(normalizedFocusSearch),
+        ),
+      )
     : [];
-  const selectedDescriptionParagraphs = selectedMarker?.description?.trim()
-    ? selectedMarker.description
+  const activeSearchPopupItemNames = normalizedFocusSearch
+    ? [
+        ...markers.flatMap((marker) =>
+          getPopupEmbeddedItemIcons(marker.name).map((icon) => icon.alt),
+        ),
+        ...classification.relations.map((relation) => relation.itemName),
+      ].filter((name) =>
+        normalizeItemName(name)
+          .toLocaleLowerCase("zh-CN")
+          .includes(normalizedFocusSearch),
+      )
+    : [];
+  const activeCategoryPopupItemNames = new Set(
+    activeCategoryEntries.map((entry) => normalizeItemName(entry.name)),
+  );
+  const activeSearchPopupNames = new Set(
+    [...activeSearchEntries.map((entry) => entry.name), ...activeSearchPopupItemNames].map(
+      (name) => normalizeItemName(name),
+    ),
+  );
+  const isPopupLinkFocus =
+    Boolean(popupLinkFocus) &&
+    selectedMarker?.id === popupLinkFocus?.ownerMarkerId;
+  const popupLinkItemName = normalizeItemName(
+    isPopupLinkFocus && popupLinkFocus ? popupLinkFocus.itemName : "",
+  );
+  const activeCategoryItemNames = new Set(
+    [
+      ...activeCategoryEntries.map((entry) => entry.name),
+      ...activeSearchEntries.map((entry) => entry.name),
+      ...activeSearchPopupItemNames,
+      ...(isPopupLinkFocus && popupLinkFocus ? [popupLinkFocus.itemName] : []),
+    ].map((name) => normalizeItemName(name)),
+  );
+  const popupItemMatchesActiveFilters = (...names: Array<string | undefined>) => {
+    const normalizedNames = names
+      .filter((name): name is string => Boolean(name))
+      .map((name) => normalizeItemName(name));
+
+    return (
+      (!isPopupLinkFocus ||
+        normalizedNames.some((name) => name === popupLinkItemName)) &&
+      (activeMarkerCategoryKeys.length === 0 ||
+        normalizedNames.some((name) => activeCategoryPopupItemNames.has(name))) &&
+      (!normalizedFocusSearch ||
+        normalizedNames.some((name) => activeSearchPopupNames.has(name)))
+    );
+  };
+  const isMaskFragmentFocus =
+    activeRegionNames.size > 0 ||
+    activeMarkerCategoryKeys.length > 0 ||
+    Boolean(normalizedFocusSearch);
+  const isSingleCategoryFocus =
+    activeMarkerCategoryKeys.length > 0 ||
+    Boolean(normalizedFocusSearch);
+  const selectedMarkerDirectlyMatchesFilter = selectedMarker
+    ? [...activeCategoryEntries, ...activeSearchEntries].some(
+        (entry) =>
+          entry.iconId === selectedMarker.iconId &&
+          entry.name === selectedMarker.name,
+      )
+    : false;
+  const selectedMarkerContainsFilteredPopupItem = selectedMarker
+    ? getPopupEmbeddedItemIcons(selectedMarker.name).some((icon) =>
+        popupItemMatchesActiveFilters(icon.alt),
+      ) ||
+      classification.relations.some(
+        (relation) =>
+          relation.ownerIconId === selectedMarker.iconId &&
+          popupItemMatchesActiveFilters(relation.itemName),
+      )
+    : false;
+  const shouldFilterPopupContents =
+    isPopupLinkFocus ||
+    (!popupLinkSource &&
+      isMaskFragmentFocus &&
+      ((activeMarkerCategoryKeys.length > 0 &&
+        !selectedMarkerDirectlyMatchesFilter) ||
+        (Boolean(normalizedFocusSearch) &&
+          selectedMarkerContainsFilteredPopupItem)));
+  const selectedMerchantSectionsBase = selectedMarker
+    ? INFORMATION_ONLY_MARKER_IDS.has(selectedMarker.id)
+      ? []
+      : (MERCHANT_OFFERS[selectedMarker.iconId] ?? [])
+    : [];
+  const shouldShowFullGrimmchildRewards = Boolean(
+    selectedMarker?.iconId === TROUPE_MASTER_GRIMM_ICON_ID &&
+      ["格林之子", "第一阶段", "第二阶段", "第三阶段", "第四阶段"].some(
+        (name) => activeCategoryItemNames.has(normalizeItemName(name)),
+      ),
+  );
+  const selectedMerchantSections = shouldFilterPopupContents
+    ? shouldShowFullGrimmchildRewards
+      ? selectedMerchantSectionsBase
+      : selectedMerchantSectionsBase
+        .map((section) => ({
+          ...section,
+          hideHeader:
+            selectedMerchantSectionsBase.length === 1
+              ? true
+              : section.hideHeader,
+          hideCount: true,
+          offers: section.offers.filter(
+            (offer) => popupItemMatchesActiveFilters(
+              offer.name,
+              offer.rewardIconLabel,
+            ),
+          ),
+        }))
+        .filter((section) => section.offers.length > 0)
+    : selectedMerchantSectionsBase;
+  const hideUnmatchedDescription = shouldFilterPopupContents;
+  const selectedMarkerDescription = selectedMarker
+    ? getMarkerDescription(selectedMarker)
+    : "";
+  const selectedDescriptionParagraphs = selectedMarkerDescription.trim()
+    ? selectedMarkerDescription
         .split(/\r?\n/)
         .map((paragraph) => paragraph.trim())
         .filter(Boolean)
     : [];
-  const selectedPopupHighlight = selectedMarker?.highlight;
+  const selectedPopupHighlight = selectedMarker
+    ? getMarkerHighlight(selectedMarker)
+    : undefined;
   const selectedHighlightLeadingIcon = selectedMarker
     ? HIGHLIGHT_LEADING_ICONS[selectedMarker.name]
     : undefined;
-  const selectedClassification = selectedMarker
-    ? (classification.entries.find(
+  const displayedHighlightLeadingIcon = selectedHighlightLeadingIcon;
+  const selectedClassifications = selectedMarker
+    ? classification.entries.filter(
         (entry) =>
           entry.iconId === selectedMarker.iconId &&
           entry.name === selectedMarker.name &&
           entry.primary,
-      ) ??
-      classification.entries.find(
-        (entry) => entry.iconId === selectedMarker.iconId && entry.primary,
-      ))
-    : undefined;
+      )
+    : [];
+  const selectedClassification =
+    selectedClassifications.find((entry) => entry.primary === "Boss") ??
+    selectedClassifications[0] ??
+    (selectedMarker
+      ? classification.entries.find(
+          (entry) => entry.iconId === selectedMarker.iconId && entry.primary,
+        )
+      : undefined);
   const getPopupItemGlowClass = (itemName = "", iconFile = "") => {
     const decodedIconFile = decodeURIComponent(iconFile);
     const iconBaseName =
@@ -1374,13 +2325,9 @@ export default function MapViewer() {
       normalizeItemName(itemName),
       normalizeItemName(iconBaseName),
     ]);
-    if (
-      normalizedCandidates.has("面具碎片") ||
-      normalizedCandidates.has("容器碎片") ||
-      normalizedCandidates.has("灵魂碎片")
-    ) {
-      return " is-white-glow";
-    }
+    const matchedEntry = classification.entries.find((entry) =>
+      normalizedCandidates.has(normalizeItemName(entry.name)),
+    );
     const isCharm = classification.entries.some(
       (entry) =>
         entry.primary === "技能" &&
@@ -1390,62 +2337,255 @@ export default function MapViewer() {
     const isCharmIconFile =
       decodedIconFile.includes("/护符+护符槽图标/") &&
       !iconBaseName.includes("护符槽");
-    if (isCharm || isCharmIconFile) return " is-blue-glow";
     const isNailArt = classification.entries.some(
       (entry) =>
         entry.primary === "技能" &&
         entry.secondary === "骨钉技艺" &&
         normalizedCandidates.has(normalizeItemName(entry.name)),
     );
-    if (isNailArt || decodedIconFile.includes("/剑技/")) {
-      return " is-purple-glow";
+    let glowClass = "";
+    if (isCharm || isCharmIconFile) {
+      glowClass = "is-blue-glow";
+    } else if (
+      matchedEntry?.primary === "技能" ||
+      isNailArt ||
+      decodedIconFile.includes("/剑技/")
+    ) {
+      glowClass = "is-purple-glow";
+    } else if (
+      matchedEntry?.primary === "收集物" ||
+      decodedIconFile.includes("/收集物/")
+    ) {
+      glowClass = "is-green-glow";
+    } else if (matchedEntry?.primary === "地点") {
+      glowClass = "is-silver-blue-glow";
+    } else if (matchedEntry?.primary === "NPC") {
+      glowClass = "is-yellow-glow";
+    } else if (matchedEntry?.primary === "Boss") {
+      glowClass = "is-red-glow";
     }
-    return "";
+    const isFilteredItem =
+      isMaskFragmentFocus &&
+      [...normalizedCandidates].some((name) =>
+        activeCategoryItemNames.has(name),
+      );
+    const sizeClass =
+      normalizedCandidates.has("苍白矿石") &&
+      selectedMarker?.iconId !== NAILSMITH_ICON_ID
+      ? " is-pale-ore-popup-icon"
+      : "";
+    return `${glowClass ? ` ${glowClass}${isFilteredItem ? " is-popup-glow-breathing" : ""}` : ""}${sizeClass}`;
   };
-  const selectedCategoryLabel = selectedMarker
-    ? selectedClassification?.primary === "Boss" && selectedClassification.secondary
-      ? selectedClassification.secondary
-      : (selectedClassification?.primary ?? selectedMarker.category)
-    : "";
+  const selectedCategoryLabels = selectedMarker
+    ? [...selectedClassifications]
+        .sort((left, right) => {
+          const priority = (primary: string) =>
+            primary === "Boss" ? 0 : primary === "NPC" ? 1 : 2;
+          return priority(left.primary) - priority(right.primary);
+        })
+        .map((entry) =>
+          entry.secondary &&
+          (entry.primary === "Boss" || entry.primary === "NPC" ||
+            new Set(
+              selectedClassifications
+                .filter((classification) => classification.primary === entry.primary)
+                .map((classification) => classification.secondary)
+                .filter(Boolean),
+            ).size > 1)
+            ? entry.secondary
+            : entry.primary,
+        )
+        .filter(
+          (label, index, labels) => Boolean(label) && labels.indexOf(label) === index,
+        )
+    : [];
+  if (selectedMarker && selectedCategoryLabels.length === 0) {
+    selectedCategoryLabels.push(selectedMarker.category);
+  }
   const selectedMarkerSupportsCompletion = Boolean(
     selectedClassification?.primary &&
       COMPLETABLE_PRIMARY_CATEGORIES.has(selectedClassification.primary),
   );
-  const selectedSecondaryCompletionGroup =
-    selectedClassification?.primary && selectedClassification.secondary
-      ? markers.filter((marker) => {
-          const markerClassification =
-            classification.entries.find(
-              (entry) =>
-                entry.iconId === marker.iconId &&
-                entry.name === marker.name &&
-                entry.primary,
-            ) ??
-            classification.entries.find(
-              (entry) => entry.iconId === marker.iconId && entry.primary,
-            );
-
-          return (
-            markerClassification?.primary === selectedClassification.primary &&
-            markerClassification.secondary === selectedClassification.secondary
-          );
-        })
+  const allSaveMappingProgress = selectedSaveDetail
+    ? getSaveMappingProgress(selectedSaveDetail)
+    : [];
+  const selectedMarkerSaveMappings =
+    selectedMarker
+      ? allSaveMappingProgress.filter(
+          (mapping) => mapping.markerId === selectedMarker.id,
+        )
       : [];
-  const selectedSecondaryCompletedCount =
-    selectedSecondaryCompletionGroup.filter((marker) =>
-      completedMarkerIds.has(marker.id),
-    ).length;
+  const canonicalPopupSaveName = (name: string) =>
+    normalizeItemName(name).replaceAll("的", "").replaceAll("匙", "钥");
+  const fragileCharmParserIds = new Set([
+    "charm-023",
+    "charm-024",
+    "charm-025",
+  ]);
+  const mappingCountsAsCollected = (
+    mapping: (typeof selectedMarkerSaveMappings)[number],
+  ) => {
+    if (mapping.state !== "collected") return false;
+    if (
+      selectedMarker &&
+      canonicalPopupSaveName(selectedMarker.name) === "迪万" &&
+      fragileCharmParserIds.has(mapping.parserId)
+    ) {
+      return mapping.formId?.startsWith("unbreakable-") === true;
+    }
+    return true;
+  };
+  const selectedMarkerCompletedFromSave = Boolean(
+    selectedMarker &&
+      selectedMarkerSaveMappings.some(
+        (mapping) =>
+          mapping.state === "collected" &&
+          [mapping.displayName, mapping.groupName].some(
+            (name) =>
+              canonicalPopupSaveName(name) ===
+              canonicalPopupSaveName(selectedMarker.name),
+          ),
+      ),
+  );
+  const isPopupItemCollected = (
+    names: Array<string | undefined>,
+    offer?: MerchantOffer,
+  ) => {
+    const candidates = names
+      .filter((name): name is string => Boolean(name))
+      .map(canonicalPopupSaveName);
+    if (
+      candidates.some((name) =>
+        ["第一阶段", "第二阶段", "第三阶段", "第四阶段"].includes(name),
+      )
+    ) {
+      candidates.push(canonicalPopupSaveName("格林之子"));
+    }
+    const exactMatch = selectedMarkerSaveMappings.find((mapping) =>
+      (mapping.parserId === "charm-040" && mapping.formNameZh
+        ? [mapping.formNameZh]
+        : [mapping.displayName, mapping.formNameZh]
+      ).some(
+        (name) => name && candidates.includes(canonicalPopupSaveName(name)),
+      ),
+    );
+    if (exactMatch) return mappingCountsAsCollected(exactMatch);
+
+    const groupMatches = selectedMarkerSaveMappings.filter((mapping) =>
+      candidates.includes(canonicalPopupSaveName(mapping.groupName)),
+    );
+    if (groupMatches.length === 0) {
+      const ownerName = selectedMarker
+        ? canonicalPopupSaveName(selectedMarker.name)
+        : "";
+      const contextualMatch = allSaveMappingProgress.find((mapping) => {
+        const displayName = canonicalPopupSaveName(mapping.displayName);
+        return (
+          ownerName &&
+          displayName.includes(ownerName) &&
+          candidates.some((candidate) => displayName.includes(candidate))
+        );
+      });
+      return contextualMatch?.state === "collected";
+    }
+    if (!offer || groupMatches.length === 1) {
+      return groupMatches.some(mappingCountsAsCollected);
+    }
+
+    const repeatedOffers = selectedMerchantSectionsBase.flatMap((section) =>
+      section.offers.filter((candidate) =>
+        candidates.includes(canonicalPopupSaveName(candidate.name)),
+      ),
+    );
+    const occurrenceIndex = repeatedOffers.indexOf(offer);
+    const occurrenceMatch = groupMatches[occurrenceIndex];
+    return occurrenceMatch ? mappingCountsAsCollected(occurrenceMatch) : false;
+  };
+  const popupItemCompletedStamp = (
+    <span className="popup-item-completed-stamp" aria-hidden="true">
+      <img src="/assets/completed-stamp.png" alt="" draggable={false} />
+    </span>
+  );
 
   const categoryGroups = useMemo(() => {
+    const saveGroupProgress = getSaveGroupProgress(selectedSaveDetail);
+    const canonicalProgressName = (name: string) =>
+      normalizeItemName(name).replaceAll("的", "").replaceAll("匙", "钥");
+    const collectedBySecondary = new Map<string, number>();
+    const mappedTotalBySecondary = new Map<string, number>();
+    const mappedSecondaries = new Set<string>();
+    const charmKey = `技能\u0000护符`;
+    const itemKey = `收集物\u0000道具`;
+    const charmDisplayProgress = selectedSaveDetail
+      ? getCharmDisplayProgress(selectedSaveDetail)
+      : undefined;
+    if (selectedSaveDetail) {
+      for (const mapping of getSaveMappingProgress(selectedSaveDetail)) {
+        // All charm forms, including the complete Kingsoul, are counted only
+        // by the dedicated 45-entry charm rule below.
+        if (mapping.groupName === "护符") continue;
+        const displayName = canonicalProgressName(mapping.displayName);
+        const groupName = canonicalProgressName(mapping.groupName);
+        const forcedBossSecondary =
+          mapping.groupName === "Boss攻略进度" &&
+          mapping.parserId === "troupe-master-grimm"
+            ? "非主线Boss"
+            : mapping.parserId === "zote-the-mighty"
+              ? "梦境Boss"
+            : undefined;
+        const matchedEntry =
+          (forcedBossSecondary
+            ? classification.entries.find(
+                (entry) =>
+                  entry.primary === "Boss" &&
+                  entry.secondary === forcedBossSecondary,
+              )
+            : undefined) ??
+          classification.entries.find(
+            (entry) => canonicalProgressName(entry.name) === displayName,
+          ) ??
+          classification.entries.find(
+            (entry) => canonicalProgressName(entry.name) === groupName,
+          ) ??
+          classification.entries.find(
+            (entry) => canonicalProgressName(entry.secondary) === groupName,
+          );
+        // NPC markers can host mapped rewards or quest states, but the NPC
+        // classification itself is not a collectible progress category.
+        if (!matchedEntry?.secondary || matchedEntry.primary === "NPC") continue;
+        const key = `${matchedEntry.primary}\u0000${matchedEntry.secondary}`;
+        mappedSecondaries.add(key);
+        mappedTotalBySecondary.set(
+          key,
+          (mappedTotalBySecondary.get(key) ?? 0) + 1,
+        );
+        if (mapping.state === "collected") {
+          collectedBySecondary.set(key, (collectedBySecondary.get(key) ?? 0) + 1);
+        }
+      }
+      mappedSecondaries.add(charmKey);
+      collectedBySecondary.set(charmKey, charmDisplayProgress!.collected);
+      mappedSecondaries.add(itemKey);
+    }
     const groups = new Map<
       string,
       Map<
         string,
-        { name: string; count: number; iconFile?: string; iconScale?: number }
+        {
+          name: string;
+          count: number;
+          saveProgress?: { collected: number; total: number };
+          iconFile?: string;
+          iconScale?: number;
+        }
       >
     >();
     const popupOccurrenceCounts = new Map<string, number>();
-    for (const sections of Object.values(MERCHANT_OFFERS)) {
+    let countedKingsoulFragments = false;
+    const countedMultiEndingCharacters = new Set<string>();
+    const countedTaskNpcCharacters = new Set<string>();
+    for (const [iconId, sections] of Object.entries(MERCHANT_OFFERS)) {
+      if (iconId === CORNIFER_ICON_ID) continue;
       for (const section of sections) {
         for (const offer of section.offers) {
           const offerName = normalizeItemName(offer.name);
@@ -1489,12 +2629,52 @@ export default function MapViewer() {
       const countedOccurrences =
         (entry.location.includes("地图") ? matchingMarkers.length : 0) +
         (entry.location.includes("弹窗") ? popupCount : 0);
-      const entryCount = countedOccurrences > 0 ? countedOccurrences : 1;
+      let entryCount = countedOccurrences > 0 ? countedOccurrences : 1;
+      if (
+        entry.primary === "技能" &&
+        entry.secondary === "护符" &&
+        ["第二阶段", "第三阶段", "第四阶段"].includes(entry.name)
+      ) {
+        entryCount = 0;
+      }
+      if (
+        entry.primary === "收集物" &&
+        entry.secondary === "国王之魂碎片"
+      ) {
+        entryCount = countedKingsoulFragments ? 0 : 2;
+        countedKingsoulFragments = true;
+      }
+      if (
+        entry.primary === "NPC" &&
+        entry.secondary === "对话型NPC" &&
+        (entry.name === "阿布(Cloth)" || entry.name === "奎若(Quirrel)")
+      ) {
+        entryCount = 1;
+      }
+      if (entry.primary === "NPC" && entry.secondary === "多结局NPC") {
+        const characterKey = entry.name.includes("左特")
+          ? "左特"
+          : normalizeItemName(entry.name);
+        entryCount = countedMultiEndingCharacters.has(characterKey) ? 0 : 1;
+        countedMultiEndingCharacters.add(characterKey);
+      }
+      if (
+        entry.primary === "NPC" &&
+        entry.secondary === "任务型NPC" &&
+        entry.name.includes("左特")
+      ) {
+        const characterKey = "左特";
+        entryCount = countedTaskNpcCharacters.has(characterKey) ? 0 : 1;
+        countedTaskNpcCharacters.add(characterKey);
+      }
       const iconOverride =
         FILTER_CATEGORY_ICON_OVERRIDES[`${entry.primary}\u0000${entry.secondary}`];
       secondary.set(entry.secondary, {
         name: entry.secondary,
         count: (current?.count ?? 0) + entryCount,
+        saveProgress: selectedSaveDetail
+          ? saveGroupProgress[entry.secondary]
+          : undefined,
         iconFile:
           iconOverride?.iconFile ??
           current?.iconFile ??
@@ -1504,35 +2684,80 @@ export default function MapViewer() {
         iconScale: iconOverride?.iconScale ?? current?.iconScale,
       });
     }
+    groups.set(
+      "区域",
+      new Map(
+        regionInfos
+          .filter((region) => !region.parent)
+          .map((region) => [
+            region.name,
+            {
+              name: region.name,
+              count:
+                markers.filter((marker) => marker.region === region.name).length +
+                1 +
+                regionInfos.filter((candidate) => candidate.parent === region.name)
+                  .length,
+              iconFile: "/filter-icons/region-map-quill.png",
+              iconScale: 0.82,
+            },
+          ]),
+      ),
+    );
+    if (selectedSaveDetail) {
+      for (const [primary, secondaryMap] of groups) {
+        for (const [secondaryName, secondary] of secondaryMap) {
+          const key = `${primary}\u0000${secondaryName}`;
+          if (!mappedSecondaries.has(key)) continue;
+          secondary.saveProgress = {
+            collected: collectedBySecondary.get(key) ?? 0,
+            total:
+              key === charmKey && charmDisplayProgress
+                ? charmDisplayProgress.total
+                : key === itemKey
+                  ? 21
+                  : mappedTotalBySecondary.get(key) ?? secondary.count,
+          };
+        }
+      }
+    }
     return [...groups.entries()].map(([primary, secondaryMap]) => ({
       primary,
       secondary: [...secondaryMap.values()].sort(
         (left, right) => right.count - left.count,
       ),
     }));
-  }, [classification.entries, markers]);
+  }, [classification.entries, markers, regionInfos, selectedSaveDetail]);
 
-  const allSecondaryCategoryKeys = useMemo(
-    () =>
-      categoryGroups.flatMap((group) =>
-        group.secondary.map((secondary) => `${group.primary}\u0000${secondary.name}`),
-      ),
-    [categoryGroups],
-  );
-  const allSecondaryCategoriesSelected =
-    allSecondaryCategoryKeys.length > 0 &&
-    allSecondaryCategoryKeys.every((key) =>
-      categoryFilter?.secondaries?.includes(key),
+  const selectedSecondaryProgress =
+    selectedClassification?.primary && selectedClassification.secondary
+      ? categoryGroups
+          .find((group) => group.primary === selectedClassification.primary)
+          ?.secondary.find(
+            (secondary) => secondary.name === selectedClassification.secondary,
+          )?.saveProgress
+      : undefined;
+
+  const normalizedSearch = normalizedFocusSearch;
+  const categoryVisibleMarkers = useMemo(() => {
+    const selectedCategoryKeys = (categoryFilter?.secondaries ?? []).filter(
+      (key) => !key.startsWith("区域\u0000"),
     );
+    const selectedRegionNames = new Set(
+      (categoryFilter?.secondaries ?? [])
+        .filter((key) => key.startsWith("区域\u0000"))
+        .map((key) => key.split("\u0000")[1]),
+    );
+    const hasMarkerCategoryFilter = selectedCategoryKeys.length > 0;
+    const hasRegionFilter = selectedRegionNames.size > 0;
+    if (!hasMarkerCategoryFilter && !hasRegionFilter && !normalizedSearch) return markers;
 
-  const normalizedSearch = searchQuery.trim().toLocaleLowerCase("zh-CN");
-  const visibleMarkers = useMemo(() => {
-    if (!categoryFilter && !normalizedSearch) return markers;
-
+    const isCorniferMerchantFilter =
+      selectedCategoryKeys.includes("NPC\u0000商人") &&
+      !selectedCategoryKeys.includes("地点\u0000地图");
     const categoryMatchedEntries = classification.entries.filter((entry) => {
-      const selectedSecondaries = categoryFilter?.secondaries ?? [];
-      return !categoryFilter ||
-        selectedSecondaries.includes(`${entry.primary}\u0000${entry.secondary}`);
+      return !hasMarkerCategoryFilter ||
+        selectedCategoryKeys.includes(`${entry.primary}\u0000${entry.secondary}`);
     });
     const categoryMatchedKeys = new Set(
       categoryMatchedEntries.map((entry) => `${entry.iconId}\u0000${entry.name}`),
@@ -1540,71 +2765,440 @@ export default function MapViewer() {
     const categoryMatchedNames = new Set(
       categoryMatchedEntries.map((entry) => normalizeItemName(entry.name)),
     );
+    const isKingsoulFragmentCategorySelected = selectedCategoryKeys.includes(
+      "收集物\u0000国王之魂碎片",
+    );
+    const categoryMatchesPopupItem = (itemName: string) => {
+      const normalizedItemName = normalizeItemName(itemName);
+      if (normalizedItemName === "国王之魂") {
+        return isKingsoulFragmentCategorySelected;
+      }
+      return categoryMatchedNames.has(normalizedItemName);
+    };
     const categoryRelatedOwnerIds = new Set(
       classification.relations
-        .filter((relation) =>
-          categoryMatchedNames.has(normalizeItemName(relation.itemName)),
+        .filter((relation) => categoryMatchesPopupItem(relation.itemName))
+        .map((relation) => relation.ownerIconId),
+    );
+    const searchMatchedEntries = normalizedSearch
+      ? classification.entries.filter((entry) =>
+          [entry.name, entry.primary, entry.secondary].some((value) =>
+            normalizeItemName(value ?? "")
+              .toLocaleLowerCase("zh-CN")
+              .includes(normalizedSearch),
+          ),
         )
+      : [];
+    const searchMatchedKeys = new Set(
+      searchMatchedEntries.map((entry) => `${entry.iconId}\u0000${entry.name}`),
+    );
+    const searchMatchedNames = new Set(
+      searchMatchedEntries.map((entry) => normalizeItemName(entry.name)),
+    );
+    const isKingsoulFragmentSearchMatch =
+      "国王之魂".includes(normalizedSearch) ||
+      searchMatchedEntries.some(
+        (entry) =>
+          entry.primary === "收集物" &&
+          entry.secondary === "国王之魂碎片",
+      );
+    const searchMatchesPopupItem = (itemName: string) => {
+      const normalizedItemName = normalizeItemName(itemName);
+      if (normalizedItemName === "国王之魂") {
+        return isKingsoulFragmentSearchMatch;
+      }
+      return searchMatchedNames.has(normalizedItemName);
+    };
+    const searchRelatedOwnerIds = new Set(
+      classification.relations
+        .filter((relation) => searchMatchesPopupItem(relation.itemName))
         .map((relation) => relation.ownerIconId),
     );
 
-    return markers.filter((marker) => {
-      const categoryMatches = !categoryFilter ||
+    const matchedMarkers = markers.filter((marker) => {
+      if (hasRegionFilter && (!marker.region || !selectedRegionNames.has(marker.region))) {
+        return false;
+      }
+      const categoryMatches = !hasMarkerCategoryFilter ||
         categoryMatchedKeys.has(`${marker.iconId}\u0000${marker.name}`) ||
-        categoryRelatedOwnerIds.has(marker.iconId) ||
+        (!INFORMATION_ONLY_MARKER_IDS.has(marker.id) &&
+          categoryRelatedOwnerIds.has(marker.iconId)) ||
         getPopupEmbeddedItemIcons(marker.name).some((icon) =>
-          categoryMatchedNames.has(normalizeItemName(icon.alt)),
+          categoryMatchesPopupItem(icon.alt),
         );
       if (!categoryMatches) return false;
+      if (
+        isCorniferMerchantFilter &&
+        marker.iconId === CORNIFER_ICON_ID &&
+        (marker.x !== 44.282 || marker.y !== 30.153)
+      ) {
+        return false;
+      }
       if (!normalizedSearch) return true;
 
-      const markerText = `${marker.name}\n${marker.description ?? ""}\n${marker.highlight?.text ?? ""}`
-        .toLocaleLowerCase("zh-CN");
-      if (markerText.includes(normalizedSearch)) return true;
+      if (
+        searchMatchedKeys.has(`${marker.iconId}\u0000${marker.name}`) ||
+        (!INFORMATION_ONLY_MARKER_IDS.has(marker.id) &&
+          searchRelatedOwnerIds.has(marker.iconId)) ||
+        getPopupEmbeddedItemIcons(marker.name).some((icon) =>
+          searchMatchesPopupItem(icon.alt),
+        )
+      ) {
+        return true;
+      }
 
-      const popupMatches = (MERCHANT_OFFERS[marker.iconId] ?? []).some(
-        (section) => {
-          const sectionText = `${section.title}\n${section.description ?? ""}`
-            .toLocaleLowerCase("zh-CN");
-          if (sectionText.includes(normalizedSearch)) return true;
-          return section.offers.some((offer) =>
-            [
-              offer.name,
-              offer.detail,
-              offer.rewardIconLabel,
-              offer.requiredItem?.label,
-              offer.materialCost?.label,
-            ]
-              .filter(Boolean)
-              .some((text) =>
-                text!.toLocaleLowerCase("zh-CN").includes(normalizedSearch),
-              ),
-          );
-        },
-      );
-      if (popupMatches) return true;
+      if (
+        normalizeItemName(marker.name)
+          .toLocaleLowerCase("zh-CN")
+          .includes(normalizedSearch)
+      ) {
+        return true;
+      }
 
-      return classification.relations.some(
-        (relation) =>
-          relation.ownerIconId === marker.iconId &&
-          relation.itemName
-            .toLocaleLowerCase("zh-CN")
-            .includes(normalizedSearch),
-      );
+      if (
+        getPopupEmbeddedItemIcons(marker.name).some((icon) =>
+          icon.alt.toLocaleLowerCase("zh-CN").includes(normalizedSearch),
+        )
+      ) {
+        return true;
+      }
+
+      return !INFORMATION_ONLY_MARKER_IDS.has(marker.id) &&
+        classification.relations.some(
+          (relation) =>
+            relation.ownerIconId === marker.iconId &&
+            relation.itemName
+              .toLocaleLowerCase("zh-CN")
+              .includes(normalizedSearch),
+        );
     });
+
+    const markerVisitNumbers = matchedMarkers.map(getMarkerVisitNumber);
+    const numberedMarkerCount = markerVisitNumbers.filter(
+      (visitNumber) => visitNumber !== null,
+    ).length;
+    const hasOneSharedMarkerName =
+      new Set(matchedMarkers.map((marker) => marker.name)).size === 1;
+    if (
+      matchedMarkers.length > 1 &&
+      numberedMarkerCount > 1 &&
+      hasOneSharedMarkerName
+    ) {
+      return [...matchedMarkers].sort(
+        (left, right) =>
+          (getMarkerVisitNumber(left) ?? Number.MAX_SAFE_INTEGER) -
+          (getMarkerVisitNumber(right) ?? Number.MAX_SAFE_INTEGER),
+      );
+    }
+
+    return matchedMarkers;
   }, [categoryFilter, classification, markers, normalizedSearch]);
+
+  const visibleMarkers = useMemo(
+    () => filterMarkersByCompletionVisibility(categoryVisibleMarkers, selectedSaveDetail, showCompleted),
+    [categoryVisibleMarkers, selectedSaveDetail, showCompleted],
+  );
+
+  const renderedMarkers = useMemo(() => {
+    if (
+      !glowFocusMarkerId ||
+      visibleMarkers.some((marker) => marker.id === glowFocusMarkerId)
+    ) {
+      return visibleMarkers;
+    }
+    const focusedMarker = markers.find(
+      (marker) => marker.id === glowFocusMarkerId,
+    );
+    return focusedMarker ? [...visibleMarkers, focusedMarker] : visibleMarkers;
+  }, [glowFocusMarkerId, markers, visibleMarkers]);
+
+  const visibleRegionFocusMarkers = useMemo<Marker[]>(() => {
+    if (activeRegionNames.size === 0) return [];
+    return allRegionChineseLabels.flatMap((label) => {
+      const region = regionInfoByName.get(label.name);
+      const layout = regionLabelLayouts[`text:${label.name}`];
+      if (
+        !region ||
+        !layout ||
+        !(
+          searchRegionNames.has(region.name) ||
+          categoryRegionNames.has(region.name) ||
+          Boolean(region.parent && categoryRegionNames.has(region.parent))
+        )
+      ) {
+        return [];
+      }
+      return [{
+        id: `region:${region.name}`,
+        name: `${region.name}(${region.englishName})`,
+        iconId: `region:${region.name}`,
+        iconFile: "",
+        category: region.parent ?? "区域",
+        description: region.parent
+          ? [region.highlight, region.description].filter(Boolean).join("\n")
+          : region.description,
+        x: layout.x,
+        y: layout.y,
+        size: Math.max(layout.size, 18),
+        highlight: !region.parent && region.highlight
+          ? { text: region.highlight, iconFiles: [] }
+          : undefined,
+      }];
+    });
+  }, [
+    activeRegionNames,
+    allRegionChineseLabels,
+    categoryRegionNames,
+    regionInfoByName,
+    regionLabelLayouts,
+    searchRegionNames,
+  ]);
+
+  const focusNavigationItems = useMemo(
+    () =>
+      [...visibleMarkers, ...visibleRegionFocusMarkers].sort(
+        (left, right) => left.x - right.x || left.y - right.y,
+      ),
+    [visibleMarkers, visibleRegionFocusMarkers],
+  );
+
+  const fitMarkersInView = useCallback(
+    (targetMarkers: Marker[]) => {
+      const viewport = viewportRef.current;
+      if (!viewport || targetMarkers.length === 0) return;
+
+      const frame = getMapFrame();
+      if (!frame) return;
+      const padding = 110;
+      const minX = Math.min(...targetMarkers.map((marker) => (marker.x / 100) * MAP_WIDTH));
+      const maxX = Math.max(...targetMarkers.map((marker) => (marker.x / 100) * MAP_WIDTH));
+      const minY = Math.min(...targetMarkers.map((marker) => (marker.y / 100) * MAP_HEIGHT));
+      const maxY = Math.max(...targetMarkers.map((marker) => (marker.y / 100) * MAP_HEIGHT));
+      const contentWidth = Math.max(1, maxX - minX);
+      const contentHeight = Math.max(1, maxY - minY);
+      const nextScale = Math.min(
+        MAX_SCALE,
+        minimumScaleRef.current * AUTO_FOCUS_MAX_SCALE_FACTOR,
+        Math.max(
+          minimumScaleRef.current,
+          Math.min(
+            (frame.width - padding * 2) / contentWidth,
+            (viewport.clientHeight - padding * 2) / contentHeight,
+          ),
+        ),
+      );
+      const centerX = (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+      if (focusNavigationTimerRef.current !== null) {
+        window.clearTimeout(focusNavigationTimerRef.current);
+      }
+      setSmoothFocusMoving(true);
+      updateTransform({
+        scale: nextScale,
+        x: frame.centerX - centerX * nextScale,
+        y: frame.centerY - centerY * nextScale,
+      });
+      focusNavigationTimerRef.current = window.setTimeout(() => {
+        setSmoothFocusMoving(false);
+        focusNavigationTimerRef.current = null;
+      }, FOCUS_TRANSITION_MS);
+    },
+    [getMapFrame, updateTransform],
+  );
+
+  const openMarker = useCallback((marker: Marker) => {
+    setSelectedMarker(marker);
+    setPopupTab(
+      !INFORMATION_ONLY_MARKER_IDS.has(marker.id) &&
+        MERCHANT_OFFERS[marker.iconId]?.length
+        ? "offers"
+        : "description",
+    );
+  }, []);
+
+  const getPopupAwareTransform = useCallback((
+    percentX: number,
+    percentY: number,
+    nextScale: number,
+  ) => {
+    const viewport = viewportRef.current;
+    if (!viewport) return { x: 0, y: 0 };
+    const margin = 12;
+    const popupHeight = Math.min(400, viewport.clientHeight - 32);
+    const markerScreenHalf = 24 * nextScale;
+
+    const frame = getMapFrame();
+    if (!frame) return { x: 0, y: 0 };
+    const targetScreenX = Math.min(
+      Math.max(frame.centerX, frame.left + margin + markerScreenHalf),
+      frame.right - margin - markerScreenHalf,
+    );
+
+    // 垂直：优先让弹窗（默认显示在图标上方）完整可见
+    const minYForPopupAbove = margin + markerScreenHalf + 14 + popupHeight;
+    const maxMarkerY = viewport.clientHeight - margin - markerScreenHalf;
+    let targetScreenY = Math.min(
+      maxMarkerY,
+      Math.max(viewport.clientHeight * 0.6, minYForPopupAbove),
+    );
+    if (minYForPopupAbove > maxMarkerY) {
+      // 视口太矮，上方放不下，把图标放到顶部触发弹窗向下显示
+      targetScreenY = margin + markerScreenHalf;
+    }
+
+    return {
+      x: targetScreenX - (percentX / 100) * MAP_WIDTH * nextScale,
+      y: targetScreenY - (percentY / 100) * MAP_HEIGHT * nextScale,
+    };
+  }, [getMapFrame]);
+
+  const focusMaskFragment = useCallback(
+    (nextIndex: number, forcePopup = false) => {
+      const viewport = viewportRef.current;
+      if (!viewport || focusNavigationItems.length === 0) return;
+      const normalizedIndex =
+        (nextIndex + focusNavigationItems.length) % focusNavigationItems.length;
+      const marker = focusNavigationItems[normalizedIndex];
+      const nextScale = Math.min(
+        MAX_SCALE,
+        minimumScaleRef.current * AUTO_FOCUS_MAX_SCALE_FACTOR,
+      );
+      if (focusNavigationTimerRef.current !== null) {
+        window.clearTimeout(focusNavigationTimerRef.current);
+      }
+      setSelectedMarker(null);
+      setSmoothFocusMoving(true);
+      const focused = getPopupAwareTransform(marker.x, marker.y, nextScale);
+      updateTransform({ scale: nextScale, ...focused });
+      setMaskFragmentCursor(normalizedIndex);
+      focusNavigationTimerRef.current = window.setTimeout(() => {
+        setSmoothFocusMoving(false);
+        if (forcePopup) {
+          allowPopupVisibilityCorrectionRef.current = true;
+          setSelectedMarker(marker);
+          setPopupTab(
+            !INFORMATION_ONLY_MARKER_IDS.has(marker.id) &&
+              MERCHANT_OFFERS[marker.iconId]?.length
+              ? "offers"
+              : "description",
+          );
+        } else if (markerHasPopupContent(marker)) {
+          allowPopupVisibilityCorrectionRef.current = true;
+          openMarker(marker);
+        }
+        focusNavigationTimerRef.current = null;
+      }, FOCUS_TRANSITION_MS);
+    },
+    [focusNavigationItems, getPopupAwareTransform, openMarker, updateTransform],
+  );
+
+  useEffect(
+    () => () => {
+      if (focusNavigationTimerRef.current !== null) {
+        window.clearTimeout(focusNavigationTimerRef.current);
+      }
+      if (popupVisibilityFrameRef.current !== null) {
+        window.cancelAnimationFrame(popupVisibilityFrameRef.current);
+      }
+      if (popupVisibilityReleaseTimerRef.current !== null) {
+        window.clearTimeout(popupVisibilityReleaseTimerRef.current);
+      }
+      if (dragFrameRef.current !== null) {
+        window.cancelAnimationFrame(dragFrameRef.current);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!selectedMarker) return;
+    schedulePopupVisibilityCheck();
+  }, [selectedMarker, popupTab, filterCollapsed, schedulePopupVisibilityCheck]);
+
+  useEffect(() => {
+    const popup = popupRef.current;
+    if (!selectedMarker || !popup) return;
+    const markerId = selectedMarker.id;
+    const measurePopup = () => {
+      const height = popup.offsetHeight;
+      setPopupMeasuredSize((current) =>
+        current?.markerId === markerId && current.height === height
+          ? current
+          : { markerId, height },
+      );
+    };
+    measurePopup();
+    const observer = new ResizeObserver(() => {
+      measurePopup();
+      schedulePopupVisibilityCheck();
+    });
+    observer.observe(popup);
+    return () => observer.disconnect();
+  }, [selectedMarker, schedulePopupVisibilityCheck]);
+
+  const lastAutoFocusKeyRef = useRef<string | null>(null);
+  const previousAutoFocusInputsRef = useRef<string | null>(null);
+  const autoFocusKey = JSON.stringify([
+    categoryFilter,
+    normalizedFocusSearch,
+    selectedSaveSlot,
+    showCompleted,
+    focusNavigationItems.map((marker) => marker.id),
+  ]);
+
+  useEffect(() => {
+    const inputsChanged = previousAutoFocusInputsRef.current !== autoFocusKey;
+    previousAutoFocusInputsRef.current = autoFocusKey;
+    if (inputsChanged && focusNavigationTimerRef.current !== null) {
+      window.clearTimeout(focusNavigationTimerRef.current);
+      focusNavigationTimerRef.current = null;
+      setSmoothFocusMoving(false);
+    }
+    if (!isMaskFragmentFocus || focusNavigationItems.length === 0) {
+      lastAutoFocusKeyRef.current = null;
+      return;
+    }
+    // Layout changes update navigation callbacks, but are not a new filter.
+    if (lastAutoFocusKeyRef.current === autoFocusKey) return;
+    setSmoothFocusMoving(false);
+    const frame = window.requestAnimationFrame(() => {
+      lastAutoFocusKeyRef.current = autoFocusKey;
+      setMaskFragmentCursor(0);
+      setSelectedMarker(null);
+      if (visibleMarkers.length === 1 || focusNavigationItems.length === 1) {
+        focusMaskFragment(0, true);
+        return;
+      }
+      fitMarkersInView(focusNavigationItems);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [
+    autoFocusKey,
+    isMaskFragmentFocus,
+    normalizedFocusSearch,
+    visibleMarkers.length,
+    focusNavigationItems,
+    fitMarkersInView,
+    focusMaskFragment,
+  ]);
 
   useEffect(() => {
     if (
       selectedMarker &&
-      !visibleMarkers.some((marker) => marker.id === selectedMarker.id)
+      !selectedMarker.id.startsWith("region:") &&
+      !renderedMarkers.some((marker) => marker.id === selectedMarker.id)
     ) {
-      setSelectedMarker(null);
+      const frame = window.requestAnimationFrame(() => setSelectedMarker(null));
+      return () => window.cancelAnimationFrame(frame);
     }
-  }, [selectedMarker, visibleMarkers]);
+  }, [renderedMarkers, selectedMarker]);
 
   const toggleSecondaryCategory = (primary: string, secondary: string) => {
     const selectionKey = `${primary}\u0000${secondary}`;
+    if (!categoryFilter?.secondaries?.length ||
+      (categoryFilter.secondaries.length === 1 && categoryFilter.secondaries[0] === selectionKey)) {
+      setSelectedClassesExpanded(false);
+    }
     setCategoryFilter((current) => {
       const selected = new Set(current?.secondaries ?? []);
       if (selected.has(selectionKey)) {
@@ -1618,24 +3212,180 @@ export default function MapViewer() {
     });
   };
 
-  const toggleAllSecondaryCategories = () => {
-    setCategoryFilter(
-      allSecondaryCategoriesSelected
-        ? null
-        : { secondaries: allSecondaryCategoryKeys },
-    );
-  };
-
   const resetFilters = () => {
+    setIsResettingFilters(true);
+    setSelectedClassesExpanded(false);
+    setShowCompleted(false);
     setCategoryFilter(null);
     setSearchInput("");
     setSearchQuery("");
+    setOpenSidebarMenu(null);
+    setMaskFragmentCursor(0);
+    closeSelectedMarker();
+    fitMap();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setIsResettingFilters(false));
+    });
   };
 
-  const openMarker = (marker: Marker) => {
-    setSelectedMarker(marker);
-    setPopupTab(MERCHANT_OFFERS[marker.iconId]?.length ? "offers" : "description");
+  const hasActiveFilters = Boolean(
+    categoryFilter ||
+    searchInput.trim() ||
+    searchQuery.trim(),
+  );
+
+  const openRegionLabel = (region: RegionInfo, layout: RegionLabelLayout) => {
+    setSelectedMarker({
+      id: `region:${region.name}`,
+      name: `${region.name}(${region.englishName})`,
+      iconId: `region:${region.name}`,
+      iconFile: "",
+      category: region.parent ?? "区域",
+      description: region.parent
+        ? [region.highlight, region.description].filter(Boolean).join("\n")
+        : region.description,
+      x: layout.x,
+      y: layout.y,
+      size: Math.max(layout.size, 18),
+      highlight: !region.parent && region.highlight
+        ? { text: region.highlight, iconFiles: [] }
+        : undefined,
+    });
+    setPopupTab("description");
   };
+
+  const focusAndOpenMarker = (marker: Marker) => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const nextScale = Math.min(
+      MAX_SCALE,
+      minimumScaleRef.current * AUTO_FOCUS_MAX_SCALE_FACTOR,
+    );
+    if (focusNavigationTimerRef.current !== null) {
+      window.clearTimeout(focusNavigationTimerRef.current);
+    }
+    setSelectedMarker(null);
+    setSmoothFocusMoving(true);
+    const focused = getPopupAwareTransform(marker.x, marker.y, nextScale);
+    updateTransform({ scale: nextScale, ...focused });
+    focusNavigationTimerRef.current = window.setTimeout(() => {
+      setSmoothFocusMoving(false);
+      openMarker(marker);
+      focusNavigationTimerRef.current = null;
+    }, FOCUS_TRANSITION_MS);
+  };
+
+  const focusAndOpenRegion = (regionName: string) => {
+    const viewport = viewportRef.current;
+    const region = regionInfoByName.get(regionName);
+    const layout = regionLabelLayouts[`text:${regionName}`];
+    if (!viewport || !region || !layout) return;
+    const nextScale = Math.min(
+      MAX_SCALE,
+      minimumScaleRef.current * AUTO_FOCUS_MAX_SCALE_FACTOR,
+    );
+    if (focusNavigationTimerRef.current !== null) {
+      window.clearTimeout(focusNavigationTimerRef.current);
+    }
+    setSelectedMarker(null);
+    setSmoothFocusMoving(true);
+    const focused = getPopupAwareTransform(layout.x, layout.y, nextScale);
+    updateTransform({ scale: nextScale, ...focused });
+    focusNavigationTimerRef.current = window.setTimeout(() => {
+      setSmoothFocusMoving(false);
+      openRegionLabel(region, layout);
+      focusNavigationTimerRef.current = null;
+    }, FOCUS_TRANSITION_MS);
+  };
+
+  const handlePopupTextLink = (target: PopupTextLinkTarget) => {
+    const sourceMarker = selectedMarker;
+    if (target.type === "marker") {
+      const marker = markers.find((candidate) => candidate.id === target.markerId);
+      if (marker) {
+        setPopupLinkSource(sourceMarker);
+        setPopupLinkFocus(null);
+        setGlowFocusMarkerId(marker.id);
+        setGlowFocusRegionName(null);
+        focusAndOpenMarker(marker);
+      }
+      return;
+    }
+    if (target.type === "region") {
+      setPopupLinkSource(sourceMarker);
+      setPopupLinkFocus(null);
+      setGlowFocusMarkerId(null);
+      setGlowFocusRegionName(target.regionName);
+      focusAndOpenRegion(target.regionName);
+      return;
+    }
+    const owner = markers.find(
+      (candidate) => candidate.id === target.ownerMarkerId,
+    );
+    if (!owner) return;
+    setPopupLinkSource(sourceMarker);
+    setPopupLinkFocus({
+      itemName: target.itemName,
+      ownerMarkerId: owner.id,
+    });
+    setGlowFocusMarkerId(owner.id);
+    setGlowFocusRegionName(null);
+    focusAndOpenMarker(owner);
+  };
+
+  const handleReturnFromPopupLink = () => {
+    if (!popupLinkSource) return;
+    const source = popupLinkSource;
+    setGlowFocusMarkerId(null);
+    setGlowFocusRegionName(null);
+    setPopupLinkSource(null);
+    setPopupLinkFocus(null);
+    focusAndOpenMarker(source);
+  };
+
+  const renderPopupLinkedText = (text: string) => {
+    if (popupTextLinks.length === 0) return text;
+    const currentMarkerName = selectedMarker
+      ? normalizeItemName(selectedMarker.name)
+      : "";
+    const names = popupTextLinks
+      .filter((link) => link.name !== currentMarkerName)
+      .map((link) => link.name);
+    if (names.length === 0) return text;
+    const pattern = names.map(escapeRegExp).join("|");
+    const parts = text.split(new RegExp(`(${pattern})`, "g"));
+    return parts.map((part, index) => {
+      const target = popupTextLinkByName.get(part);
+      return target ? (
+        <button
+          type="button"
+          className="marker-description-internal-link"
+          onClick={() => handlePopupTextLink(target)}
+          key={`${part}-${index}`}
+        >
+          {part}
+        </button>
+      ) : (
+        <span key={`${part.slice(0, 12)}-${index}`}>{part}</span>
+      );
+    });
+  };
+
+  const selectedClassItems = activeCategoryKeys.map((key) => {
+    const [primary, name] = key.split("\u0000");
+    const secondary = categoryGroups.find((group) => group.primary === primary)?.secondary.find((item) => item.name === name);
+    return { key, primary, name, iconFile: secondary?.iconFile };
+  });
+  const uniqueProgress = useMemo(() => {
+    const mappedProgress = selectedSaveDetail ? getSaveMappingProgress(selectedSaveDetail) : [];
+    return [...new Map(mappedProgress.map((item) => [item.parserId, item])).values()];
+  }, [selectedSaveDetail]);
+  const mapCompletion = uniqueProgress.length
+    ? Math.round(100 * uniqueProgress.filter((item) => item.state === "collected").length / uniqueProgress.length)
+    : 0;
+  const popupFilterIndex = selectedMarker
+    ? focusNavigationItems.findIndex((marker) => marker.id === selectedMarker.id)
+    : -1;
 
   return (
     <main
@@ -1648,6 +3398,15 @@ export default function MapViewer() {
       onWheel={handleWheel}
       aria-label="空洞骑士地图"
     >
+      <input
+        ref={saveInputRef}
+        className="save-directory-input"
+        type="file"
+        multiple
+        disabled={isParsingSave}
+        aria-label="选择空洞骑士存档目录"
+        onChange={handleSaveInputChange}
+      />
       <button
         type="button"
         className={`map-filter-toggle${filterCollapsed ? " is-collapsed" : ""}`}
@@ -1659,60 +3418,100 @@ export default function MapViewer() {
         <span aria-hidden="true">{filterCollapsed ? "›" : "‹"}</span>
       </button>
       <aside
-        className={`map-filter-panel${filterCollapsed ? " is-collapsed" : ""}`}
+        ref={filterPanelRef}
+        className={`map-filter-panel${filterCollapsed ? " is-collapsed" : ""}${isResettingFilters ? " is-resetting-filters" : ""}`}
         aria-label="地图图标筛选"
         onPointerDown={(event) => event.stopPropagation()}
         onWheel={(event) => event.stopPropagation()}
       >
-        <div className="map-filter-logo" aria-hidden="true">
-          <img src="/assets/hollow-knight-logo.png" alt="" />
+        <div className="map-filter-logo">
+          <img src="/assets/hollow-knight-logo.png" alt="" aria-hidden="true" />
+          <div className="map-filter-brand-copy">
+            <h1>空洞骑士·地图攻略</h1>
+          </div>
         </div>
-        <header className="map-filter-header">
-          <div>
-            <h1>图标筛选</h1>
-            <p>当前显示 {visibleMarkers.length}/{markers.length}</p>
-          </div>
-          <div className="map-filter-header-actions">
-            <button
-              type="button"
-              className="map-filter-select-all"
-              aria-pressed={allSecondaryCategoriesSelected}
-              onClick={toggleAllSecondaryCategories}
-            >
-              {allSecondaryCategoriesSelected ? "取消全选" : "全选"}
-            </button>
-            <button
-              type="button"
-              className="map-filter-select-all"
-              onClick={resetFilters}
-            >
-              重置
-            </button>
-          </div>
-        </header>
         <div className="map-filter-search">
           <input
             type="search"
             value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="搜索图标名称、描述或物品"
-            aria-label="搜索图标名称、描述或弹窗物品"
+            onChange={(event) => {
+              const value = event.target.value;
+              setSearchInput(value);
+              if (!value.trim()) setSearchQuery("");
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                setSearchQuery(searchInput);
+              }
+            }}
+            placeholder="搜索图标、物品或分类名称"
+            aria-label="搜索图标、物品或分类名称"
           />
           <button
             type="button"
-            className="map-filter-search-submit"
+            className="map-filter-search-submit map-filter-text-action"
             aria-label="确认搜索"
             onClick={() => setSearchQuery(searchInput)}
           >
             搜索
           </button>
         </div>
-        <div className="map-filter-categories">
-          {categoryGroups.map((group) => (
+        {searchInput.trim() && normalizedSearch && focusNavigationItems.length === 0 && (
+          <p className="map-filter-search-empty">没有找到搜索内容</p>
+        )}
+        <div className="map-filter-save-panel" aria-busy={isParsingSave} aria-live="polite">
+          <div className="sidebar-save-row">
+            {saveSlots.length === 0 ? <>
+              <span className="sidebar-save-hint">上传存档可将解析后的内容同步到地图中</span>
+              <button type="button" disabled={isParsingSave} title="选择 Hollow Knight 文件夹；默认路径：%USERPROFILE%\AppData\LocalLow\Team Cherry\Hollow Knight" onClick={() => saveInputRef.current?.click()}>{isParsingSave ? "解析中…" : "上传存档"}</button>
+            </> : <>
+              <details className="sidebar-menu" open={openSidebarMenu === "slots"} onToggle={(event) => { if (!event.currentTarget.open && openSidebarMenu === "slots") setOpenSidebarMenu(null); }}>
+                <summary onClick={(event) => { event.preventDefault(); setOpenSidebarMenu(openSidebarMenu === "slots" ? null : "slots"); }}>槽位{saveSlots.find((slot) => slot.slotId === selectedSaveSlot)?.slotNumber}<span className="sidebar-slot-arrow" aria-hidden="true">›</span></summary>
+                <div className="sidebar-menu-options">
+                  {saveSlots.map((slot) => <button type="button" key={slot.slotId} className={selectedSaveSlot === slot.slotId ? "is-active" : ""} onClick={() => { setSelectedSaveSlot(slot.slotId); setOpenSidebarMenu(null); closeSelectedMarker(); }}>槽位{slot.slotNumber}</button>)}
+                  <button type="button" disabled={isParsingSave} onClick={() => { setOpenSidebarMenu(null); saveInputRef.current?.click(); }}>重新上传</button>
+                </div>
+              </details>
+              <span className="sidebar-save-completion" title={`已完成 ${uniqueProgress.filter((item) => item.state === "collected").length}/${uniqueProgress.length} 个可解析项目；未知状态不计为已完成`}>地图完成度：{mapCompletion}%</span>
+            </>}
+          </div>
+          {saveError && <p className="map-filter-save-error">{saveError}</p>}
+          {saveFailures.length > 0 && (
+            <p className="map-filter-save-error">
+              {saveFailures.map((failure) => `槽位 ${failure.slot} 无法解析`).join("；")}
+            </p>
+          )}
+        </div>
+        <nav className="sidebar-view-tabs" aria-label="筛选视图">
+          <button type="button" aria-pressed={sidebarTab === "categories"} onClick={() => { setSidebarTab("categories"); setOpenSidebarMenu(null); }}>
+            <img src="/filter-icons/sidebar-categories.webp" alt="" aria-hidden="true" draggable={false} />
+            类目
+          </button>
+          <button type="button" aria-pressed={sidebarTab === "regions"} onClick={() => { setSidebarTab("regions"); setOpenSidebarMenu(null); }}>
+            <img src="/filter-icons/sidebar-regions.png" alt="" aria-hidden="true" draggable={false} />
+            地区
+          </button>
+        </nav>
+        {saveSlots.length > 0 && (
+          <div className="sidebar-completed-toggle-row">
+            <span id="show-completed-label">显示已完成</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={showCompleted}
+              aria-labelledby="show-completed-label"
+              className="sidebar-completed-switch"
+              onClick={() => {
+                setShowCompleted((current) => !current);
+                setMaskFragmentCursor(0);
+              }}
+            ><span aria-hidden="true" /></button>
+          </div>
+        )}
+        <div className={`map-filter-categories${sidebarTab === "regions" ? " is-region-view" : ""}`}>
+          {categoryGroups.filter((group) => sidebarTab === "regions" ? group.primary === "区域" : group.primary !== "区域").map((group) => (
             <section className="map-filter-category-page" key={group.primary}>
-              <header>
-                <h2>{group.primary}</h2>
-              </header>
+              {group.primary !== "区域" && <header><h2>{group.primary}</h2></header>}
               <div className="map-filter-secondary-grid">
                 {group.secondary.map((secondary) => (
                   <button
@@ -1752,7 +3551,11 @@ export default function MapViewer() {
                     </span>
                     <span className="map-filter-secondary-copy">
                       <strong>{secondary.name}</strong>
-                      <small>{secondary.count}</small>
+                      <small>
+                        {secondary.saveProgress
+                          ? `${secondary.saveProgress.collected}/${secondary.saveProgress.total}`
+                          : secondary.count}
+                      </small>
                     </span>
                   </button>
                 ))}
@@ -1760,12 +3563,37 @@ export default function MapViewer() {
             </section>
           ))}
         </div>
-        {(categoryFilter || normalizedSearch) && visibleMarkers.length === 0 && (
-          <p className="map-filter-empty">没有找到符合条件的图标</p>
-        )}
+        <footer className="sidebar-footer">
+          <button type="button" className="sidebar-selection-toggle" disabled={selectedClassItems.length === 0} aria-expanded={selectedClassItems.length > 0 && selectedClassesExpanded} onClick={() => setSelectedClassesExpanded((current) => !current)}>
+            <span>当前选中{selectedClassItems.length}类{visibleMarkers.length === 0 ? "，没有找到符合条件的图标" : isMaskFragmentFocus ? `，显示${visibleMarkers.length}/${markers.length}个图标` : ""}</span>
+            {selectedClassItems.length > 0 && <span className="sidebar-selection-arrow" aria-hidden="true" />}
+          </button>
+          {selectedClassesExpanded && selectedClassItems.length > 0 && <div className="sidebar-selected-classes" aria-label="已选择的类目与地区">
+            {selectedClassItems.map((item) => (
+              <SelectedClassChip
+                key={item.key}
+                name={item.name}
+                iconFile={item.iconFile}
+                onRemove={() => toggleSecondaryCategory(item.primary, item.name)}
+              />
+            ))}
+          </div>}
+          <div className="sidebar-bottom-actions">
+            <button type="button" className="sidebar-reset" aria-label="重置地图和筛选" title="重置地图和筛选" onClick={resetFilters}>
+              <img src="/filter-icons/reset-arrows.png" alt="" aria-hidden="true" draggable={false} />
+            </button>
+            <button type="button" className="sidebar-locate" disabled={focusNavigationItems.length === 0} onClick={() => focusMaskFragment(maskFragmentCursor)}>定位</button>
+          </div>
+          <span className="sr-only">{hasActiveFilters ? "筛选已启用" : "显示全部地图图标"}</span>
+        </footer>
       </aside>
+      <div className="map-zoom-control" onPointerDown={(event) => event.stopPropagation()} onWheel={(event) => event.stopPropagation()}>
+        <button type="button" aria-label="放大地图" onClick={() => zoomToScale(transform.scale * 1.2)}><span className="map-zoom-arrow map-zoom-arrow-up" aria-hidden="true" /></button>
+        <input type="range" aria-label="地图缩放" min="0" max="100" step="0.1" value={Math.max(0, Math.min(100, 100 * Math.log(transform.scale / minimumMapScale) / Math.log(MAX_SCALE / minimumMapScale)))} onChange={(event) => zoomToScale(minimumMapScale * Math.pow(MAX_SCALE / minimumMapScale, Number(event.target.value) / 100))} />
+        <button type="button" aria-label="缩小地图" onClick={() => zoomToScale(transform.scale / 1.2)}><span className="map-zoom-arrow map-zoom-arrow-down" aria-hidden="true" /></button>
+      </div>
       <div
-        className="map-canvas"
+        className={`map-canvas${smoothFocusMoving ? " is-smooth-focus-moving" : ""}`}
         style={
           {
             transform: `translate3d(${transform.x}px, ${transform.y}px, 0) scale(${transform.scale})`,
@@ -1787,15 +3615,18 @@ export default function MapViewer() {
           {MAP_REGION_LABELS.map((region) => {
             const labelId = `image:${region.name}`;
             const layout = regionLabelLayouts[labelId];
+            if (!layout || (activeRegionNames.size > 0 && !activeRegionNames.has(region.name))) return null;
             return (
               <div
                 key={labelId}
-                className="map-region-label-editor is-image"
-                style={{
-                  left: `${layout.x}%`,
-                  top: `${layout.y}%`,
-                  width: `${layout.size}px`,
-                }}
+                className={`map-region-label-editor map-region-label-visual is-image has-hover-highlight${activeRegionNames.has(region.name) ? " is-region-filter-focus" : ""}${hoveredRegionLabelName === region.name ? " is-hover-highlighted" : ""}`}
+                style={
+                  {
+                    left: `${layout.x}%`,
+                    top: `${layout.y}%`,
+                    width: `${layout.size}px`,
+                  } as React.CSSProperties
+                }
               >
                 <img
                   className="map-region-label-image"
@@ -1806,13 +3637,26 @@ export default function MapViewer() {
               </div>
             );
           })}
-          {MAP_REGION_CHINESE_LABELS.map((region) => {
+          {allRegionChineseLabels.map((region) => {
             const labelId = `text:${region.name}`;
             const layout = regionLabelLayouts[labelId];
+            const regionInfo = regionInfoByName.get(region.name);
+            const hasMatchedGlow =
+              MATCHED_NEW_REGION_LABELS.has(region.name) ||
+              !BASE_REGION_LABEL_NAMES.has(region.name);
+            const regionParent = regionInfo?.parent;
+            const belongsToSelectedRegion =
+              activeRegionNames.size === 0 ||
+              activeRegionNames.has(region.name) ||
+              Boolean(regionParent && activeRegionNames.has(regionParent));
+            const isRegionFilterFocus =
+              activeRegionNames.size > 0 && belongsToSelectedRegion;
+            const isGlowFocusRegion = region.name === glowFocusRegionName;
+            if (!layout || (!belongsToSelectedRegion && !isGlowFocusRegion)) return null;
             return (
               <div
                 key={labelId}
-                className="map-region-label-editor is-text"
+                className={`map-region-label-editor map-region-label-visual is-text has-hover-highlight${hasMatchedGlow ? " has-matched-region-glow" : ""}${isRegionFilterFocus || isGlowFocusRegion ? " is-region-filter-focus" : ""}${hoveredRegionLabelName === region.name ? " is-hover-highlighted" : ""}`}
                 style={
                   {
                     left: `${layout.x}%`,
@@ -1824,66 +3668,266 @@ export default function MapViewer() {
                   } as React.CSSProperties
                 }
               >
-                <span>{region.name}</span>
+                {hasMatchedGlow && (
+                  <span className="map-region-label-text-haze" aria-hidden="true">
+                    {region.name}
+                  </span>
+                )}
+                <span className={hasMatchedGlow ? "map-region-label-text-main" : undefined}>
+                  {region.name}
+                </span>
               </div>
+            );
+          })}
+          {allRegionChineseLabels.map((region) => {
+            const textLayout = regionLabelLayouts[`text:${region.name}`];
+            const imageLayout = regionLabelLayouts[`image:${region.name}`];
+            const regionInfo = regionInfoByName.get(region.name);
+            const regionParent = regionInfo?.parent;
+            const belongsToSelectedRegion =
+              activeRegionNames.size === 0 ||
+              activeRegionNames.has(region.name) ||
+              Boolean(regionParent && activeRegionNames.has(regionParent));
+            const isGlowFocusRegion = region.name === glowFocusRegionName;
+            if (
+              !textLayout ||
+              !regionInfo ||
+              (!belongsToSelectedRegion && !isGlowFocusRegion)
+            ) return null;
+
+            const isMajorRegion = !regionInfo.parent && Boolean(imageLayout);
+            const centerX = isMajorRegion
+              ? (textLayout.x + imageLayout!.x) / 2
+              : textLayout.x;
+            const centerY = isMajorRegion
+              ? (textLayout.y + imageLayout!.y) / 2
+              : textLayout.y;
+            const positionGapX = isMajorRegion
+              ? (Math.abs(textLayout.x - imageLayout!.x) / 100) * MAP_WIDTH
+              : 0;
+            const positionGapY = isMajorRegion
+              ? (Math.abs(textLayout.y - imageLayout!.y) / 100) * MAP_HEIGHT
+              : 0;
+            const hitWidth = isMajorRegion
+              ? Math.max(
+                  imageLayout!.size,
+                  textLayout.size * region.name.length * 1.25,
+                ) + positionGapX
+              : textLayout.size * region.name.length * 1.35;
+            const hitHeight = isMajorRegion
+              ? Math.max(76, textLayout.size * 1.35 + positionGapY)
+              : textLayout.size * 1.7;
+
+            return (
+              <button
+                type="button"
+                key={`interaction:${region.name}`}
+                className="map-region-label-interaction"
+                aria-label={`查看${region.name}区域介绍`}
+                onPointerDown={(event) => event.stopPropagation()}
+                onPointerEnter={() => setHoveredRegionLabelName(region.name)}
+                onPointerLeave={() =>
+                  setHoveredRegionLabelName((current) =>
+                    current === region.name ? null : current,
+                  )
+                }
+                onFocus={() => setHoveredRegionLabelName(region.name)}
+                onBlur={() =>
+                  setHoveredRegionLabelName((current) =>
+                    current === region.name ? null : current,
+                  )
+                }
+                onClick={() => {
+                  setGlowFocusMarkerId(null);
+                  setGlowFocusRegionName(null);
+                  setPopupLinkSource(null);
+                  setPopupLinkFocus(null);
+                  openRegionLabel(regionInfo, textLayout);
+                }}
+                style={{
+                  left: `${centerX}%`,
+                  top: `${centerY}%`,
+                  width: `${hitWidth}px`,
+                  height: `${hitHeight}px`,
+                }}
+              />
             );
           })}
         </div>
         <div className="marker-layer">
-          {visibleMarkers.map((marker) => (
-            <button
+          {renderedMarkers.map((marker) => {
+            const markerClassifications = classification.entries.filter(
+              (entry) =>
+                entry.iconId === marker.iconId && entry.name === marker.name,
+            );
+            const markerPrimaryCategory =
+              markerClassifications.find((entry) => entry.primary === "Boss")
+                ?.primary ??
+              markerClassifications[0]?.primary ??
+              classification.entries.find(
+                (entry) => entry.iconId === marker.iconId,
+              )?.primary;
+            const glowColors = getMarkerGlowColors(marker, markerPrimaryCategory);
+            const isGlowFocus = marker.id === glowFocusMarkerId;
+            const effectiveGlowColors =
+              glowColors ??
+              (activeRegionNames.size > 0 || isGlowFocus
+                ? { core: "235, 244, 255", haze: "154, 190, 225" }
+                : null);
+            const isCurrentFilterFocus =
+              isMaskFragmentFocus &&
+              marker.id === visibleMarkers[maskFragmentCursor]?.id;
+            const showBreathingGlow =
+              (isGlowFocus ||
+                (isMaskFragmentFocus &&
+                  (visibleMarkers.length <= MAX_BATCH_BREATHING_GLOW_MARKERS ||
+                    isCurrentFilterFocus))) &&
+              Boolean(effectiveGlowColors);
+            const markerVisitNumber = getMarkerVisitNumber(marker);
+            return (
+              <button
               key={marker.id}
               type="button"
-              className="map-marker-button"
+              className={`map-marker-button${isSingleCategoryFocus ? " is-filter-focus" : ""}${showBreathingGlow ? " has-breathing-glow" : ""}${isCurrentFilterFocus ? " is-current-focus" : ""}`}
               aria-label={`查看${marker.name}的描述`}
               onPointerDown={(event) => event.stopPropagation()}
-              onClick={() => openMarker(marker)}
-              style={{
-                left: `${marker.x}%`,
-                top: `${marker.y}%`,
-                width: `${marker.size}px`,
+              onClick={() => {
+                setGlowFocusMarkerId(null);
+                setGlowFocusRegionName(null);
+                setPopupLinkSource(null);
+                setPopupLinkFocus(null);
+                openMarker(marker);
               }}
+              style={
+                {
+                  left: `${marker.x}%`,
+                  top: `${marker.y}%`,
+                  width: `${marker.size}px`,
+                  ...(effectiveGlowColors
+                    ? {
+                        "--marker-glow-core": effectiveGlowColors.core,
+                        "--marker-glow-haze": effectiveGlowColors.haze,
+                      }
+                    : {}),
+                } as React.CSSProperties
+              }
             >
               <img
                 className={`map-marker${marker.category === "BOSS" ? " is-boss" : ""}${marker.category === "技能" || marker.category === "剑技" ? " is-ability" : ""}${marker.category === "地标+npc" ? " is-landmark" : ""}${marker.category === "护符+护符槽图标" ? " is-charm" : ""}`}
                 src={decodeURIComponent(marker.iconFile).replace(/^\.\//, "/")}
                 alt=""
                 draggable={false}
-                style={{ filter: getMarkerGlow(marker) }}
+                onLoad={(event) => {
+                  const image = event.currentTarget;
+                  if (!image.naturalWidth || !image.naturalHeight) return;
+                  const nextRatio = image.naturalHeight / image.naturalWidth;
+                  setMarkerAspectRatios((current) => {
+                    if (current.get(marker.id) === nextRatio) return current;
+                    const next = new Map(current);
+                    next.set(marker.id, nextRatio);
+                    return next;
+                  });
+                }}
+                style={{ filter: getMarkerGlow(marker, markerPrimaryCategory) }}
               />
-            </button>
-          ))}
+              {showBreathingGlow && (
+                <img
+                  className="map-marker map-marker-glow-overlay"
+                  src={decodeURIComponent(marker.iconFile).replace(/^\.\//, "/")}
+                  alt=""
+                  draggable={false}
+                  aria-hidden="true"
+                />
+              )}
+              {markerVisitNumber !== null && (
+                <span className="mister-mushroom-visit-number" aria-hidden="true">
+                  {markerVisitNumber}
+                </span>
+              )}
+              </button>
+            );
+          })}
         </div>
       </div>
       {selectedMarker && popupPosition && (
         <section
+          ref={popupRef}
           className={`marker-popup${popupPosition.showBelow ? " is-below" : ""}`}
-          style={{ left: `${popupPosition.left}px`, top: `${popupPosition.top}px` }}
+          style={
+            {
+              left: `${popupPosition.left}px`,
+              top: `${popupPosition.top}px`,
+              "--popup-arrow-offset": `${popupPosition.arrowOffset}px`,
+            } as React.CSSProperties
+          }
           aria-live="polite"
           onPointerDown={(event) => event.stopPropagation()}
           onWheel={(event) => event.stopPropagation()}
         >
+          <span className="marker-popup-pointer" aria-hidden="true" />
           <header className="marker-popup-header">
+            {selectedMarkerCompletedFromSave && (
+              <span
+                className="marker-popup-boss-completed-stamp-clip"
+                aria-hidden="true"
+              >
+                <img
+                  className="marker-popup-boss-completed-stamp"
+                  src="/assets/completed-stamp.png"
+                  alt=""
+                  draggable={false}
+                />
+              </span>
+            )}
             <div className="marker-popup-heading">
               <div className="marker-popup-title-line">
-                <h2>{selectedMarker.name}</h2>
-                {selectedCategoryLabel && (
-                  <span className="marker-popup-category-tag">
-                    {selectedCategoryLabel}
-                  </span>
-                )}
+                <div className="marker-popup-title-and-tags">
+                  <h2>{selectedMarker.name}</h2>
+                  <span className="marker-popup-title-tag-gap"> </span>
+                  {selectedCategoryLabels.length > 0 && (
+                    <span className="marker-popup-category-tags">
+                      {selectedCategoryLabels.map((label) => (
+                        <span className="marker-popup-category-tag" key={label}>
+                          {label}
+                        </span>
+                      ))}
+                    </span>
+                  )}
+                </div>
+                {selectedMarkerSupportsCompletion &&
+                  selectedClassification?.primary !== "Boss" &&
+                  selectedSecondaryProgress && (
+                    <span className="marker-popup-header-progress">
+                      完成进度 {selectedSecondaryProgress.collected}/
+                      {selectedSecondaryProgress.total}
+                    </span>
+                  )}
               </div>
             </div>
             <button
               type="button"
               className="marker-popup-close"
               aria-label="关闭描述"
-              onClick={() => setSelectedMarker(null)}
+              onClick={closeSelectedMarker}
             >
               ×
             </button>
           </header>
-          {selectedMerchantSections.length > 0 && (
+          {popupLinkSource &&
+            selectedMarker &&
+            selectedMarker.id !== popupLinkSource.id && (
+              <button
+                type="button"
+                className="marker-popup-back-breadcrumb"
+                onClick={handleReturnFromPopupLink}
+              >
+                <span className="marker-popup-back-arrow" aria-hidden="true">
+                  ←
+                </span>
+                <span>返回：{popupLinkSource.name}</span>
+              </button>
+            )}
+          {selectedMerchantSections.length > 0 && !shouldFilterPopupContents && (
             <nav className="marker-popup-tabs" aria-label="弹窗内容">
               <button
                 type="button"
@@ -1904,65 +3948,169 @@ export default function MapViewer() {
             </nav>
           )}
           <div className="marker-popup-content">
-            {(selectedMerchantSections.length === 0 || popupTab === "description") && (
+            {(selectedMerchantSections.length === 0 || popupTab === "description") &&
+              (!hideUnmatchedDescription || Boolean(selectedPopupHighlight)) && (
               <div
-                className={`marker-description${selectedDescriptionParagraphs.length ? "" : " is-empty"}`}
+                className={`marker-description${selectedDescriptionParagraphs.length || selectedPopupHighlight ? "" : " is-empty"}`}
               >
                 {selectedPopupHighlight && (
                   <aside
-                    className={`marker-description-highlight${selectedHighlightLeadingIcon ? " has-leading-icon" : ""}${selectedMarker.name === "布蕾塔(Bretta)" ? " has-compact-leading-icon" : ""}`}
+                    className={`marker-description-highlight${displayedHighlightLeadingIcon ? " has-leading-icon" : ""}${displayedHighlightLeadingIcon?.displaySize === "small" ? " has-small-leading-icon" : ""}${displayedHighlightLeadingIcon?.alt === "面具碎片" ? " has-compact-leading-icon" : ""}${shouldFilterPopupContents ? " without-divider" : ""}${displayedHighlightLeadingIcon && isPopupItemCollected([displayedHighlightLeadingIcon.alt]) ? " has-completed-stamp" : ""}`}
                     aria-label="重要描述"
                   >
-                    {selectedHighlightLeadingIcon && (
+                    {displayedHighlightLeadingIcon && (
                       <img
-                        className={`marker-description-highlight-icon${getPopupItemGlowClass(selectedHighlightLeadingIcon.alt, selectedHighlightLeadingIcon.src)}`}
-                        src={selectedHighlightLeadingIcon.src}
-                        alt={selectedHighlightLeadingIcon.alt}
+                        className={`marker-description-highlight-icon${getPopupItemGlowClass(displayedHighlightLeadingIcon.alt, displayedHighlightLeadingIcon.src)}`}
+                        src={displayedHighlightLeadingIcon.src}
+                        alt={displayedHighlightLeadingIcon.alt}
                       />
                     )}
-                    <p>{selectedPopupHighlight.text}</p>
+                    <p>
+                      {selectedPopupHighlight.text
+                        .split("[GEO]")
+                        .map((part, partIndex, parts) => (
+                          <span key={`${partIndex}-${part.slice(0, 8)}`}>
+                            {renderPopupLinkedText(part)}
+                            {partIndex < parts.length - 1 && (
+                              <img
+                                className="marker-description-geo-icon"
+                                src="/assets/geo.png"
+                                alt="吉欧"
+                              />
+                            )}
+                          </span>
+                        ))}
+                    </p>
+                    {displayedHighlightLeadingIcon &&
+                      isPopupItemCollected([displayedHighlightLeadingIcon.alt]) &&
+                      popupItemCompletedStamp}
                     {HIGHLIGHT_ITEM_NOTES[selectedMarker.name] && (
-                      <div className="marker-highlight-item-note">
-                        <img
-                          className={getPopupItemGlowClass(
+                        <div
+                          className={`marker-highlight-item-note${isPopupItemCollected([HIGHLIGHT_ITEM_NOTES[selectedMarker.name].alt]) ? " has-completed-stamp" : ""}`}
+                        >
+                          <img
+                            className={`${getPopupItemGlowClass(
+                              HIGHLIGHT_ITEM_NOTES[selectedMarker.name].alt,
+                              HIGHLIGHT_ITEM_NOTES[selectedMarker.name].src,
+                            ).trim()}${HIGHLIGHT_ITEM_NOTES[selectedMarker.name].src.startsWith("/icons/剑技/") ? " is-nail-art" : ""}`}
+                            src={HIGHLIGHT_ITEM_NOTES[selectedMarker.name].src}
+                            alt={HIGHLIGHT_ITEM_NOTES[selectedMarker.name].alt}
+                          />
+                          <div>
+                            {HIGHLIGHT_ITEM_NOTES[selectedMarker.name].paragraphs.map(
+                              (paragraph) => (
+                                <p key={paragraph}>
+                                  {renderPopupLinkedText(paragraph)}
+                                </p>
+                              ),
+                            )}
+                          </div>
+                          {isPopupItemCollected([
                             HIGHLIGHT_ITEM_NOTES[selectedMarker.name].alt,
-                            HIGHLIGHT_ITEM_NOTES[selectedMarker.name].src,
-                          ).trim()}
-                          src={HIGHLIGHT_ITEM_NOTES[selectedMarker.name].src}
-                          alt={HIGHLIGHT_ITEM_NOTES[selectedMarker.name].alt}
-                        />
-                        <div>
-                          {HIGHLIGHT_ITEM_NOTES[selectedMarker.name].paragraphs.map(
-                            (paragraph) => <p key={paragraph}>{paragraph}</p>,
-                          )}
+                          ]) && popupItemCompletedStamp}
                         </div>
-                      </div>
-                    )}
+                      )}
                   </aside>
                 )}
-                {selectedDescriptionParagraphs.length ? (
-                  selectedDescriptionParagraphs.map((paragraph, index) => (
-                    <p key={`${index}-${paragraph.slice(0, 12)}`}>
-                      {paragraph.split("[GEO]").map((part, partIndex, parts) => (
-                        <span key={`${partIndex}-${part.slice(0, 8)}`}>
-                          {part}
-                          {partIndex < parts.length - 1 && (
+                {!hideUnmatchedDescription && selectedDescriptionParagraphs.length ? (
+                  <>
+                    {selectedDescriptionParagraphs.map((paragraph, index) =>
+                      paragraph.startsWith("小标题：") ? (
+                        <header
+                          className="merchant-section-header marker-description-subheading"
+                          key={`${index}-${paragraph.slice(0, 12)}`}
+                        >
+                          <span className="merchant-section-title">
+                            {paragraph.slice("小标题：".length).trim()}
+                          </span>
+                        </header>
+                      ) : (
+                      <p key={`${index}-${paragraph.slice(0, 12)}`}>
+                        {paragraph.split("[GEO]").map((part, partIndex, parts) => (
+                          <span key={`${partIndex}-${part.slice(0, 8)}`}>
+                            {renderPopupLinkedText(part)}
+                            {partIndex < parts.length - 1 && (
+                              <img
+                                className="marker-description-geo-icon"
+                                src="/assets/geo.png"
+                                alt="吉欧"
+                              />
+                            )}
+                          </span>
+                        ))}
+                        {(DESCRIPTION_INLINE_ICONS[selectedMarker.id] ??
+                          DESCRIPTION_INLINE_ICONS[selectedMarker.name])
+                          ?.filter((icon) =>
+                            paragraph.includes(icon.paragraphIncludes),
+                          )
+                          .map((icon) => (
                             <img
-                              className="marker-description-geo-icon"
-                              src="/assets/geo.png"
-                              alt="吉欧"
+                              className="marker-description-inline-icon"
+                              src={icon.src}
+                              alt={icon.alt}
+                              draggable={false}
+                              key={icon.src}
                             />
-                          )}
-                        </span>
-                      ))}
-                    </p>
-                  ))
-                ) : (
+                          ))}
+                      </p>
+                      ),
+                    )}
+                    {CHARACTER_DESCRIPTION_SECTIONS[selectedMarker.name] && (
+                      <section
+                        className="character-description-sections"
+                        aria-label="人物介绍章节"
+                      >
+                        {CHARACTER_DESCRIPTION_SECTIONS[selectedMarker.name].map(
+                          (section) => (
+                            <section
+                              className="character-description-section"
+                              key={section.title}
+                            >
+                              <header className="merchant-section-header">
+                                <span className="merchant-section-title">
+                                  {section.title}
+                                </span>
+                              </header>
+                              {section.paragraphs.map((paragraph) => (
+                                <p key={paragraph}>
+                                  {renderPopupLinkedText(paragraph)}
+                                </p>
+                              ))}
+                            </section>
+                          ),
+                        )}
+                      </section>
+                    )}
+                    {CHARACTER_ENDINGS[selectedMarker.name] && (
+                      <section className="character-endings" aria-label="人物结局">
+                        {CHARACTER_ENDINGS[selectedMarker.name].map((ending) => (
+                          <article className="character-ending" key={ending.title}>
+                            <header className="character-ending-heading merchant-section-header">
+                              <span className="merchant-section-title">
+                                {ending.title}
+                              </span>
+                              <img src={ending.iconFile} alt="" draggable={false} />
+                            </header>
+                            <p>{renderPopupLinkedText(ending.description)}</p>
+                          </article>
+                        ))}
+                        {CHARACTER_ENDING_NOTES[selectedMarker.name] && (
+                          <p className="character-ending-note">
+                            {renderPopupLinkedText(
+                              CHARACTER_ENDING_NOTES[selectedMarker.name],
+                            )}
+                          </p>
+                        )}
+                      </section>
+                    )}
+                  </>
+                ) : !hideUnmatchedDescription ? (
                   <p>暂无描述</p>
-                )}
+                ) : null}
               </div>
             )}
-            {selectedMerchantSections.length > 0 && popupTab === "offers" && (
+            {selectedMerchantSections.length > 0 &&
+              (popupTab === "offers" || shouldFilterPopupContents) && (
               <section className="merchant-offers" aria-label="出售物品与奖励">
                 {selectedMerchantSections.map((section) => (
                     <section className="merchant-offer-section" key={section.title}>
@@ -1989,18 +4137,20 @@ export default function MapViewer() {
                           </header>
                           {section.description && (
                             <p className="merchant-section-description">
-                              {section.description}
+                              {renderPopupLinkedText(section.description)}
                             </p>
                           )}
                         </>
                       )}
-                      <div className="merchant-offer-list">
+                      <div
+                        className={`merchant-offer-list${section.layout === "price-table" ? " is-price-table" : ""}`}
+                      >
                           {section.offers.map((offer) => (
                             <article
-                              className={`merchant-offer${offer.geoReward ? " is-reward-row" : ""}`}
+                              className={`merchant-offer${offer.geoReward ? " is-reward-row" : ""}${isPopupItemCollected([offer.name, offer.rewardIconLabel], offer) ? " has-completed-stamp" : ""}`}
                               key={`${section.title}-${offer.name}-${offer.detail ?? offer.price ?? "reward"}`}
                             >
-                              {!offer.geoReward && <span className="merchant-offer-icons">
+                              {!offer.geoReward && section.layout !== "price-table" && <span className="merchant-offer-icons">
                                 {offer.iconFile ? (
                                   <img
                                     className={`merchant-offer-icon${getPopupItemGlowClass(offer.name, offer.iconFile)}`}
@@ -2034,7 +4184,9 @@ export default function MapViewer() {
                               </span>}
                               <span className="merchant-offer-name">
                                 <strong>{offer.name}</strong>
-                                {offer.detail && <small>{offer.detail}</small>}
+                                {offer.detail && (
+                                  <small>{renderPopupLinkedText(offer.detail)}</small>
+                                )}
                               </span>
                               {typeof offer.price === "number" ? (
                                 <span
@@ -2050,7 +4202,7 @@ export default function MapViewer() {
                                   {offer.requiredItem && (
                                     <>
                                       <img
-                                        className="merchant-offer-required-item"
+                                        className={`merchant-offer-required-item${getPopupItemGlowClass(offer.requiredItem.label, offer.requiredItem.iconFile)}`}
                                         src={offer.requiredItem.iconFile}
                                         alt={offer.requiredItem.label}
                                         draggable={false}
@@ -2065,6 +4217,10 @@ export default function MapViewer() {
                                       <span aria-hidden="true">+</span>
                                       <strong>{offer.materialCost.amount}</strong>
                                       <img
+                                        className={getPopupItemGlowClass(
+                                          offer.materialCost.label,
+                                          offer.materialCost.iconFile,
+                                        ).trim()}
                                         src={offer.materialCost.iconFile}
                                         alt={offer.materialCost.label}
                                         draggable={false}
@@ -2100,12 +4256,20 @@ export default function MapViewer() {
                                 >
                                   <strong>{offer.requirement}</strong>
                                   <img
+                                    className={getPopupItemGlowClass(
+                                      section.requirementUnitLabel ?? "",
+                                      section.requirementIconFile,
+                                    ).trim()}
                                     src={section.requirementIconFile}
                                     alt=""
                                     draggable={false}
                                   />
                                 </span>
                               ) : null}
+                              {isPopupItemCollected(
+                                [offer.name, offer.rewardIconLabel],
+                                offer,
+                              ) && popupItemCompletedStamp}
                             </article>
                           ))}
                       </div>
@@ -2114,24 +4278,12 @@ export default function MapViewer() {
               </section>
             )}
           </div>
-          {selectedMarkerSupportsCompletion && (
-            <footer className="marker-popup-actions">
-              <button
-                type="button"
-                className={`marker-complete-button${completedMarkerIds.has(selectedMarker.id) ? " is-completed" : ""}`}
-                aria-pressed={completedMarkerIds.has(selectedMarker.id)}
-                onClick={() => toggleMarkerCompleted(selectedMarker.id)}
-              >
-                {completedMarkerIds.has(selectedMarker.id) ? "取消完成" : "已完成"}
-              </button>
-              {selectedClassification?.primary !== "Boss" &&
-                selectedSecondaryCompletionGroup.length > 1 && (
-                  <span className="marker-completion-count">
-                    完成进度 {selectedSecondaryCompletedCount}/
-                    {selectedSecondaryCompletionGroup.length}
-                  </span>
-                )}
-            </footer>
+          {isMaskFragmentFocus && popupFilterIndex >= 0 && (
+            <nav className="popup-peer-navigation" aria-label="筛选结果导航">
+              <button type="button" disabled={popupFilterIndex < 0 || focusNavigationItems.length < 2} onClick={() => focusMaskFragment(popupFilterIndex - 1, true)}><span className="popup-peer-arrow" aria-hidden="true">‹</span><span>上一个</span></button>
+              <span>{popupFilterIndex >= 0 ? `${popupFilterIndex + 1} / ${focusNavigationItems.length}` : "—"}</span>
+              <button type="button" disabled={popupFilterIndex < 0 || focusNavigationItems.length < 2} onClick={() => focusMaskFragment(popupFilterIndex + 1, true)}><span>下一个</span><span className="popup-peer-arrow" aria-hidden="true">›</span></button>
+            </nav>
           )}
         </section>
       )}
